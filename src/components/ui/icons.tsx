@@ -1,0 +1,78 @@
+import {
+  AndroidLogo,
+  AppleLogo,
+  Article,
+  Browser,
+  CalendarCheck,
+  ChartBarHorizontal,
+  ChatsCircle,
+  DownloadSimple,
+  EnvelopeSimple,
+  FacebookLogo,
+  FirstAid,
+  FolderOpen,
+  GlobeHemisphereEast,
+  GlobeHemisphereWest,
+  HardHat,
+  InstagramLogo,
+  LinkedinLogo,
+  LinuxLogo,
+  LockKey,
+  Newspaper,
+  PenNib,
+  Question,
+  ShieldCheck,
+  Timer,
+  UsersThree,
+  VideoCamera,
+  WindowsLogo,
+} from "@phosphor-icons/react/ssr";
+import type { Icon } from "@phosphor-icons/react";
+import type { TrustFactId } from "@/content/home";
+import type { MenuIcon } from "@/content/navigation";
+import type { PlatformId, SocialIcon } from "@/content/site";
+
+/*
+ * One icon set (Phosphor, regular weight), rendered on the server only. Icons mark navigation items,
+ * platforms, key facts and social profiles, where they speed up recognition.
+ */
+
+export const menuIcons: Record<MenuIcon, Icon> = {
+  chats: ChatsCircle,
+  video: VideoCamera,
+  files: FolderOpen,
+  feed: Newspaper,
+  events: CalendarCheck,
+  polls: ChartBarHorizontal,
+  distributed: GlobeHemisphereWest,
+  field: HardHat,
+  studio: PenNib,
+  healthcare: FirstAid,
+  about: UsersThree,
+  download: DownloadSimple,
+  blog: Article,
+  faq: Question,
+  contact: EnvelopeSimple,
+};
+
+export const platformIcons: Record<PlatformId, Icon> = {
+  web: Browser,
+  macos: AppleLogo,
+  windows: WindowsLogo,
+  linux: LinuxLogo,
+  ios: AppleLogo,
+  android: AndroidLogo,
+};
+
+export const trustIcons: Record<TrustFactId, Icon> = {
+  calls: Timer,
+  encryption: LockKey,
+  residency: GlobeHemisphereEast,
+  gdpr: ShieldCheck,
+};
+
+export const socialIcons: Record<SocialIcon, Icon> = {
+  linkedin: LinkedinLogo,
+  instagram: InstagramLogo,
+  facebook: FacebookLogo,
+};

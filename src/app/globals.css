@@ -1,0 +1,349 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+/*
+ * Stateful UI without JavaScript. Each switch is a set of native radio inputs; CSS reads which one is
+ * checked. So the feature switcher, billing period and currency all work before (and without) JS.
+ */
+@custom-variant billing-monthly (&:where(.pricing:has(#billing-monthly:checked) *));
+@custom-variant feature-meetings (&:where(.features:has(#feature-meetings:checked) *));
+@custom-variant feature-files (&:where(.features:has(#feature-files:checked) *));
+@custom-variant currency-usd (&:where(.pricing:has(#currency-usd:checked) *));
+@custom-variant currency-eur (&:where(.pricing:has(#currency-eur:checked) *));
+@custom-variant currency-aed (&:where(.pricing:has(#currency-aed:checked) *));
+@custom-variant currency-rub (&:where(.pricing:has(#currency-rub:checked) *));
+
+/*
+ * Size-matched fallbacks, so text wraps the same before and after the web fonts arrive (no layout shift).
+ * next/font has no metrics for Stack Sans yet, so these were measured: Stack Sans Text sets 9.33% wider
+ * than Arial, Stack Sans Headline Bold 2.11% narrower than Arial Bold. Ascent 1000 and descent 300 per
+ * 1000 units come from the font files; overrides are divided by size-adjust, as the spec applies both.
+ */
+@font-face {
+  font-family: "Stack Sans Text Fallback";
+  src: local("Arial"), local("ArialMT");
+  size-adjust: 109.33%;
+  ascent-override: 91.47%;
+  descent-override: 27.44%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Stack Sans Headline Fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT");
+  font-weight: 700;
+  size-adjust: 97.89%;
+  ascent-override: 102.16%;
+  descent-override: 30.65%;
+  line-gap-override: 0%;
+}
+
+/* Page container: content width plus the responsive side gutter (16 / 24 / 32px). */
+@utility container-page {
+  width: 100%;
+  max-width: calc(var(--container-content) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Layout grid: 4 columns on phones, 8 on tablets, 12 on desktop. */
+@utility grid-page {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 1rem;
+  @media (width >= 48rem) {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    column-gap: 1.5rem;
+  }
+  @media (width >= 64rem) {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 2rem;
+  }
+}
+
+/* The calculator's slider on the dark card: accent fill up to the thumb (--fill is set by the inline
+   script), a dark track, a white thumb. The 44px-tall input keeps a full-size touch target. */
+@utility range {
+  appearance: none;
+  background: transparent;
+  &::-webkit-slider-runnable-track {
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: linear-gradient(
+      to right,
+      var(--color-accent) var(--fill, 22%),
+      var(--color-night-line) var(--fill, 22%)
+    );
+  }
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-top: -0.5rem;
+    border-radius: 9999px;
+    background: var(--color-surface);
+    box-shadow: 0 0 0 0.25rem color-mix(in oklab, var(--color-accent) 45%, transparent);
+  }
+  &::-moz-range-track {
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--color-night-line);
+  }
+  &::-moz-range-progress {
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--color-accent);
+  }
+  &::-moz-range-thumb {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 0;
+    border-radius: 9999px;
+    background: var(--color-surface);
+  }
+}
+
+/* Region flags for the data-residency chips, drawn as a pseudo-element so they add no DOM nodes.
+   Decorative: the chip's text names the region. Files live in public/flags. */
+@utility flag {
+  &::before {
+    content: "";
+    flex-shrink: 0;
+    width: 1.5rem;
+    aspect-ratio: 4 / 3;
+    border-radius: 0.1875rem;
+    background: var(--flag) center / cover no-repeat;
+    box-shadow: 0 0 0 1px var(--color-line);
+  }
+}
+
+@utility flag-gb {
+  --flag: url("/flags/gb.svg");
+}
+
+@utility flag-eu {
+  --flag: url("/flags/eu.svg");
+}
+
+@utility flag-ae {
+  --flag: url("/flags/ae.svg");
+}
+
+/* ── Motion ──────────────────────────────────────────────────────────────────────
+ * Rules: transform and opacity only; text is never hidden waiting for a scroll; everything is
+ * removed (not shortened) under prefers-reduced-motion; scroll-linked effects are progressive
+ * enhancement through CSS scroll timelines, with no JavaScript.
+ */
+
+/* Product frames rise a little as they come into view. Opacity is untouched, so nothing is hidden. */
+@utility rise-in {
+  @supports (animation-timeline: view()) {
+    animation: rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 30%;
+  }
+}
+
+@keyframes rise {
+  from {
+    translate: 0 48px;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+/* The sticky header blends into the page at the top and gains a surface, hairline and shadow once the
+   page scrolls. Without scroll timelines (or with reduced motion) it keeps the solid, scrolled style. */
+@utility header-lift {
+  @supports (animation-timeline: scroll()) {
+    animation: header-lift linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 96px;
+  }
+}
+
+@keyframes header-lift {
+  from {
+    background-color: var(--color-canvas);
+    border-color: transparent;
+    box-shadow: none;
+  }
+  to {
+    background-color: var(--color-surface);
+    border-color: var(--color-line);
+    box-shadow: var(--shadow-raised);
+  }
+}
+
+/* Bars in the cost comparison grow from the left as they scroll into view (decorative; the figures are text). */
+@utility grow-in {
+  transform-box: fill-box;
+  transform-origin: left center;
+  @supports (animation-timeline: view()) {
+    animation: grow-x linear both;
+    animation-timeline: view();
+    animation-range: entry 20% cover 45%;
+  }
+}
+
+@keyframes grow-x {
+  from {
+    scale: 0.08 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+/* Header menu panels appear with a short fade and settle. They are only in the DOM while open. */
+@utility pop-in {
+  transition:
+    opacity 200ms var(--ease-out),
+    translate 200ms var(--ease-out),
+    scale 200ms var(--ease-out);
+  @starting-style {
+    opacity: 0;
+    translate: 0 -6px;
+    scale: 0.98;
+  }
+}
+
+/* The phone menu: a modal <dialog> that fades in and out, backdrop included. */
+@utility sheet {
+  opacity: 0;
+  translate: 0 -12px;
+  transition:
+    opacity 260ms var(--ease-out),
+    translate 260ms var(--ease-out),
+    display 260ms allow-discrete,
+    overlay 260ms allow-discrete;
+  &[open] {
+    opacity: 1;
+    translate: 0 0;
+  }
+  @starting-style {
+    &[open] {
+      opacity: 0;
+      translate: 0 -12px;
+    }
+  }
+}
+
+/* Feature panels cross-fade: they share one grid cell, and visibility flips with the fade (visible at
+   once when showing, hidden after the fade when hiding), so the outgoing panel never takes a click. */
+@utility switch-in {
+  transition:
+    opacity 320ms var(--ease-out),
+    visibility 320ms;
+}
+
+/* Lift on hover for cards that link somewhere. */
+@utility lift {
+  transition:
+    translate 180ms var(--ease-out),
+    box-shadow 180ms var(--ease-out),
+    border-color 180ms var(--ease-out);
+  &:hover {
+    translate: 0 -3px;
+    box-shadow: var(--shadow-raised);
+  }
+}
+
+/* The hero demo pauses while it's off screen (an inline IntersectionObserver sets data-paused) and when
+   the visitor pauses it with the control on the stage (WCAG 2.2.2). The control is a checkbox, so it
+   works without JavaScript. */
+[data-demo][data-paused] *,
+[data-demo]:has(#demo-pause:checked) * {
+  animation-play-state: paused !important;
+}
+
+/* Disclosure panels open smoothly where the browser supports animating to auto height. */
+@supports (interpolate-size: allow-keywords) {
+  :root {
+    interpolate-size: allow-keywords;
+  }
+
+  details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size 320ms var(--ease-out),
+      content-visibility 320ms allow-discrete;
+  }
+
+  details[open]::details-content {
+    block-size: auto;
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-line);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-subtle);
+    color: var(--color-ink);
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  dd {
+    text-wrap: pretty;
+  }
+
+  [id] {
+    scroll-margin-top: calc(var(--header-height) + 1.5rem);
+  }
+
+  summary {
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+}
+
+/* Reduced motion removes non-essential motion entirely rather than shortening it. Every animated
+   element's resting style is its final state, so the page reads completely without motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
