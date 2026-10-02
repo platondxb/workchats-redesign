@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
+import { CurrencySwitch } from "@/components/ui/CurrencySwitch";
 import { SiteLink } from "@/components/ui/SiteLink";
 import { TextLink } from "@/components/ui/TextLink";
 import { buttonClasses } from "@/components/ui/button-classes";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { home } from "@/content/home";
 import {
-  billingCurrency,
   defaultBillingPeriod,
   displayCurrencies,
   plans,
@@ -14,7 +14,6 @@ import {
   type Plan,
 } from "@/content/pricing";
 import { convert, formatDisplayPrice, gbpPrice } from "@/lib/pricing";
-import { cx } from "@/lib/cx";
 
 /*
  * Four tiers, each with the action that fits it. Every price comes from content/pricing.ts, the same
@@ -25,13 +24,17 @@ import { cx } from "@/lib/cx";
  * to screen readers.
  */
 
-/** Shows a price only for its currency. The pound is the default, so it hides when another is chosen. */
+/**
+ * Shows a price only for its currency. The pound is the default, so it hides when another is chosen.
+ * Every span carries price-in: the newly matched one is rendered for the first time, and a CSS animation
+ * restarts when an element becomes rendered, so the figure rises in instead of snapping.
+ */
 const currencyClasses = {
-  GBP: "inline currency-usd:hidden currency-eur:hidden currency-aed:hidden currency-rub:hidden",
-  USD: "hidden currency-usd:inline",
-  EUR: "hidden currency-eur:inline",
-  AED: "hidden currency-aed:inline",
-  RUB: "hidden currency-rub:inline",
+  GBP: "price-in inline currency-usd:hidden currency-eur:hidden currency-aed:hidden currency-rub:hidden",
+  USD: "price-in hidden currency-usd:inline",
+  EUR: "price-in hidden currency-eur:inline",
+  AED: "price-in hidden currency-aed:inline",
+  RUB: "price-in hidden currency-rub:inline",
 } satisfies Record<CurrencyCode, string>;
 
 const periodClasses = {
@@ -72,26 +75,7 @@ export function Pricing() {
             </Segment>
           </fieldset>
 
-          <fieldset className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <legend className="float-left mr-1 text-small font-semibold text-ink-muted">
-              {pricing.currencyLegend}
-            </legend>
-            <span className="inline-flex flex-wrap rounded-full border border-line bg-surface p-1">
-              {displayCurrencies.map((currency) => (
-                <Segment
-                  key={currency.code}
-                  name="currency"
-                  id={`currency-${currency.code.toLowerCase()}`}
-                  value={currency.code}
-                  checked={currency.code === billingCurrency}
-                  compact
-                  accessibleName={`${currency.label} (${currency.code})`}
-                >
-                  {currency.code}
-                </Segment>
-              ))}
-            </span>
-          </fieldset>
+          <CurrencySwitch name="currency" legend={pricing.currencyLegend} />
         </div>
 
         <ul className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -118,35 +102,17 @@ function Segment({
   id,
   value,
   checked,
-  compact = false,
-  accessibleName,
   children,
 }: {
   name: string;
   id: string;
   value: string;
   checked: boolean;
-  compact?: boolean;
-  /** A fuller accessible name, e.g. "US dollar (USD)", which contains the visible label. */
-  accessibleName?: string;
   children: ReactNode;
 }) {
   return (
-    <label
-      className={cx(
-        "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full font-semibold text-ink-muted transition-colors hover:text-ink has-checked:bg-ink has-checked:text-on-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent",
-        compact ? "min-w-11 justify-center px-3 text-micro" : "px-4 text-small",
-      )}
-    >
-      <input
-        type="radio"
-        name={name}
-        id={id}
-        value={value}
-        defaultChecked={checked}
-        aria-label={accessibleName}
-        className="sr-only"
-      />
+    <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-4 text-small font-semibold text-ink-muted transition-colors hover:text-ink has-checked:bg-ink has-checked:text-on-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent">
+      <input type="radio" name={name} id={id} value={value} defaultChecked={checked} className="sr-only" />
       {children}
     </label>
   );

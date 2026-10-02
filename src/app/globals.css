@@ -13,6 +13,12 @@
 @custom-variant currency-aed (&:where(.pricing:has(#currency-aed:checked) *));
 @custom-variant currency-rub (&:where(.pricing:has(#currency-rub:checked) *));
 
+/* The cost calculator carries the same five currencies, under its own radio group and its own ids. */
+@custom-variant cost-currency-usd (&:where(.comparison:has(#cost-currency-usd:checked) *));
+@custom-variant cost-currency-eur (&:where(.comparison:has(#cost-currency-eur:checked) *));
+@custom-variant cost-currency-aed (&:where(.comparison:has(#cost-currency-aed:checked) *));
+@custom-variant cost-currency-rub (&:where(.comparison:has(#cost-currency-rub:checked) *));
+
 /*
  * Size-matched fallbacks, so text wraps the same before and after the web fonts arrive (no layout shift).
  * next/font has no metrics for Stack Sans yet, so these were measured: Stack Sans Text sets 9.33% wider
@@ -42,6 +48,15 @@
 @utility container-page {
   width: 100%;
   max-width: calc(var(--container-content) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* The floating header's container. Wider than the page content, so the bar frames the page rather than
+   hugging the text, and capped so it stays a bar on very wide screens. */
+@utility container-nav {
+  width: 100%;
+  max-width: calc(var(--container-nav) + 2 * var(--gutter));
   margin-inline: auto;
   padding-inline: var(--gutter);
 }
@@ -153,26 +168,23 @@
   }
 }
 
-/* The sticky header blends into the page at the top and gains a surface, hairline and shadow once the
-   page scrolls. Without scroll timelines (or with reduced motion) it keeps the solid, scrolled style. */
-@utility header-lift {
+/* The floating header's glass surface fades in as the page scrolls, so at the top of the page the bar is
+   invisible and the navigation sits straight on the canvas; once content moves under it, the surface and
+   its halo appear. Without scroll timelines (or with reduced motion) it keeps the solid, scrolled style. */
+@utility nav-glass {
   @supports (animation-timeline: scroll()) {
-    animation: header-lift linear both;
+    animation: nav-glass linear both;
     animation-timeline: scroll(root);
     animation-range: 0 96px;
   }
 }
 
-@keyframes header-lift {
+@keyframes nav-glass {
   from {
-    background-color: var(--color-canvas);
-    border-color: transparent;
-    box-shadow: none;
+    opacity: 0;
   }
   to {
-    background-color: var(--color-surface);
-    border-color: var(--color-line);
-    box-shadow: var(--shadow-raised);
+    opacity: 1;
   }
 }
 
@@ -247,6 +259,24 @@
   &:hover {
     translate: 0 -3px;
     box-shadow: var(--shadow-raised);
+  }
+}
+
+/* A price that appears when the currency or the billing period changes. The element is display: none
+   until its variant matches, and a CSS animation restarts when an element becomes rendered, so the new
+   figure rises in rather than snapping. Transform and opacity only, so nothing around it moves. */
+@utility price-in {
+  animation: price-in 260ms var(--ease-out) both;
+}
+
+@keyframes price-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 

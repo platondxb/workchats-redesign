@@ -26,6 +26,18 @@ export function convert(gbp: number, currency: CurrencyCode): number {
   return Math.round((gbp * entry.rate) / conversionStep) * conversionStep;
 }
 
+/**
+ * Converts a whole-pound annual total. Rounding to the nearest half unit is right for a per-user monthly
+ * price and meaningless for a five-figure total, so these round to whole units instead. The calculator's
+ * inline script applies the same rule, so the figure does not jump when JavaScript takes over.
+ */
+export function convertTotal(gbp: number, currency: CurrencyCode): number {
+  const entry = displayCurrencies.find((c) => c.code === currency);
+  if (!entry) throw new Error(`Unknown currency ${currency}`);
+  if (currency === "GBP" || gbp === 0) return gbp;
+  return Math.round(gbp * entry.rate);
+}
+
 /** "£3", "$6.50", "Dh 14", "₽315": symbol first, decimals only when needed, as on the current site. */
 export function formatDisplayPrice(amount: number, currency: CurrencyCode): string {
   const entry = displayCurrencies.find((c) => c.code === currency);

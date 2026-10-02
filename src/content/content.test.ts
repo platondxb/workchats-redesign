@@ -81,9 +81,9 @@ describe("the cost calculator", () => {
   it("adds up for the blog's 50-person example, from list prices", () => {
     const { calculator } = home.comparison;
     expect(calculator.seats).toBe(50);
-    expect(calculator.fiveTools.total).toBe("£24,744");
-    expect(calculator.workchats.total).toBe("£9,000");
-    expect(calculator.saving.total).toBe("£15,744");
+    expect(calculator.fiveTools.totalGbp).toBe(24744);
+    expect(calculator.workchats.totalGbp).toBe(9000);
+    expect(calculator.saving.totalGbp).toBe(15744);
   });
 
   it("prices per user, so any team size works, and switches to Max above Pro's limit", () => {

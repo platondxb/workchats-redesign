@@ -22,8 +22,9 @@ const LITERAL_COLOUR_ALLOWED = new Set([
   "src/styles/tokens.css",
 ]);
 // Class-like words that intentionally produce no CSS of their own.
-// (.pricing and .features scope the radio-driven variants in globals.css; group and peer are Tailwind hooks.)
-const MARKER_CLASSES = new Set(["group", "group/button", "peer", "pricing", "features"]);
+// (.pricing, .features and .comparison scope the radio-driven variants in globals.css; group and peer
+// are Tailwind hooks.)
+const MARKER_CLASSES = new Set(["group", "group/button", "peer", "pricing", "features", "comparison"]);
 
 function walk(dir, exts) {
   const out = [];

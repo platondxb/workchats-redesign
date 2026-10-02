@@ -165,7 +165,9 @@ export const home = {
       min: 10,
       max: 200,
       step: 10,
-      fiveTools: { label: "Five separate tools", perUser: fiveToolsPerUser, total: gbp(fiveToolsYear) },
+      currencyLegend: "Show the totals in",
+      /** Totals are whole pounds; the section shows them in the visitor's chosen currency. */
+      fiveTools: { label: "Five separate tools", perUser: fiveToolsPerUser, totalGbp: fiveToolsYear },
       workchats: {
         /** Pro covers up to 50 people; larger teams need Max. */
         proLimit: quotas.pro.members,
@@ -177,12 +179,12 @@ export const home = {
           label: `Workchats Max + ${keptTool.tool.replace(" Business Standard", "")}`,
           perUser: maxAnnual + keptTool.price,
         },
-        total: gbp(consolidatedYear),
+        totalGbp: consolidatedYear,
       },
-      saving: { label: "You save", total: gbp(fiveToolsYear - consolidatedYear), suffix: "a year" },
+      saving: { label: "You save", totalGbp: fiveToolsYear - consolidatedYear, suffix: "a year" },
       perYear: "a year",
       cta: { label: "Start free", href: site.links.signUp },
-      note: `List prices per user, billed annually, before VAT. Above ${quotas.pro.members} people the sum uses Workchats Max.`,
+      note: `List prices per user, billed annually, before VAT. Above ${quotas.pro.members} people the sum uses Workchats Max. Converted totals are approximate.`,
     },
     source: { label: "Read the full cost breakdown", href: site.links.costBreakdown },
   },

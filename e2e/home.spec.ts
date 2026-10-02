@@ -12,13 +12,19 @@ test.describe("content and rendering", () => {
       "A simpler way to talk with your whole team",
     );
     const pro = page.getByRole("article", { name: "Pro" });
+    const pricing = page.locator("#pricing");
     await expect(pro.getByText("£3", { exact: true })).toBeVisible();
     // Without JavaScript both pricing switches still work: they're native radios read by CSS.
-    await page.locator("label", { hasText: "Monthly" }).click();
+    await pricing.locator("label", { hasText: "Monthly" }).click();
     await expect(pro.getByText("£4", { exact: true })).toBeVisible();
-    await page.locator("label").filter({ hasText: /^USD$/ }).click();
+    await pricing.locator("label").filter({ hasText: /^USD$/ }).click();
     await expect(pro.getByText("$5", { exact: true })).toBeVisible();
     await expect(pro.getByText("£4", { exact: true })).toBeHidden();
+    // The calculator's currency switch is CSS-driven too, so its server-rendered totals still convert.
+    await expect(page.locator('#cost-five [data-currency="GBP"]')).toBeVisible();
+    await page.locator("#comparison label").filter({ hasText: /^USD$/ }).click();
+    await expect(page.locator('#cost-five [data-currency="USD"]')).toBeVisible();
+    await expect(page.locator('#cost-five [data-currency="GBP"]')).toBeHidden();
     await context.close();
   });
 
@@ -222,26 +228,62 @@ test.describe("interaction", () => {
   test("the currency switch converts prices, is remembered and is announced", async ({ page }) => {
     await page.goto("/");
     const pro = page.getByRole("article", { name: "Pro" });
-    await expect(page.getByRole("radio", { name: "Pound sterling (GBP)" })).toBeChecked();
-    await page.locator("label").filter({ hasText: /^EUR$/ }).click();
+    const pricing = page.locator("#pricing");
+    await expect(pricing.getByRole("radio", { name: "Pound sterling (GBP)" })).toBeChecked();
+    await pricing.locator("label").filter({ hasText: /^EUR$/ }).click();
     await expect(pro.getByText("€3.50", { exact: true })).toBeVisible();
     await expect(page.locator("#pricing-status")).toContainText("Pro €3.50");
+    // One choice for the whole page: the calculator follows the pricing cards.
+    await expect(page.locator("#comparison").getByRole("radio", { name: "Euro (EUR)" })).toBeChecked();
+    await expect(page.locator('#cost-saving [data-currency="EUR"]')).toBeVisible();
     await page.reload();
-    await expect(page.getByRole("radio", { name: "Euro (EUR)" })).toBeChecked();
+    await expect(pricing.getByRole("radio", { name: "Euro (EUR)" })).toBeChecked();
     await expect(pro.getByText("€3.50", { exact: true })).toBeVisible();
+  });
+
+  test("the calculator's own currency switch converts the totals and carries back to pricing", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.locator('#cost-saving [data-currency="GBP"]')).toHaveText("£15,744");
+    await page.locator("#comparison label").filter({ hasText: /^AED$/ }).click();
+    await expect(page.locator('#cost-saving [data-currency="AED"]')).toBeVisible();
+    await expect(page.locator('#cost-saving [data-currency="AED"]')).toHaveText("Dh 73,367");
+    // The pricing cards are part of the same choice, not a second one.
+    await expect(page.locator("#pricing").getByRole("radio", { name: "UAE dirham (AED)" })).toBeChecked();
+    await expect(
+      page.getByRole("article", { name: "Pro" }).getByText("Dh 14", { exact: true }),
+    ).toBeVisible();
+    // And the pick is remembered for the session.
+    await page.reload();
+    await expect(page.locator('#cost-saving [data-currency="AED"]')).toBeVisible();
+    await expect(page.locator("#comparison").getByRole("radio", { name: "UAE dirham (AED)" })).toBeChecked();
+  });
+
+  test("a new price rises in rather than snapping when the currency changes", async ({ page }) => {
+    await page.goto("/");
+    const pro = page.getByRole("article", { name: "Pro" });
+    const gbp = pro.getByText("£3", { exact: true }).first();
+    await expect(gbp).toBeVisible();
+    await expect(gbp).toHaveCSS("animation-name", "price-in");
+    await page.locator("#pricing label").filter({ hasText: /^USD$/ }).click();
+    const usd = pro.getByText("$4", { exact: true }).first();
+    await expect(usd).toBeVisible();
+    await expect(usd).toHaveCSS("animation-name", "price-in");
   });
 
   test("the cost calculator recalculates and switches to Max above Pro's 50 people", async ({ page }) => {
     await page.goto("/");
     const slider = page.getByRole("slider", { name: "Team size" });
     await expect(slider).toBeVisible();
-    await expect(page.locator("#cost-saving")).toHaveText("£15,744");
+    const saving = page.locator('#cost-saving [data-currency="GBP"]');
+    await expect(saving).toHaveText("£15,744");
     await slider.fill("120");
     await expect(page.locator("#team-size-value")).toHaveText("120 people");
-    await expect(page.locator("#cost-five")).toHaveText("£59,386");
+    await expect(page.locator('#cost-five [data-currency="GBP"]')).toHaveText("£59,386");
     await expect(page.locator("#cost-workchats-label")).toHaveText("Workchats Max + Google Workspace");
-    await expect(page.locator("#cost-workchats")).toHaveText("£24,480");
-    await expect(page.locator("#cost-saving")).toHaveText("£34,906");
+    await expect(page.locator('#cost-workchats [data-currency="GBP"]')).toHaveText("£24,480");
+    await expect(saving).toHaveText("£34,906");
   });
 
   test("the feature switcher shows one feature at a time on larger screens", async ({ page }) => {
@@ -268,6 +310,40 @@ test.describe("interaction", () => {
     ]) {
       await expect(page.getByRole("heading", { name })).toBeVisible();
     }
+  });
+
+  test("the header floats on a glass bar that fades in as the page scrolls", async ({ page }) => {
+    test.skip(isMobile(page), "the desktop bar");
+    await page.goto("/");
+    const bar = page.locator("header .container-nav > div");
+    const glass = bar.locator("> [aria-hidden='true']");
+    // Inset from the viewport edges, so the bar frames the page instead of touching it.
+    const box = await bar.boundingBox();
+    expect(Math.round(box?.x ?? 0)).toBeGreaterThan(0);
+    expect(Math.round(box?.width ?? 0)).toBeLessThan(1440);
+    // Invisible at the top of the page, opaque once content moves under it.
+    await expect(glass).toHaveCSS("opacity", "0");
+    await page.mouse.wheel(0, 400);
+    await expect(glass).toHaveCSS("opacity", "1");
+    await expect(glass).toHaveCSS("backdrop-filter", "blur(16px)");
+  });
+
+  test("a menu item is an icon, a label, its one line and a status chip", async ({ page }) => {
+    test.skip(isMobile(page), "desktop menus");
+    await page.goto("/");
+    const features = page.getByRole("button", { name: "Features" });
+    await features.click();
+    const panel = page.locator(`#${await features.getAttribute("aria-controls")}`);
+    await expect(panel).toBeVisible();
+    // Six features in one grid, then the footer.
+    await expect(panel.getByRole("link")).toHaveCount(7);
+    await expect(panel.getByRole("link", { name: /Messaging and channels/ })).toContainText(
+      "One place for every team conversation.",
+    );
+    // The chip rides along in the row's accessible name, so the flag is never colour-only.
+    await expect(panel.getByRole("link", { name: /Social feed Coming soon/ })).toBeVisible();
+    await expect(panel.getByText("Coming soon")).toHaveCount(3);
+    await expect(panel.getByRole("link", { name: "Explore all features" })).toBeVisible();
   });
 
   test("desktop menus open on hover for mouse users", async ({ page }) => {
@@ -317,6 +393,21 @@ test.describe("layout", () => {
         clientWidth: document.documentElement.clientWidth,
       }));
       expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+    });
+  }
+
+  for (const width of [320, 360, 390, 768]) {
+    test(`the header contents never collide at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/");
+      const gap = await page.evaluate(() => {
+        const header = document.querySelector("header")!;
+        const logo = header.querySelector('a[href="/"]')!;
+        const actions = header.querySelector(".ml-auto")!;
+        return Math.round(actions.getBoundingClientRect().left - logo.getBoundingClientRect().right);
+      });
+      // The wordmark, the primary action and the menu button all fit, with room between them.
+      expect(gap).toBeGreaterThanOrEqual(8);
     });
   }
 

@@ -1,23 +1,54 @@
 import { ButtonLink } from "@/components/ui/Button";
+import { CurrencySwitch } from "@/components/ui/CurrencySwitch";
 import { TextLink } from "@/components/ui/TextLink";
 import { home } from "@/content/home";
+import { displayCurrencies, type CurrencyCode } from "@/content/pricing";
 import { cx } from "@/lib/cx";
+import { convertTotal, formatDisplayPrice } from "@/lib/pricing";
 
 /*
- * The cost case as a calculator: pick a team size and see the five-tool bill next to Workchats.
- * Server-rendered for 50 people (the blog's example), so it reads completely without JavaScript; a
- * small inline script reveals the slider and recalculates. Above 50 people Pro no longer fits, so the
- * sum switches to Max. All prices come from content/home.ts and content/pricing.ts.
+ * The cost case as a calculator: pick a team size and a currency, and see the five-tool bill next to
+ * Workchats. Server-rendered for 50 people (the blog's example), so it reads completely without
+ * JavaScript; a small inline script reveals the slider, recalculates, and keeps the currency in step
+ * with the pricing section. Above 50 people Pro no longer fits, so the sum switches to Max. All prices
+ * come from content/home.ts and content/pricing.ts.
  */
 
-const calculatorScript = `(function(){var r=document.getElementById("team-size");if(!r)return;var d=r.dataset,five=+d.five,pro=+d.pro,max=+d.max,limit=+d.limit,g=function(i){return document.getElementById(i)},out=g("team-size-value"),a=g("cost-five"),b=g("cost-workchats"),label=g("cost-workchats-label"),bar=g("cost-workchats-bar"),saving=g("cost-saving"),live=g("cost-status"),t;function gbp(n){return"£"+Math.round(n).toLocaleString("en-GB")}function fill(){r.style.setProperty("--fill",(r.value-r.min)/(r.max-r.min)*100+"%")}function update(){fill();var n=+r.value,small=n<=limit,per=small?pro:max,f=n*12*five,w=n*12*per;out.textContent=n+" people";r.setAttribute("aria-valuetext",n+" people");a.textContent=gbp(f);b.textContent=gbp(w);saving.textContent=gbp(f-w);label.textContent=small?d.proLabel:d.maxLabel;bar.setAttribute("width",String(Math.round(per/five*1000)/10));clearTimeout(t);t=setTimeout(function(){live.textContent=n+" people: "+gbp(f)+" a year for five tools, "+gbp(w)+" with "+label.textContent+". You save "+gbp(f-w)+" a year."},600)}fill();r.hidden=false;r.addEventListener("input",update)})()`;
+/** Shows a total only for its currency; the pound is the default, so it hides when another is chosen. */
+const currencyClasses = {
+  GBP: "price-in inline cost-currency-usd:hidden cost-currency-eur:hidden cost-currency-aed:hidden cost-currency-rub:hidden",
+  USD: "price-in hidden cost-currency-usd:inline",
+  EUR: "price-in hidden cost-currency-eur:inline",
+  AED: "price-in hidden cost-currency-aed:inline",
+  RUB: "price-in hidden cost-currency-rub:inline",
+} satisfies Record<CurrencyCode, string>;
+
+/** One figure in every display currency. The chosen one is shown by CSS; the script rewrites them all. */
+function Amounts({ gbp }: { gbp: number }) {
+  return displayCurrencies.map((currency) => (
+    <span key={currency.code} data-currency={currency.code} className={currencyClasses[currency.code]}>
+      {formatDisplayPrice(convertTotal(gbp, currency.code), currency.code)}
+    </span>
+  ));
+}
+
+/** The rates the inline script needs, so a recalculation matches this server-rendered markup exactly. */
+const rates = JSON.stringify(
+  Object.fromEntries(displayCurrencies.map((c) => [c.code, { symbol: c.symbol, rate: c.rate }])),
+);
+
+const calculatorScript = `(function(){var r=document.getElementById("team-size");if(!r)return;var d=r.dataset,five=+d.five,pro=+d.pro,max=+d.max,limit=+d.limit,rates=JSON.parse(d.rates),K="workchats-currency",g=function(i){return document.getElementById(i)},out=g("team-size-value"),fiveEl=g("cost-five"),workEl=g("cost-workchats"),label=g("cost-workchats-label"),bar=g("cost-workchats-bar"),savingEl=g("cost-saving"),live=g("cost-status"),t;function active(){var el=document.querySelector('input[name="cost-currency"]:checked');return el?el.value:"GBP"}function money(n,code){var c=rates[code||active()],v=Math.round(n*c.rate);return c.symbol+v.toLocaleString("en-GB")}function setAmount(host,n){if(!host)return;var spans=host.querySelectorAll("[data-currency]");for(var i=0;i<spans.length;i++){spans[i].textContent=money(n,spans[i].getAttribute("data-currency"))}}function mirror(code){["currency","cost-currency"].forEach(function(n){var el=g(n+"-"+code.toLowerCase());if(el)el.checked=true})}function fill(){r.style.setProperty("--fill",(r.value-r.min)/(r.max-r.min)*100+"%")}function update(){fill();var n=+r.value,small=n<=limit,per=small?pro:max,f=n*12*five,w=n*12*per;out.textContent=n+" people";r.setAttribute("aria-valuetext",n+" people");setAmount(fiveEl,f);setAmount(workEl,w);setAmount(savingEl,f-w);label.textContent=small?d.proLabel:d.maxLabel;bar.setAttribute("width",String(Math.round(per/five*1000)/10));clearTimeout(t);t=setTimeout(function(){live.textContent=n+" people: "+money(f)+" a year for five tools, "+money(w)+" with "+label.textContent+". You save "+money(f-w)+" a year."},600)}try{var stored=sessionStorage.getItem(K);if(stored)mirror(stored)}catch(e){}document.addEventListener("change",function(e){var t=e.target;if(!t||t.type!=="radio"||(t.name!=="currency"&&t.name!=="cost-currency"))return;try{sessionStorage.setItem(K,t.value)}catch(err){}mirror(t.value)});fill();r.hidden=false;r.addEventListener("input",update)})()`;
 
 export function Comparison() {
   const { comparison } = home;
   const { calculator } = comparison;
   const { fiveTools, workchats, saving } = calculator;
   return (
-    <section aria-labelledby="comparison-title" className="bg-night py-section text-on-night">
+    <section
+      id="comparison"
+      aria-labelledby="comparison-title"
+      className="comparison bg-night py-section text-on-night"
+    >
       <div className="container-page grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
         <div className="lg:col-span-5">
           <h2 id="comparison-title" className="font-display text-title">
@@ -72,17 +103,25 @@ export function Comparison() {
             data-limit={workchats.proLimit}
             data-pro-label={workchats.pro.label}
             data-max-label={workchats.max.label}
+            data-rates={rates}
             hidden
             suppressHydrationWarning
             className="range mt-3 h-11 w-full cursor-pointer"
           />
 
-          <div className="mt-6 grid gap-6">
-            <CostRow id="cost-five" label={fiveTools.label} total={fiveTools.total} share={1} />
+          <CurrencySwitch
+            name="cost-currency"
+            legend={calculator.currencyLegend}
+            tone="dark"
+            className="mt-6 justify-between"
+          />
+
+          <div className="mt-5 grid gap-6">
+            <CostRow id="cost-five" label={fiveTools.label} amountGbp={fiveTools.totalGbp} share={1} />
             <CostRow
               id="cost-workchats"
               label={workchats.pro.label}
-              total={workchats.total}
+              amountGbp={workchats.totalGbp}
               share={workchats.pro.perUser / fiveTools.perUser}
               highlight
             />
@@ -96,7 +135,7 @@ export function Comparison() {
                 className="font-display text-title tabular-nums"
                 suppressHydrationWarning
               >
-                {saving.total}
+                <Amounts gbp={saving.totalGbp} />
               </span>{" "}
               <span className="text-body text-on-night-muted">{saving.suffix}</span>
             </p>
@@ -121,13 +160,14 @@ export function Comparison() {
 function CostRow({
   id,
   label,
-  total,
+  amountGbp,
   share,
   highlight = false,
 }: {
   id: string;
   label: string;
-  total: string;
+  /** The whole-pound total; the row shows it in every display currency. */
+  amountGbp: number;
   /** Share of the five-tool bill, for the bar. */
   share: number;
   highlight?: boolean;
@@ -140,7 +180,7 @@ function CostRow({
         </span>
         <span className="shrink-0 font-display text-heading tabular-nums">
           <span id={id} suppressHydrationWarning>
-            {total}
+            <Amounts gbp={amountGbp} />
           </span>
           <span className="font-sans text-small font-regular text-on-night-muted"> a year</span>
         </span>

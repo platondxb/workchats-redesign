@@ -26,9 +26,14 @@
   --animate-*: initial;
   --container-*: initial;
 
+  /* One breakpoint below Tailwind's sm: the narrowest phones (360px), where the header has to shed a
+     little width so the wordmark, the primary action and the menu button all still fit. */
+  --breakpoint-xs: 22.5rem;
+
   /* ── Colour: neutrals ───────────────────────────────────────────────────────── */
   --color-canvas: #f6f8fb; /* page background: surfaces sit on it in layers */
   --color-surface: #ffffff; /* cards, menus, product UI */
+  --color-surface-glass: rgb(255 255 255 / 0.72); /* the floating header: content reads through it */
   --color-tint: #eef2f8; /* quiet fills inside surfaces */
   --color-ink: #0e1626; /* primary text, 18.4:1 */
   --color-ink-muted: #475467; /* secondary text, 7.6:1 (7.1:1 on canvas) */
@@ -124,13 +129,16 @@
   --radius-lg: 28px; /* product stage, large sections */
   --radius-full: 9999px; /* buttons, avatars, pills */
 
-  /* Two elevations. Raised: product windows and hovered cards. Overlay: menus and dialogs. */
+  /* Two elevations. Raised: product windows and hovered cards. Overlay: menus and dialogs.
+     Float: the header bar, a wide soft halo rather than a hard edge. */
   --shadow-raised: 0 1px 2px rgb(14 22 38 / 0.04), 0 10px 30px -8px rgb(14 22 38 / 0.12);
   --shadow-overlay: 0 4px 12px rgb(14 22 38 / 0.08), 0 28px 64px -12px rgb(14 22 38 / 0.28);
+  --shadow-float: 0 1px 2px rgb(14 22 38 / 0.04), 0 4px 80px -16px rgb(14 22 38 / 0.24);
 
   /* ── Layout ─────────────────────────────────────────────────────────────────── */
   --container-text: 38rem; /* ~65 characters of body text */
   --container-content: 76rem; /* 1216px content width */
+  --container-nav: 87.5rem; /* 1400px: the floating header runs wider than the content */
   --container-window: 66rem; /* the desktop app window in the hero */
   --container-phone: 15rem; /* the phone in the hero */
   --container-menu-sm: 22rem; /* header menu panels */
@@ -145,6 +153,9 @@
   --default-transition-duration: 180ms;
   --default-transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* The floating header's glass: content shows through it, softened. */
+  --blur-glass: 16px;
 
   /* The hero stage settles into place on load. Transform only, so the headline (LCP) is unaffected. */
   --animate-stage-in: stage-in 900ms var(--ease-out) both;

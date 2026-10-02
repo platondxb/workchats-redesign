@@ -63,18 +63,34 @@ comparison totals, the meta description and the structured data are all computed
    walkthrough. Plan-level extras (SSO, DLP, SLAs) live in the pricing cards. It comes before the price, so
    the main objection is answered before the ask.
 6. **Cost calculator** (the dark section): a team-size slider recalculates the five-tool bill against
-   Workchats (Pro up to 50 people, Max above). Server-rendered for 50 people, so it reads without
-   JavaScript.
-7. **Pricing:** billing period and currency.
+   Workchats (Pro up to 50 people, Max above), and a currency switch shows the totals in pounds, dollars,
+   euros, dirhams or roubles. Server-rendered for 50 people in every currency, so it reads without
+   JavaScript; the slider is the only part that needs it.
+7. **Pricing:** billing period and currency. A price rises in when either switch changes.
 8. **FAQ.**
 9. **Final call to action.**
 
 **Product UI** is coded HTML, not screenshots. Each view is exposed to assistive technology as one
 image with a written description. The demo team uses initials, not stock photos.
 
-**Interactive without JavaScript.** The feature switcher, billing period and currency switch are native
-radio buttons; CSS shows the matching panel or price (custom variants in `src/app/globals.css`). The FAQ
-uses `<details>`. Phones show all three features stacked, rather than behind a switcher.
+**Interactive without JavaScript.** The feature switcher, billing period and both currency switches —
+one in the pricing cards, one in the calculator — are native radio buttons; CSS shows the matching panel,
+price or total (custom variants in `src/app/globals.css`). The two currency switches are separate radio
+groups, so each is its own tab stop, and an inline script keeps them on the same choice; the visitor's
+pick is remembered for the session. The FAQ uses `<details>`. Phones show all three features stacked,
+rather than behind a switcher.
+
+**The header** floats: a glass bar inside its own wider container (`container-nav`, 1400px), inset from
+the page edges, with the menu panels hanging below it. At the top of the page its surface is invisible
+and the navigation rests on the canvas; the glass and its halo fade in as content moves under it. On the
+narrowest phones the bar tightens its padding and the wordmark steps down a size (the `xs` breakpoint),
+so the logo, the primary action and the menu button always have room between them.
+
+**Menu panels** are a two-column grid of rich items: an icon tile, the label, and the one line that says
+what the feature does. Unreleased features sit in the same grid, in no special order, and carry a
+"Coming soon" chip rather than being moved into a column of their own — the flag belongs to the link.
+Each panel ends with a single arrow row under a hairline. The phone menu shows the same icon, label and
+chip at menu-sized text, without the descriptions, because the list is long enough already.
 
 **JavaScript that does ship:**
 
@@ -87,9 +103,11 @@ uses `<details>`. Phones show all three features stacked, rather than behind a s
 
 - The hero demo loops every 14 s. It stops while it is off screen. There is no pause button: the demo is
   decorative, and `prefers-reduced-motion` shows its final frame instead (see the note below).
-- The stage settles in on load, and the header gains a surface as you scroll (scroll timeline).
+- The stage settles in on load, and the floating header's glass surface fades in as you scroll (scroll timeline).
 - Tiles rise into view and the comparison bars grow (view timelines, progressive enhancement).
 - Feature panels fade in, menus pop in, and FAQ answers open smoothly.
+- A price rises in when the currency or the billing period changes: the newly matched figure was
+  `display: none`, and a CSS animation restarts when an element becomes rendered.
 - `prefers-reduced-motion` removes all of it and shows the demo's final frame.
 
 **Motion and WCAG 2.2.2.** The hero demo runs on a loop longer than five seconds, so 2.2.2 asks for a
@@ -119,9 +137,9 @@ Measured on the production build (`next start`), Lighthouse 13.5.0, three runs e
 | CLS                                 | ≤ 0.05                  | 0                                                                      |
 | TBT                                 | ≤ 100 ms                | 10–20 ms (simulated mobile), 50 ms (applied), 0 ms (desktop)           |
 | JavaScript                          | ≤ 120 KB                | 117.8 KB Brotli (137.5 KB gzip)                                        |
-| Total first view                    | ≤ 800 KB                | 208 KB                                                                 |
+| Total first view                    | ≤ 800 KB                | 209 KB                                                                 |
 | Fonts                               | ≤ 2 families, ≤ 4 files | 2 families, 2 files, 48.5 KB                                           |
-| DOM elements                        | ≤ 1,000                 | 952                                                                    |
+| DOM elements                        | ≤ 1,000                 | 982                                                                    |
 | Third-party requests before consent | 0                       | 0                                                                      |
 
 Two deviations to know about:
@@ -141,7 +159,9 @@ elements, and menus mount only when opened.
 - One `h1` and a logical heading order. Landmarks are labelled, and a skip link is the first stop.
 - Visible 2px focus rings everywhere, including the custom radio controls.
 - Tap targets are at least 44 × 44 px on phones, and colour pairs are checked for contrast.
-- Desktop menus open on click, Enter and Space, and also on hover with a delay. Escape closes them and returns focus.
+- Desktop menus open on click, Enter and Space, and also on hover with a delay. Escape closes them and
+  returns focus. The "Coming soon" chip sits inside its link, so the flag rides in the accessible name
+  and is never signalled by colour alone.
 - The phone menu is a modal `<dialog>`.
 - The animated demo stops while it is off screen and disappears entirely under reduced motion. It has no
   in-page pause control (see "Motion and WCAG 2.2.2" above).
