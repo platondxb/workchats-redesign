@@ -57,7 +57,7 @@ export const home = {
     secondary: { label: "Book a demo", href: site.links.bookDemo },
     note: `Free for up to ${quotas.free.members} people. No credit card needed.`,
     productLabel:
-      "The Workchats desktop and mobile apps. In the #spring-launch channel, Priya Shah suggests a quick check-in and starts a call from the conversation; the call appears on her teammates' phones.",
+      "The Workchats app. In the #spring-launch channel, Priya Shah suggests a quick check-in and starts a call from the conversation; the call arrives on a teammate's phone.",
   },
 
   /**

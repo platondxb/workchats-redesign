@@ -262,21 +262,25 @@
   }
 }
 
-/* A price that appears when the currency or the billing period changes. The element is display: none
-   until its variant matches, and a CSS animation restarts when an element becomes rendered, so the new
-   figure rises in rather than snapping. Transform and opacity only, so nothing around it moves. */
+/* A price that appears when the currency changes. The four that are not chosen are display: none, so the
+   box is always exactly as wide as the figure on screen; a CSS animation restarts when an element becomes
+   rendered, so the new figure rises into place instead of appearing. Transform and opacity only, so
+   nothing around the price moves.
+   An earlier pass cross-faded the two figures by stacking all five in one grid cell. It read better, but
+   the cell sized to the widest currency on the page (₽1,653,120), which left a visible gap between a
+   shorter figure and the "a year" that follows it. */
 @utility price-in {
-  animation: price-in 260ms var(--ease-out) both;
+  animation: price-in 360ms var(--ease-out) both;
 }
 
 @keyframes price-in {
   from {
     opacity: 0;
-    transform: translateY(5px);
+    translate: 0 12px;
   }
   to {
     opacity: 1;
-    transform: none;
+    translate: 0 0;
   }
 }
 

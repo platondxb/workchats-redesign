@@ -82,6 +82,13 @@ export const phoneView = {
       unread: 1,
     },
     { kind: "channel", name: "field-ops", preview: "You: Site visit done. Photos coming…", time: "08:47" },
+    {
+      kind: "person",
+      person: "tom" as PersonId,
+      preview: "Left two comments on the header spacing.",
+      time: "Yesterday",
+    },
+    { kind: "channel", name: "announcements", preview: "Amara: Office closed on Friday.", time: "Tue" },
   ],
 } as const;
 

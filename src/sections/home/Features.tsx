@@ -51,8 +51,10 @@ export function Features() {
           action={features.all}
         />
 
-        <fieldset className="mt-10 hidden rounded-full border border-line bg-surface p-1 shadow-raised md:inline-flex">
-          <legend className="sr-only">{features.legend}</legend>
+        <fieldset
+          aria-label={features.legend}
+          className="mt-10 hidden rounded-full border border-line bg-surface p-1 shadow-raised md:inline-flex"
+        >
           {features.tabs.map((tab, index) => {
             const TabIcon = tabIcons[tab.id];
             return (

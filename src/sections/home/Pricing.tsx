@@ -25,9 +25,9 @@ import { convert, formatDisplayPrice, gbpPrice } from "@/lib/pricing";
  */
 
 /**
- * Shows a price only for its currency. The pound is the default, so it hides when another is chosen.
- * Every span carries price-in: the newly matched one is rendered for the first time, and a CSS animation
- * restarts when an element becomes rendered, so the figure rises in instead of snapping.
+ * Shows a price only for its currency, and hides the other four with display: none, so the block is
+ * exactly as wide as the figure on screen and the "a year" that follows it sits next to it. The chosen
+ * figure rises in on price-in.
  */
 const currencyClasses = {
   GBP: "price-in inline currency-usd:hidden currency-eur:hidden currency-aed:hidden currency-rub:hidden",
@@ -42,7 +42,7 @@ const periodClasses = {
   monthly: "hidden billing-monthly:inline",
 } satisfies Record<BillingPeriod, string>;
 
-const pricingScript = `(function(){var s=document.getElementById("pricing");if(!s)return;var k="workchats-currency";try{var c=sessionStorage.getItem(k),r=c&&document.getElementById("currency-"+c.toLowerCase());if(r)r.checked=true}catch(e){}var live=document.getElementById("pricing-status");s.addEventListener("change",function(e){var t=e.target;if(!t||t.type!=="radio")return;if(t.name==="currency"){try{sessionStorage.setItem(k,t.value)}catch(e){}}if(!live)return;var parts=[];s.querySelectorAll("[data-plan-price]").forEach(function(p){var a=[].find.call(p.querySelectorAll("[data-amount]"),function(x){return x.offsetParent!==null});if(a)parts.push(p.getAttribute("data-plan-price")+" "+a.textContent)});var monthly=document.getElementById("billing-monthly").checked;live.textContent=parts.join(", ")+" per user a month, billed "+(monthly?"monthly":"annually")+"."})})()`;
+const pricingScript = `(function(){var s=document.getElementById("pricing");if(!s)return;var K="workchats-currency",live=document.getElementById("pricing-status");function mirror(c){["currency","cost-currency"].forEach(function(n){var el=document.getElementById(n+"-"+c.toLowerCase());if(el)el.checked=true})}try{var c=sessionStorage.getItem(K);if(c)mirror(c)}catch(e){}document.addEventListener("change",function(e){var t=e.target;if(!t||t.type!=="radio")return;if(t.name==="currency"||t.name==="cost-currency"){try{sessionStorage.setItem(K,t.value)}catch(err){}mirror(t.value)}if(!live)return;var code=(document.querySelector('input[name="currency"]:checked')||{value:"GBP"}).value,monthly=document.getElementById("billing-monthly").checked,parts=[];s.querySelectorAll("[data-plan-price]").forEach(function(p){var a=[].find.call(p.querySelectorAll('[data-currency="'+code+'"]'),function(x){return x.offsetParent!==null});if(a)parts.push(p.getAttribute("data-plan-price")+" "+a.textContent)});live.textContent=parts.join(", ")+" per user a month, billed "+(monthly?"monthly":"annually")+"."})})()`;
 
 export function Pricing() {
   const { pricing } = home;
@@ -52,8 +52,10 @@ export function Pricing() {
         <SectionHeader id="pricing-title" title={pricing.title} intro={pricing.intro} />
 
         <div className="mt-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <fieldset className="inline-flex self-start rounded-full border border-line bg-surface p-1 shadow-raised">
-            <legend className="sr-only">{pricing.periodLegend}</legend>
+          <fieldset
+            aria-label={pricing.periodLegend}
+            className="inline-flex self-start rounded-full border border-line bg-surface p-1 shadow-raised"
+          >
             <Segment
               name="billing"
               id="billing-annual"
@@ -163,7 +165,12 @@ function PlanPrice({ plan }: { plan: Plan }) {
     const gbp = gbpPrice(plan, period);
     if (gbp === null) throw new Error(`Plan "${plan.id}" has no ${period} price in content/pricing.ts`);
     return displayCurrencies.map((currency) => (
-      <span key={currency.code} data-amount="" className={currencyClasses[currency.code]}>
+      <span
+        key={currency.code}
+        data-amount=""
+        data-currency={currency.code}
+        className={currencyClasses[currency.code]}
+      >
         {formatDisplayPrice(convert(gbp, currency.code), currency.code)}
       </span>
     ));

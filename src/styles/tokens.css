@@ -128,6 +128,7 @@
   --radius-md: 16px; /* cards, product panels */
   --radius-lg: 28px; /* product stage, large sections */
   --radius-full: 9999px; /* buttons, avatars, pills */
+  --radius-device: 2.25rem; /* the handset's body in the hero */
 
   /* Two elevations. Raised: product windows and hovered cards. Overlay: menus and dialogs.
      Float: the header bar, a wide soft halo rather than a hard edge. */
@@ -141,6 +142,7 @@
   --container-nav: 87.5rem; /* 1400px: the floating header runs wider than the content */
   --container-window: 66rem; /* the desktop app window in the hero */
   --container-phone: 15rem; /* the phone in the hero */
+  --aspect-device: 393 / 852; /* a current iPhone's screen, so the handset reads as one */
   --container-menu-sm: 22rem; /* header menu panels */
   --container-menu-md: 34rem;
   --container-menu-lg: 44rem;

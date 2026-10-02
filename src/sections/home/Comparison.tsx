@@ -14,7 +14,10 @@ import { convertTotal, formatDisplayPrice } from "@/lib/pricing";
  * come from content/home.ts and content/pricing.ts.
  */
 
-/** Shows a total only for its currency; the pound is the default, so it hides when another is chosen. */
+/**
+ * Shows a total only for its currency. Display: none for the other four keeps the line exactly as wide as
+ * the figure on screen, so the "a year" that follows it stays next to it; the chosen one rises in.
+ */
 const currencyClasses = {
   GBP: "price-in inline cost-currency-usd:hidden cost-currency-eur:hidden cost-currency-aed:hidden cost-currency-rub:hidden",
   USD: "price-in hidden cost-currency-usd:inline",
@@ -174,19 +177,22 @@ function CostRow({
 }) {
   return (
     <div>
-      <p className="flex items-baseline justify-between gap-4">
-        <span id={`${id}-label`} className="text-small font-semibold" suppressHydrationWarning>
+      <p className="flex items-baseline gap-4">
+        <span id={`${id}-label`} className="mr-auto text-small font-semibold" suppressHydrationWarning>
           {label}
         </span>
-        <span className="shrink-0 font-display text-heading tabular-nums">
-          <span id={id} suppressHydrationWarning>
-            <Amounts gbp={amountGbp} />
-          </span>
-          <span className="font-sans text-small font-regular text-on-night-muted"> a year</span>
+        <span id={id} className="shrink-0 font-display text-heading tabular-nums" suppressHydrationWarning>
+          <Amounts gbp={amountGbp} />
         </span>
+        <span className="shrink-0 font-sans text-small font-regular text-on-night-muted"> a year</span>
       </p>
-      <svg aria-hidden="true" viewBox="0 0 100 2" preserveAspectRatio="none" className="mt-3 h-2 w-full">
-        <rect width="100" height="2" rx="1" className="fill-night-line" />
+      {/* The track is the SVG's own background, which saves a rect on every row. */}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 100 2"
+        preserveAspectRatio="none"
+        className="mt-3 h-2 w-full rounded-full bg-night-line"
+      >
         <rect
           id={`${id}-bar`}
           width={Math.round(share * 1000) / 10}

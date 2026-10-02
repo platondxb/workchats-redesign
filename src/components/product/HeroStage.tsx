@@ -35,7 +35,7 @@ const pauseOffscreen = `(function(){var d=document.getElementById("hero-demo");i
 export function HeroStage({ label }: { label: string }) {
   return (
     <div id="hero-demo" data-demo="" suppressHydrationWarning className="mt-10 md:mt-14">
-      <div className="relative isolate animate-stage-in overflow-hidden rounded-lg bg-accent px-3 pt-4 sm:px-6 sm:pt-6 md:px-10 md:pt-12 lg:px-16 lg:pt-14">
+      <div className="relative isolate animate-stage-in overflow-hidden rounded-lg bg-accent px-3 pt-4 pb-8 sm:px-6 sm:pt-6 md:px-10 md:pt-12 md:pb-0 lg:px-16 lg:pt-14">
         {/* The speech-bubble mark from the logo, cropped large behind the product. */}
         <svg
           aria-hidden="true"
@@ -54,12 +54,17 @@ export function HeroStage({ label }: { label: string }) {
   );
 }
 
+/**
+ * The desktop app. It is the desktop-sized view of the demo, so phones show the phone instead: a
+ * shrunken desktop window on a 390px screen reads as a broken layout, not as a product.
+ */
 function DesktopWindow() {
   const [workspace] = workspaces;
   return (
     <div
       inert
-      className="overflow-hidden rounded-t-md border border-b-0 border-line bg-surface text-ink shadow-overlay lg:mr-24 xl:mr-0"
+      data-app="desktop"
+      className="hidden overflow-hidden rounded-t-md border border-b-0 border-line bg-surface text-ink shadow-overlay md:block lg:mr-24 xl:mr-0"
     >
       <div className="flex items-center gap-2.5 border-b border-line bg-tint px-3 py-2 md:px-4">
         <span className="grid size-7 place-items-center rounded-sm bg-accent text-nano font-bold text-on-accent">
@@ -251,15 +256,39 @@ function Message({
   );
 }
 
-/** Daniel's phone, out on a site visit: the call from #spring-launch arrives as a notification. */
+/**
+ * Daniel's phone, out on a site visit: the call from #spring-launch arrives as a notification. Below md
+ * this is the whole demo, centred in the stage; from lg it is the second screen, cropped by the stage and
+ * hanging off the desktop window's bottom-right corner.
+ */
 function PhoneScreen() {
   const { call } = heroDemo;
   return (
     <div
       inert
-      className="absolute bottom-0 hidden w-phone translate-y-40 rounded-lg border-6 border-ink bg-ink shadow-overlay lg:-right-8 lg:block xl:-right-12"
+      data-app="phone"
+      className={cx(
+        // Three layers, as a handset has them: the machined band, the black bezel, then the screen. The
+        // band is a diagonal gradient so the frame catches light at the top and falls away at the bottom.
+        "relative mx-auto w-phone rounded-device bg-linear-to-br from-tint via-line-strong to-ink-muted p-1 shadow-overlay",
+        // Volume buttons on the left, the side button on the right: drawn, so the handset costs no DOM.
+        "before:absolute before:top-24 before:-left-0.5 before:h-14 before:w-1 before:rounded-l-sm before:bg-ink",
+        "after:absolute after:top-32 after:-right-0.5 after:h-16 after:w-1 after:rounded-r-sm after:bg-ink",
+        "md:hidden lg:absolute lg:-right-8 lg:bottom-0 lg:block lg:translate-y-40 xl:-right-12",
+      )}
     >
-      <div className="relative h-120 overflow-hidden rounded-md bg-surface">
+      {/* The screen: a current iPhone's proportions, with its Dynamic Island and home indicator drawn as
+          pseudo-elements. */}
+      <div
+        className={cx(
+          // border-4 is the black bezel between the band and the glass.
+          "relative aspect-device overflow-hidden rounded-lg border-4 border-ink bg-surface",
+          "before:absolute before:top-1.5 before:left-1/2 before:h-5 before:w-18 before:-translate-x-1/2 before:rounded-full before:bg-ink",
+          "after:absolute after:bottom-1.5 after:left-1/2 after:h-1 after:w-20 after:-translate-x-1/2 after:rounded-full after:bg-ink/30",
+        )}
+      >
+        {/* The front camera, sitting at the right end of the Dynamic Island. */}
+        <span className="absolute top-3.5 left-1/2 ml-7 size-1.5 rounded-full bg-accent-ink/50" />
         <p className="px-4 pt-2.5 text-nano font-semibold">{phoneView.time}</p>
         <p className="flex items-center justify-between px-4 pt-4 pb-2">
           <span className="font-display text-heading">Chats</span>

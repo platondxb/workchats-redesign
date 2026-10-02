@@ -71,7 +71,15 @@ comparison totals, the meta description and the structured data are all computed
 9. **Final call to action.**
 
 **Product UI** is coded HTML, not screenshots. Each view is exposed to assistive technology as one
-image with a written description. The demo team uses initials, not stock photos.
+image with a written description. The demo team uses initials, not stock photos. The hero carries two
+renders of the same story: phones (below `md`) get the mobile app on its own, in a handset frame; from
+`md` the desktop window takes over, and from `lg` the phone joins it as the second screen, cropped by the
+stage. A shrunken desktop window is never shown at phone widths. The handset is drawn to a current
+iPhone's screen proportions (`--aspect-device`, 393 × 852). The outline is three layers, as a handset
+has them: a machined band (a diagonal gradient, so the frame catches light at the top and falls away at
+the bottom), the black bezel as the screen's border, then the glass. A status bar carries the time, the
+Dynamic Island holds its camera, and the home indicator and side buttons are pseudo-elements — so the
+whole device chrome costs one element.
 
 **Interactive without JavaScript.** The feature switcher, billing period and both currency switches —
 one in the pricing cards, one in the calculator — are native radio buttons; CSS shows the matching panel,
@@ -106,8 +114,9 @@ chip at menu-sized text, without the descriptions, because the list is long enou
 - The stage settles in on load, and the floating header's glass surface fades in as you scroll (scroll timeline).
 - Tiles rise into view and the comparison bars grow (view timelines, progressive enhancement).
 - Feature panels fade in, menus pop in, and FAQ answers open smoothly.
-- A price rises in when the currency or the billing period changes: the newly matched figure was
-  `display: none`, and a CSS animation restarts when an element becomes rendered.
+- A price rises into place when the currency changes. The four that are not chosen are `display: none`,
+  so the block is exactly as wide as the figure on screen and the "a year" after it stays next to it; a
+  CSS animation restarts when an element becomes rendered, which is what runs the rise.
 - `prefers-reduced-motion` removes all of it and shows the demo's final frame.
 
 **Motion and WCAG 2.2.2.** The hero demo runs on a loop longer than five seconds, so 2.2.2 asks for a
@@ -137,9 +146,9 @@ Measured on the production build (`next start`), Lighthouse 13.5.0, three runs e
 | CLS                                 | ≤ 0.05                  | 0                                                                      |
 | TBT                                 | ≤ 100 ms                | 10–20 ms (simulated mobile), 50 ms (applied), 0 ms (desktop)           |
 | JavaScript                          | ≤ 120 KB                | 117.8 KB Brotli (137.5 KB gzip)                                        |
-| Total first view                    | ≤ 800 KB                | 209 KB                                                                 |
+| Total first view                    | ≤ 800 KB                | 210 KB                                                                 |
 | Fonts                               | ≤ 2 families, ≤ 4 files | 2 families, 2 files, 48.5 KB                                           |
-| DOM elements                        | ≤ 1,000                 | 982                                                                    |
+| DOM elements                        | ≤ 1,000                 | 991                                                                    |
 | Third-party requests before consent | 0                       | 0                                                                      |
 
 Two deviations to know about:

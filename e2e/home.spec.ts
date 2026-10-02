@@ -260,16 +260,52 @@ test.describe("interaction", () => {
     await expect(page.locator("#comparison").getByRole("radio", { name: "UAE dirham (AED)" })).toBeChecked();
   });
 
-  test("a new price rises in rather than snapping when the currency changes", async ({ page }) => {
+  test("a changed price rises in, and the figure it replaced leaves the line", async ({ page }) => {
     await page.goto("/");
-    const pro = page.getByRole("article", { name: "Pro" });
-    const gbp = pro.getByText("£3", { exact: true }).first();
-    await expect(gbp).toBeVisible();
-    await expect(gbp).toHaveCSS("animation-name", "price-in");
-    await page.locator("#pricing label").filter({ hasText: /^USD$/ }).click();
-    const usd = pro.getByText("$4", { exact: true }).first();
-    await expect(usd).toBeVisible();
-    await expect(usd).toHaveCSS("animation-name", "price-in");
+    await page.locator("#pricing").scrollIntoViewIfNeeded();
+    const mid = await page.evaluate(async () => {
+      const label = [...document.querySelectorAll("#pricing label")].find(
+        (element) => element.textContent?.trim() === "USD",
+      );
+      (label as HTMLElement).click();
+      await new Promise((resolve) => setTimeout(resolve, 60));
+      const usd = document.querySelector('#pricing [data-currency="USD"]')!;
+      const gbp = document.querySelector('#pricing [data-currency="GBP"]')!;
+      return {
+        opacity: Number(getComputedStyle(usd).opacity),
+        translate: getComputedStyle(usd).translate,
+        gbpDisplay: getComputedStyle(gbp).display,
+      };
+    });
+    // Caught mid-animation: still fading, and still on its way up.
+    expect(mid.opacity).toBeLessThan(1);
+    expect(mid.translate).not.toBe("0px");
+    // The figure it replaced is out of the line, so the box is only as wide as what is on screen.
+    expect(mid.gbpDisplay).toBe("none");
+    await expect(page.locator('#pricing [data-currency="USD"]').first()).toHaveCSS("opacity", "1");
+  });
+
+  test("the calculator totals animate, and keep the 'a year' beside the figure", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("#comparison").scrollIntoViewIfNeeded();
+    const mid = await page.evaluate(async () => {
+      const label = [...document.querySelectorAll("#comparison label")].find(
+        (element) => element.textContent?.trim() === "EUR",
+      );
+      (label as HTMLElement).click();
+      await new Promise((resolve) => setTimeout(resolve, 60));
+      const eur = document.querySelector('#cost-saving [data-currency="EUR"]')!;
+      return Number(getComputedStyle(eur).opacity);
+    });
+    expect(mid).toBeLessThan(1);
+    // The suffix sits beside the figure on screen, not beside the widest currency on the page
+    // (₽1,653,120). Stacking the currencies in one grid cell left a gap here; this is that guard.
+    const gap = await page.evaluate(() => {
+      const value = document.querySelector("#cost-saving")!;
+      const year = value.nextElementSibling!;
+      return Math.round(year.getBoundingClientRect().left - value.getBoundingClientRect().right);
+    });
+    expect(gap).toBeLessThan(16);
   });
 
   test("the cost calculator recalculates and switches to Max above Pro's 50 people", async ({ page }) => {
@@ -368,6 +404,25 @@ test.describe("interaction", () => {
     await page.keyboard.press("Escape");
     await expect(features).toHaveAttribute("aria-expanded", "false");
     await expect(features).toBeFocused();
+  });
+
+  test("phones render the mobile app, not a shrunken desktop window", async ({ page }) => {
+    test.skip(!isMobile(page), "phones only");
+    await page.goto("/");
+    const demo = page.locator("#hero-demo");
+    await expect(demo.locator('[data-app="phone"]')).toBeVisible();
+    await expect(demo.locator('[data-app="desktop"]')).toBeHidden();
+    // A handset, not a squashed desktop window: taller than it is wide, in phone proportions.
+    const box = await demo.locator('[data-app="phone"]').boundingBox();
+    expect((box?.height ?? 0) / (box?.width ?? 1)).toBeGreaterThan(1.6);
+  });
+
+  test("desktop shows the app window, with the phone as the second screen", async ({ page }) => {
+    test.skip(isMobile(page), "desktop only");
+    await page.goto("/");
+    const demo = page.locator("#hero-demo");
+    await expect(demo.locator('[data-app="desktop"]')).toBeVisible();
+    await expect(demo.locator('[data-app="phone"]')).toBeVisible();
   });
 
   test("the phone menu is a dialog that leads with the free sign-up", async ({ page }) => {
