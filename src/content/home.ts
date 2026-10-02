@@ -56,21 +56,18 @@ export const home = {
     primary: { label: "Start free", href: site.links.signUp },
     secondary: { label: "Book a demo", href: site.links.bookDemo },
     note: `Free for up to ${quotas.free.members} people. No credit card needed.`,
-    pause: "Pause animation",
     productLabel:
       "The Workchats desktop and mobile apps. In the #spring-launch channel, Priya Shah suggests a quick check-in and starts a call from the conversation; the call appears on her teammates' phones.",
   },
 
-  trust: {
-    label: "Platforms and key facts",
-    platformsTitle: "Workchats runs on",
-    download: { label: "All downloads", href: site.links.download },
-    facts: [
-      { id: "calls", text: "No time limit on calls" },
-      { id: "encryption", text: "End-to-end encrypted by default" },
-      { id: "residency", text: "Hosted in the UK, EU or Middle East" },
-      { id: "gdpr", text: "GDPR compliant" },
-    ],
+  /**
+   * The downloads bar. Every platform is a real, pressable button. There is no downloads route in this
+   * app yet, so in this MVP the buttons take a press and do nothing else: no navigation, no swap.
+   */
+  downloads: {
+    label: "Supported platforms",
+    title: "Workchats runs on",
+    hint: "Choose a platform to see what you'll need.",
   },
 
   features: {
@@ -270,4 +267,3 @@ export const home = {
 } as const;
 
 export type FeatureTab = (typeof home.features.tabs)[number];
-export type TrustFactId = (typeof home.trust.facts)[number]["id"];

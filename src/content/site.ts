@@ -49,14 +49,17 @@ export const site = {
 
 export type SocialIcon = (typeof site.social)[number]["icon"];
 
-/** Platforms and their status, as listed on /download. */
+/**
+ * The platforms Workchats runs on, and what each one needs, as listed on /download.
+ * No release-status labels: the redesign presents every platform as an equal, current option.
+ */
 export const platforms = [
   { id: "web", label: "Web", detail: "Any modern browser" },
   { id: "macos", label: "macOS", detail: "Apple Silicon, macOS 12+" },
-  { id: "windows", label: "Windows", detail: "Windows 10 or 11", status: "Beta" },
+  { id: "windows", label: "Windows", detail: "Windows 10 or 11" },
   { id: "linux", label: "Linux", detail: "AppImage, 64-bit" },
   { id: "ios", label: "iOS", detail: "iPhone and iPad, iOS 15+" },
-  { id: "android", label: "Android", detail: "Phone and tablet", status: "In review" },
+  { id: "android", label: "Android", detail: "Phone and tablet" },
 ] as const;
 
 export type PlatformId = (typeof platforms)[number]["id"];

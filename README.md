@@ -40,7 +40,7 @@ Every claim on the page comes from the current workchats.com pages. Nothing on t
 | Display currencies and rates (USD, EUR, AED, RUB)                           | The current pricing widget (`data-rate-*`, rounding 0.5)                                 |
 | Cost comparison (five tools, 50 seats)                                      | Blog: _The real cost of running five team communication tools_                           |
 | Security and hosting                                                        | `/faq` (Security, Privacy and Compliance)                                                |
-| Platforms and their status                                                  | `/download`                                                                              |
+| Platforms and what each one needs                                           | `/download`                                                                              |
 | Company details                                                             | `/about`, `/faq`, Terms, footer                                                          |
 
 Content lives in `src/content/` (copy, plans, demo data, navigation) and is typed. Prices, the
@@ -52,7 +52,9 @@ comparison totals, the meta description and the structured data are all computed
 **Sections, in order:**
 
 1. **Hero:** an animated product demo. Priya types in #spring-launch, posts, starts a call, and it rings on Daniel's phone.
-2. **Platforms and key facts.**
+2. **Downloads:** every platform Workchats runs on, as a real, pressable button. No release-status
+   badges. The buttons are inert by design in this MVP: the app serves no downloads route yet, so a
+   press navigates nowhere and changes nothing.
 3. **Features:** a switcher for messaging, meetings and files, plus the coming-soon features.
 4. **Bento grid** of product details, with the founder quote.
 5. **Security:** the hosting regions as flag chips next to the heading, then three cards in the original
@@ -83,11 +85,18 @@ uses `<details>`. Phones show all three features stacked, rather than behind a s
 
 **Motion** is CSS only and uses transform and opacity:
 
-- The hero demo loops every 14 s. It pauses off screen, and a visible pause control covers WCAG 2.2.2.
+- The hero demo loops every 14 s. It stops while it is off screen. There is no pause button: the demo is
+  decorative, and `prefers-reduced-motion` shows its final frame instead (see the note below).
 - The stage settles in on load, and the header gains a surface as you scroll (scroll timeline).
 - Tiles rise into view and the comparison bars grow (view timelines, progressive enhancement).
 - Feature panels fade in, menus pop in, and FAQ answers open smoothly.
 - `prefers-reduced-motion` removes all of it and shows the demo's final frame.
+
+**Motion and WCAG 2.2.2.** The hero demo runs on a loop longer than five seconds, so 2.2.2 asks for a
+way to pause it. The pause control was removed by design decision; what remains is the off-screen stop
+and `prefers-reduced-motion`, which is a user-agent mechanism rather than an in-page one. If the site
+has to claim 2.2.2 outright, restore a control in `HeroStage` (the CSS hook is already documented) or
+make the demo run once instead of looping. This is recorded in `UX-REVIEW.md`.
 
 **Design tokens** live in `src/styles/tokens.css`. Tailwind's default scales are reset, so components can
 only use the defined colours, type sizes, radii, shadows and motion; `check:tokens` enforces this.
@@ -112,7 +121,7 @@ Measured on the production build (`next start`), Lighthouse 13.5.0, three runs e
 | JavaScript                          | ≤ 120 KB                | 117.8 KB Brotli (137.5 KB gzip)                                        |
 | Total first view                    | ≤ 800 KB                | 208 KB                                                                 |
 | Fonts                               | ≤ 2 families, ≤ 4 files | 2 families, 2 files, 48.5 KB                                           |
-| DOM elements                        | ≤ 1,000                 | 969                                                                    |
+| DOM elements                        | ≤ 1,000                 | 952                                                                    |
 | Third-party requests before consent | 0                       | 0                                                                      |
 
 Two deviations to know about:
@@ -134,7 +143,8 @@ elements, and menus mount only when opened.
 - Tap targets are at least 44 × 44 px on phones, and colour pairs are checked for contrast.
 - Desktop menus open on click, Enter and Space, and also on hover with a delay. Escape closes them and returns focus.
 - The phone menu is a modal `<dialog>`.
-- The animated demo can be paused, and stops entirely under reduced motion.
+- The animated demo stops while it is off screen and disappears entirely under reduced motion. It has no
+  in-page pause control (see "Motion and WCAG 2.2.2" above).
 - axe (WCAG 2.2 A/AA) runs in CI on desktop and mobile with no serious or critical issues.
 
 ## Privacy and security
@@ -158,8 +168,10 @@ These come from contradictions or gaps on the current site, not from this rebuil
    labelled approximate. The old widget defaulted to US dollars; the new one defaults to pounds.
 4. **Launch timing.** The FAQ still describes a pre-launch, Q2 2026 early-access programme and a waitlist.
    None of that is repeated here; the FAQ page itself needs updating.
-5. **Platform status.** The page follows `/download`: Windows is in beta and Android is in Google Play
-   review. Update `src/content/site.ts` when either changes.
+5. **Platform status.** The redesign drops every release-status badge, so the downloads bar and the FAQ
+   now present all six platforms as current. `/download` still marks Windows as beta and Android as in
+   Google Play review: either keep the page's claim softer than the docs, or update `src/content/site.ts`
+   and `src/content/faq.ts` when the statuses change. `UX-REVIEW.md` records the decision.
 6. **Middle East hosting.** The site says data is hosted "in the UK, EU, or Middle East" and the Terms cite
    the UAE's PDPL, but no page names the Middle East hosting country. The region chip uses the UAE flag;
    swap `public/flags/ae.svg` if hosting is elsewhere.

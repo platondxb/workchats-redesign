@@ -39,6 +39,6 @@ export const faq: readonly FaqItem[] = [
     id: "platforms",
     question: "Which platforms does Workchats run on?",
     answer:
-      "The web, macOS (Apple Silicon, macOS 12 or later), iPhone and iPad (iOS 15 or later) and Linux as an AppImage. The Windows app is in beta, and the Android app is in Google Play review.",
+      "The web, macOS (Apple Silicon, macOS 12 or later), Windows 10 or 11, iPhone and iPad (iOS 15 or later), Android phones and tablets, and Linux as an AppImage.",
   },
 ];

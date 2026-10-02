@@ -60,6 +60,13 @@ test.describe("content and rendering", () => {
     await expect(page.locator("body")).not.toContainText(/unconfirmed|needs content|\bQ\d{1,2}\b|lorem/i);
   });
 
+  test("presents every platform as current: nothing is beta and nothing is in review", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("body")).not.toContainText(/beta|in review/i);
+    const bar = page.locator("section[aria-label='Supported platforms']");
+    await expect(bar.getByRole("button")).toHaveCount(6);
+  });
+
   test("has link-preview tags and a 1200 × 630 preview image", async ({ page, request }) => {
     await page.goto("/");
     const image = await page.locator('meta[property="og:image"]').getAttribute("content");
@@ -138,9 +145,13 @@ test.describe("accessibility", () => {
       const result = await page.evaluate(() => {
         const el = document.activeElement as HTMLElement | null;
         if (!el || el === document.body) return null;
-        const style = getComputedStyle(el);
-        const hasOutline = style.outlineStyle !== "none" && parseFloat(style.outlineWidth) >= 2;
-        return hasOutline ? null : `${el.tagName} "${(el.textContent ?? "").trim().slice(0, 30)}"`;
+        const hasRing = (node: HTMLElement) => {
+          const style = getComputedStyle(node);
+          return style.outlineStyle !== "none" && parseFloat(style.outlineWidth) >= 2;
+        };
+        // Visually hidden controls (the radio switches) draw their ring on the visible label around them.
+        const target = el.closest("label") ?? el;
+        return hasRing(target) ? null : `${el.tagName} "${(el.textContent ?? "").trim().slice(0, 30)}"`;
       });
       if (result) missing.push(result);
     }
@@ -159,23 +170,42 @@ test.describe("accessibility", () => {
     const message = page.locator("#hero-demo [class*='animate-demo-message']");
     expect(await message.evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
     expect(await message.evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
-    // Nothing moves, so there's nothing to pause, and the typing indicator would never resolve.
-    await expect(page.locator("label", { hasText: "Pause animation" })).toBeHidden();
+    // Nothing moves and the typing indicator would never resolve, so neither is shown.
     await expect(page.getByText(/is typing/)).toBeHidden();
     await context.close();
   });
 
-  test("the hero animation can be paused (WCAG 2.2.2)", async ({ page }) => {
+  test("the hero demo stops while it is off screen, so it never animates out of sight", async ({ page }) => {
     await page.goto("/");
-    const message = page.locator("#hero-demo [class*='animate-demo-message']");
-    expect(await message.evaluate((el) => getComputedStyle(el).animationPlayState)).toBe("running");
-    await page.locator("label", { hasText: "Pause animation" }).click();
-    await expect(page.getByRole("checkbox", { name: "Pause animation" })).toBeChecked();
-    expect(await message.evaluate((el) => getComputedStyle(el).animationPlayState)).toBe("paused");
+    const demo = page.locator("#hero-demo");
+    await expect(demo).not.toHaveAttribute("data-paused", "");
+    await page.mouse.wheel(0, 4000);
+    await expect(demo).toHaveAttribute("data-paused", "");
   });
 });
 
 test.describe("interaction", () => {
+  test("every platform takes a press and leaves the page exactly as it was", async ({ page }) => {
+    await page.goto("/");
+    const bar = page.locator("section[aria-label='Supported platforms']");
+    const hint = bar.getByText("Choose a platform to see what you'll need.");
+    await expect(hint).toBeVisible();
+
+    for (const name of ["Web", "macOS", "Windows", "Linux", "iOS", "Android"]) {
+      await expect(bar.getByRole("button", { name })).toBeAttached();
+    }
+
+    const urlBefore = page.url();
+    const textBefore = await bar.innerText();
+    for (const name of ["Windows", "iOS", "Web"]) {
+      await bar.getByRole("button", { name }).click();
+    }
+    // The MVP buttons are inert on purpose: no navigation, no swap, nothing appears or disappears.
+    expect(page.url()).toBe(urlBefore);
+    expect(await bar.innerText()).toBe(textBefore);
+    await expect(hint).toBeVisible();
+  });
+
   test("the billing period switch changes the prices shown", async ({ page }) => {
     await page.goto("/");
     const pro = page.getByRole("article", { name: "Pro" });

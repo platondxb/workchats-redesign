@@ -28,7 +28,7 @@ export function Hero() {
             <p className="mt-3 text-small text-ink-subtle">{hero.note}</p>
           </div>
         </div>
-        <HeroStage label={hero.productLabel} pauseLabel={hero.pause} />
+        <HeroStage label={hero.productLabel} />
       </div>
     </section>
   );

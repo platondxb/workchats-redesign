@@ -5,13 +5,13 @@ import { site } from "@/content/site";
 import { homeJsonLd } from "@/lib/structured-data";
 import { Bento } from "@/sections/home/Bento";
 import { Comparison } from "@/sections/home/Comparison";
+import { Downloads } from "@/sections/home/Downloads";
 import { Faq } from "@/sections/home/Faq";
 import { Features } from "@/sections/home/Features";
 import { FinalCta } from "@/sections/home/FinalCta";
 import { Hero } from "@/sections/home/Hero";
 import { Pricing } from "@/sections/home/Pricing";
 import { Security } from "@/sections/home/Security";
-import { TrustBar } from "@/sections/home/TrustBar";
 
 export const metadata: Metadata = {
   title: { absolute: home.meta.title },
@@ -43,7 +43,7 @@ export default function HomePage() {
     <>
       <JsonLd data={homeJsonLd()} />
       <Hero />
-      <TrustBar />
+      <Downloads />
       <Features />
       <Bento />
       <Security />

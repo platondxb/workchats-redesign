@@ -250,11 +250,8 @@
   }
 }
 
-/* The hero demo pauses while it's off screen (an inline IntersectionObserver sets data-paused) and when
-   the visitor pauses it with the control on the stage (WCAG 2.2.2). The control is a checkbox, so it
-   works without JavaScript. */
-[data-demo][data-paused] *,
-[data-demo]:has(#demo-pause:checked) * {
+/* The hero demo stops while it's off screen: an inline IntersectionObserver sets data-paused. */
+[data-demo][data-paused] * {
   animation-play-state: paused !important;
 }
 

@@ -3,10 +3,8 @@ import {
   Hash,
   MagnifyingGlass,
   PaperPlaneRight,
-  Pause,
   Phone,
   PhoneIncoming,
-  Play,
   Plus,
   ThumbsUp,
   VideoCamera,
@@ -23,8 +21,9 @@ import { Avatar, firstName, personName } from "./ProductFrame";
  * call rings on Daniel's phone. CSS animations only (opacity and transform), so there is no layout
  * shift and no JavaScript. Without motion, the final frame is shown.
  *
- * The loop pauses off screen (a tiny inline IntersectionObserver) and with the visible pause control
- * (WCAG 2.2.2), which is a checkbox read by CSS, so it works before and without JavaScript.
+ * The loop pauses while it is off screen (a tiny inline IntersectionObserver), so it costs nothing and
+ * never animates out of sight. There is no pause button: the demo is decorative, and visitors who want
+ * it still can set "reduce motion" in their operating system, which shows the final frame instantly.
  *
  * The window and phone are a picture: the role="img" wrapper carries the description, and the mock UI
  * inside is inert (nothing in it can be focused, selected or read out item by item). Its text is
@@ -33,7 +32,7 @@ import { Avatar, firstName, personName } from "./ProductFrame";
 
 const pauseOffscreen = `(function(){var d=document.getElementById("hero-demo");if(!d||!("IntersectionObserver"in window))return;new IntersectionObserver(function(e){e[0].isIntersecting?d.removeAttribute("data-paused"):d.setAttribute("data-paused","")}).observe(d)})()`;
 
-export function HeroStage({ label, pauseLabel }: { label: string; pauseLabel: string }) {
+export function HeroStage({ label }: { label: string }) {
   return (
     <div id="hero-demo" data-demo="" suppressHydrationWarning className="mt-10 md:mt-14">
       <div className="relative isolate animate-stage-in overflow-hidden rounded-lg bg-accent px-3 pt-4 sm:px-6 sm:pt-6 md:px-10 md:pt-12 lg:px-16 lg:pt-14">
@@ -49,14 +48,6 @@ export function HeroStage({ label, pauseLabel }: { label: string; pauseLabel: st
           <DesktopWindow />
           <PhoneScreen />
         </div>
-      </div>
-      <div className="mt-3 flex justify-end motion-reduce:hidden">
-        <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-3 text-small font-semibold text-ink-muted hover:bg-tint hover:text-ink has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent">
-          <input id="demo-pause" type="checkbox" className="peer sr-only" />
-          <Pause aria-hidden="true" className="size-4 peer-checked:hidden" />
-          <Play aria-hidden="true" className="hidden size-4 peer-checked:block" />
-          {pauseLabel}
-        </label>
       </div>
       <script dangerouslySetInnerHTML={{ __html: pauseOffscreen }} />
     </div>
