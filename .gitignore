@@ -50,3 +50,6 @@ next-env.d.ts
 
 # local tooling (Claude Code preview config and session worktrees)
 /.claude/
+
+# third-party mood references for the redesign (not licensed for redistribution; see docs/redesign/assets.md)
+/docs/redesign/references/

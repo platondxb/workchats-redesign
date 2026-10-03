@@ -6,3 +6,5 @@ next-env.d.ts
 playwright-report
 test-results
 coverage
+.agents
+docs/redesign/HOME-REDESIGN-PROMPT.md

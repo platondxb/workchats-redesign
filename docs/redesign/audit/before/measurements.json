@@ -1,0 +1,805 @@
+{
+  "320": {
+    "viewport": {
+      "width": 320,
+      "height": 568
+    },
+    "pageHeight": 17851,
+    "screens": 31.4,
+    "domElements": 991,
+    "sections": [
+      {
+        "label": "A simpler way to talk with your whole team",
+        "top": 76,
+        "height": 1281,
+        "screensFromTop": 0.13
+      },
+      {
+        "label": "Supported platforms",
+        "top": 1357,
+        "height": 310,
+        "screensFromTop": 2.39
+      },
+      {
+        "label": "Everything your team needs. Nothing they don't.",
+        "top": 1667,
+        "height": 4307,
+        "screensFromTop": 2.93
+      },
+      {
+        "label": "Built for teams who actually talk",
+        "top": 5974,
+        "height": 2695,
+        "screensFromTop": 10.52
+      },
+      {
+        "label": "Your team's data stays your team's data",
+        "top": 8669,
+        "height": 2035,
+        "screensFromTop": 15.26
+      },
+      {
+        "label": "One app instead of five",
+        "top": 10704,
+        "height": 1628,
+        "screensFromTop": 18.84
+      },
+      {
+        "label": "Pricing that's simple and affordable",
+        "top": 12332,
+        "height": 3017,
+        "screensFromTop": 21.71
+      },
+      {
+        "label": "Questions? We're glad you asked.",
+        "top": 15349,
+        "height": 986,
+        "screensFromTop": 27.02
+      },
+      {
+        "label": "Your team deserves a simpler way to work together",
+        "top": 16335,
+        "height": 618,
+        "screensFromTop": 28.76
+      }
+    ],
+    "ctaCounts": {
+      "Start free": 5,
+      "Menu": 1,
+      "Book a demo": 3,
+      "Web": 1,
+      "macOS": 1,
+      "Windows": 1,
+      "Linux": 1,
+      "iOS": 1,
+      "Android": 1,
+      "Explore all features": 1,
+      "Explore messaging": 1,
+      "Explore video and meetings": 1,
+      "Explore files and search": 1,
+      "Coming soonSocial feedCompany news, wins and culture your team will actually read.": 1,
+      "Coming soonEventsInternal events with RSVP, without the spreadsheet.": 1,
+      "Coming soonPolls and surveysAsk your team anything. Get real answers, not silence.": 1,
+      "Read the full cost breakdown": 1,
+      "Start with Pro": 1,
+      "Start with Max": 1,
+      "Contact sales": 1,
+      "Compare every plan in detail": 1,
+      "See all questions": 1,
+      "support@workchats.com": 1
+    },
+    "firstViewportText": [
+      "Skip to content",
+      "Start free",
+      "Menu",
+      "A simpler way to talk with your whole team",
+      "Great teams don't need more apps. Workchats puts messages, video calls and files in one calm place, with no time limit on calls and end-to-end encryption on every plan."
+    ],
+    "competitorHits": {
+      "Slack": {
+        "inVisibleText": 3,
+        "inHtml": 13
+      },
+      "Zoom": {
+        "inVisibleText": 2,
+        "inHtml": 5
+      },
+      "Google Workspace": {
+        "inVisibleText": 3,
+        "inHtml": 11
+      },
+      "Loom": {
+        "inVisibleText": 2,
+        "inHtml": 5
+      },
+      "WhatsApp": {
+        "inVisibleText": 2,
+        "inHtml": 5
+      }
+    },
+    "inertButtons": ["Web", "macOS", "Windows", "Linux", "iOS", "Android"],
+    "freeMentions": [
+      {
+        "text": "{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"Organization\",\"@id\":\"https://www.work",
+        "top": 0,
+        "screens": 0
+      },
+      {
+        "text": "Free for up to 5 people. No credit card needed.",
+        "top": 666,
+        "screens": 1.17
+      },
+      {
+        "text": "Start free with up to 5 team members. Upgrade when you need more space, more people or mor",
+        "top": 12480,
+        "screens": 21.97
+      },
+      {
+        "text": "Up to 5 team members",
+        "top": 13136,
+        "screens": 23.13
+      },
+      {
+        "text": "Yes. The Free plan is free for teams of up to 5, with no time limit and no credit card. Yo",
+        "top": 15729,
+        "screens": 27.69
+      },
+      {
+        "text": "Start free with up to 5 people, or book a demo and we'll walk you through Workchats with y",
+        "top": 16543,
+        "screens": 29.12
+      }
+    ],
+    "firstMentions": {
+      "price": {
+        "text": "What the five cost, per user a month",
+        "screens": 19.48
+      },
+      "sla": {
+        "text": "99.9% uptime SLA",
+        "screens": 24.61
+      },
+      "encryption": {
+        "text": "Great teams don't need more apps. Workchats puts messages, video calls and files",
+        "screens": 0.55
+      },
+      "residency": {
+        "text": "Hosted in your region",
+        "screens": 15.6
+      },
+      "replaces": {
+        "text": "One app instead of five",
+        "screens": 18.96
+      },
+      "free5": {
+        "text": "Free for up to 5 people. No credit card needed.",
+        "screens": 1.17
+      }
+    },
+    "horizontalOverflow": false
+  },
+  "390": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "pageHeight": 16103,
+    "screens": 19.1,
+    "domElements": 991,
+    "sections": [
+      {
+        "label": "A simpler way to talk with your whole team",
+        "top": 76,
+        "height": 1094,
+        "screensFromTop": 0.09
+      },
+      {
+        "label": "Supported platforms",
+        "top": 1170,
+        "height": 235,
+        "screensFromTop": 1.39
+      },
+      {
+        "label": "Everything your team needs. Nothing they don't.",
+        "top": 1405,
+        "height": 3968,
+        "screensFromTop": 1.66
+      },
+      {
+        "label": "Built for teams who actually talk",
+        "top": 5373,
+        "height": 2434,
+        "screensFromTop": 6.37
+      },
+      {
+        "label": "Your team's data stays your team's data",
+        "top": 7807,
+        "height": 1795,
+        "screensFromTop": 9.25
+      },
+      {
+        "label": "One app instead of five",
+        "top": 9602,
+        "height": 1324,
+        "screensFromTop": 11.38
+      },
+      {
+        "label": "Pricing that's simple and affordable",
+        "top": 10926,
+        "height": 2837,
+        "screensFromTop": 12.95
+      },
+      {
+        "label": "Questions? We're glad you asked.",
+        "top": 13763,
+        "height": 892,
+        "screensFromTop": 16.31
+      },
+      {
+        "label": "Your team deserves a simpler way to work together",
+        "top": 14655,
+        "height": 554,
+        "screensFromTop": 17.36
+      }
+    ],
+    "ctaCounts": {
+      "Start free": 5,
+      "Menu": 1,
+      "Book a demo": 3,
+      "Web": 1,
+      "macOS": 1,
+      "Windows": 1,
+      "Linux": 1,
+      "iOS": 1,
+      "Android": 1,
+      "Explore all features": 1,
+      "Explore messaging": 1,
+      "Explore video and meetings": 1,
+      "Explore files and search": 1,
+      "Coming soonSocial feedCompany news, wins and culture your team will actually read.": 1,
+      "Coming soonEventsInternal events with RSVP, without the spreadsheet.": 1,
+      "Coming soonPolls and surveysAsk your team anything. Get real answers, not silence.": 1,
+      "Read the full cost breakdown": 1,
+      "Start with Pro": 1,
+      "Start with Max": 1,
+      "Contact sales": 1,
+      "Compare every plan in detail": 1,
+      "See all questions": 1,
+      "support@workchats.com": 1
+    },
+    "firstViewportText": [
+      "Skip to content",
+      "Start free",
+      "Menu",
+      "A simpler way to talk with your whole team",
+      "Great teams don't need more apps. Workchats puts messages, video calls and files in one calm place, with no time limit on calls and end-to-end encryption on every plan.",
+      "Book a demo",
+      "Free for up to 5 people. No credit card needed.",
+      "09:41",
+      "Chats",
+      "DN",
+      "09:20",
+      "Tom: Thanks. I'll update the homepage mockups…",
+      "PS",
+      "09:05",
+      "Can you send the photos from site?",
+      "08:47",
+      "You: Site visit done. Photos coming…",
+      "PS",
+      "#spring-launch",
+      "Priya started a call",
+      "Decline",
+      "Join"
+    ],
+    "competitorHits": {
+      "Slack": {
+        "inVisibleText": 3,
+        "inHtml": 13
+      },
+      "Zoom": {
+        "inVisibleText": 2,
+        "inHtml": 5
+      },
+      "Google Workspace": {
+        "inVisibleText": 3,
+        "inHtml": 11
+      },
+      "Loom": {
+        "inVisibleText": 2,
+        "inHtml": 5
+      },
+      "WhatsApp": {
+        "inVisibleText": 2,
+        "inHtml": 5
+      }
+    },
+    "inertButtons": ["Web", "macOS", "Windows", "Linux", "iOS", "Android"],
+    "freeMentions": [
+      {
+        "text": "{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"Organization\",\"@id\":\"https://www.work",
+        "top": 0,
+        "screens": 0
+      },
+      {
+        "text": "Free for up to 5 people. No credit card needed.",
+        "top": 501,
+        "screens": 0.59
+      },
+      {
+        "text": "Start free with up to 5 team members. Upgrade when you need more space, more people or mor",
+        "top": 11074,
+        "screens": 13.12
+      },
+      {
+        "text": "Up to 5 team members",
+        "top": 11730,
+        "screens": 13.9
+      },
+      {
+        "text": "Yes. The Free plan is free for teams of up to 5, with no time limit and no credit card. Yo",
+        "top": 14121,
+        "screens": 16.73
+      },
+      {
+        "text": "Start free with up to 5 people, or book a demo and we'll walk you through Workchats with y",
+        "top": 14829,
+        "screens": 17.57
+      }
+    ],
+    "firstMentions": {
+      "price": {
+        "text": "What the five cost, per user a month",
+        "screens": 11.73
+      },
+      "sla": {
+        "text": "99.9% uptime SLA",
+        "screens": 14.79
+      },
+      "encryption": {
+        "text": "Great teams don't need more apps. Workchats puts messages, video calls and files",
+        "screens": 0.32
+      },
+      "residency": {
+        "text": "Hosted in your region",
+        "screens": 9.43
+      },
+      "replaces": {
+        "text": "One app instead of five",
+        "screens": 11.45
+      },
+      "free5": {
+        "text": "Free for up to 5 people. No credit card needed.",
+        "screens": 0.59
+      }
+    },
+    "horizontalOverflow": false
+  },
+  "1024": {
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "pageHeight": 8730,
+    "screens": 11.4,
+    "domElements": 991,
+    "sections": [
+      {
+        "label": "A simpler way to talk with your whole team",
+        "top": 84,
+        "height": 1079,
+        "screensFromTop": 0.11
+      },
+      {
+        "label": "Supported platforms",
+        "top": 1163,
+        "height": 183,
+        "screensFromTop": 1.51
+      },
+      {
+        "label": "Everything your team needs. Nothing they don't.",
+        "top": 1346,
+        "height": 1399,
+        "screensFromTop": 1.75
+      },
+      {
+        "label": "Built for teams who actually talk",
+        "top": 2745,
+        "height": 1384,
+        "screensFromTop": 3.57
+      },
+      {
+        "label": "Your team's data stays your team's data",
+        "top": 4129,
+        "height": 971,
+        "screensFromTop": 5.38
+      },
+      {
+        "label": "One app instead of five",
+        "top": 5099,
+        "height": 787,
+        "screensFromTop": 6.64
+      },
+      {
+        "label": "Pricing that's simple and affordable",
+        "top": 5886,
+        "height": 1251,
+        "screensFromTop": 7.66
+      },
+      {
+        "label": "Questions? We're glad you asked.",
+        "top": 7138,
+        "height": 660,
+        "screensFromTop": 9.29
+      },
+      {
+        "label": "Your team deserves a simpler way to work together",
+        "top": 7798,
+        "height": 508,
+        "screensFromTop": 10.15
+      }
+    ],
+    "ctaCounts": {
+      "Features": 1,
+      "Solutions": 1,
+      "Pricing": 1,
+      "Resources": 1,
+      "Sign in": 1,
+      "Book a demo": 4,
+      "Start free": 5,
+      "Web": 1,
+      "macOS": 1,
+      "Windows": 1,
+      "Linux": 1,
+      "iOS": 1,
+      "Android": 1,
+      "Explore all features": 1,
+      "Explore messaging": 1,
+      "Coming soonSocial feedCompany news, wins and culture your team will actually read.": 1,
+      "Coming soonEventsInternal events with RSVP, without the spreadsheet.": 1,
+      "Coming soonPolls and surveysAsk your team anything. Get real answers, not silence.": 1,
+      "Read the full cost breakdown": 1,
+      "Start with Pro": 1,
+      "Start with Max": 1,
+      "Contact sales": 1,
+      "Compare every plan in detail": 1,
+      "See all questions": 1,
+      "support@workchats.com": 1
+    },
+    "firstViewportText": [
+      "Skip to content",
+      "Pricing",
+      "Sign in",
+      "Book a demo",
+      "Start free",
+      "A simpler way to talk with your whole team",
+      "Great teams don't need more apps. Workchats puts messages, video calls and files in one calm place, with no time limit on calls and end-to-end encryption on every plan.",
+      "Book a demo",
+      "Free for up to 5 people. No credit card needed.",
+      "NS",
+      "Northgate Studio",
+      "AO",
+      "Channels",
+      "spring-launch",
+      "8 members",
+      "Today",
+      "AO",
+      "Amara Okafor",
+      "09:12",
+      "Final brand guidelines are in. Please use v3 from today.",
+      "Spring launch check-in",
+      "Started by Priya · 3 in the call",
+      "PS",
+      "AO",
+      "DN",
+      "Join",
+      "09:41"
+    ],
+    "competitorHits": {
+      "Slack": {
+        "inVisibleText": 3,
+        "inHtml": 13
+      },
+      "Zoom": {
+        "inVisibleText": 2,
+        "inHtml": 5
+      },
+      "Google Workspace": {
+        "inVisibleText": 3,
+        "inHtml": 11
+      },
+      "Loom": {
+        "inVisibleText": 2,
+        "inHtml": 5
+      },
+      "WhatsApp": {
+        "inVisibleText": 2,
+        "inHtml": 5
+      }
+    },
+    "inertButtons": ["Web", "macOS", "Windows", "Linux", "iOS", "Android"],
+    "freeMentions": [
+      {
+        "text": "{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"Organization\",\"@id\":\"https://www.work",
+        "top": 0,
+        "screens": 0
+      },
+      {
+        "text": "Free for up to 5 people. No credit card needed.",
+        "top": 398,
+        "screens": 0.52
+      },
+      {
+        "text": "Start free with up to 5 team members. Upgrade when you need more space, more people or mor",
+        "top": 6046,
+        "screens": 7.87
+      },
+      {
+        "text": "Up to 5 team members",
+        "top": 6558,
+        "screens": 8.54
+      },
+      {
+        "text": "Yes. The Free plan is free for teams of up to 5, with no time limit and no credit card. Yo",
+        "top": 7299,
+        "screens": 9.5
+      },
+      {
+        "text": "Start free with up to 5 people, or book a demo and we'll walk you through Workchats with y",
+        "top": 7989,
+        "screens": 10.4
+      }
+    ],
+    "firstMentions": {
+      "price": {
+        "text": "What the five cost, per user a month",
+        "screens": 7.2
+      },
+      "sla": {
+        "text": "99.9% uptime SLA",
+        "screens": 8.99
+      },
+      "encryption": {
+        "text": "Great teams don't need more apps. Workchats puts messages, video calls and files",
+        "screens": 0.21
+      },
+      "residency": {
+        "text": "Hosted in your region",
+        "screens": 5.66
+      },
+      "replaces": {
+        "text": "One app instead of five",
+        "screens": 6.81
+      },
+      "free5": {
+        "text": "Free for up to 5 people. No credit card needed.",
+        "screens": 0.52
+      }
+    },
+    "horizontalOverflow": false
+  },
+  "1440": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "pageHeight": 8569,
+    "screens": 9.5,
+    "domElements": 991,
+    "sections": [
+      {
+        "label": "A simpler way to talk with your whole team",
+        "top": 84,
+        "height": 1017,
+        "screensFromTop": 0.09
+      },
+      {
+        "label": "Supported platforms",
+        "top": 1101,
+        "height": 183,
+        "screensFromTop": 1.22
+      },
+      {
+        "label": "Everything your team needs. Nothing they don't.",
+        "top": 1284,
+        "height": 1471,
+        "screensFromTop": 1.43
+      },
+      {
+        "label": "Built for teams who actually talk",
+        "top": 2755,
+        "height": 1345,
+        "screensFromTop": 3.06
+      },
+      {
+        "label": "Your team's data stays your team's data",
+        "top": 4100,
+        "height": 878,
+        "screensFromTop": 4.56
+      },
+      {
+        "label": "One app instead of five",
+        "top": 4978,
+        "height": 794,
+        "screensFromTop": 5.53
+      },
+      {
+        "label": "Pricing that's simple and affordable",
+        "top": 5772,
+        "height": 1193,
+        "screensFromTop": 6.41
+      },
+      {
+        "label": "Questions? We're glad you asked.",
+        "top": 6965,
+        "height": 660,
+        "screensFromTop": 7.74
+      },
+      {
+        "label": "Your team deserves a simpler way to work together",
+        "top": 7625,
+        "height": 522,
+        "screensFromTop": 8.47
+      }
+    ],
+    "ctaCounts": {
+      "Features": 1,
+      "Solutions": 1,
+      "Pricing": 1,
+      "Resources": 1,
+      "Sign in": 1,
+      "Book a demo": 4,
+      "Start free": 5,
+      "Web": 1,
+      "macOS": 1,
+      "Windows": 1,
+      "Linux": 1,
+      "iOS": 1,
+      "Android": 1,
+      "Explore all features": 1,
+      "Explore messaging": 1,
+      "Coming soonSocial feedCompany news, wins and culture your team will actually read.": 1,
+      "Coming soonEventsInternal events with RSVP, without the spreadsheet.": 1,
+      "Coming soonPolls and surveysAsk your team anything. Get real answers, not silence.": 1,
+      "Read the full cost breakdown": 1,
+      "Start with Pro": 1,
+      "Start with Max": 1,
+      "Contact sales": 1,
+      "Compare every plan in detail": 1,
+      "See all questions": 1,
+      "support@workchats.com": 1
+    },
+    "firstViewportText": [
+      "Skip to content",
+      "Pricing",
+      "Sign in",
+      "Book a demo",
+      "Start free",
+      "A simpler way to talk with your whole team",
+      "Great teams don't need more apps. Workchats puts messages, video calls and files in one calm place, with no time limit on calls and end-to-end encryption on every plan.",
+      "Book a demo",
+      "Free for up to 5 people. No credit card needed.",
+      "NS",
+      "Northgate Studio",
+      "AO",
+      "Channels",
+      "Direct messages",
+      "PS",
+      "TH",
+      "DN",
+      "spring-launch",
+      "8 members",
+      "Today",
+      "AO",
+      "Amara Okafor",
+      "09:12",
+      "Final brand guidelines are in. Please use v3 from today.",
+      "Brand guidelines v3.pdf",
+      "PDF · 2.4 MB",
+      "TH",
+      "Tom Hughes",
+      "09:20",
+      "Thanks. I'll update the homepage mockups this afternoon.",
+      "Spring launch check-in",
+      "Started by Priya · 3 in the call",
+      "PS",
+      "AO",
+      "DN",
+      "Join",
+      "09:41",
+      "Chats",
+      "DN",
+      "09:20",
+      "Tom: Thanks. I'll update the homepage mockups…",
+      "PS",
+      "09:05",
+      "Can you send the photos from site?",
+      "PS",
+      "#spring-launch",
+      "Priya started a call",
+      "Decline",
+      "Join"
+    ],
+    "competitorHits": {
+      "Slack": {
+        "inVisibleText": 3,
+        "inHtml": 13
+      },
+      "Zoom": {
+        "inVisibleText": 2,
+        "inHtml": 5
+      },
+      "Google Workspace": {
+        "inVisibleText": 3,
+        "inHtml": 11
+      },
+      "Loom": {
+        "inVisibleText": 2,
+        "inHtml": 5
+      },
+      "WhatsApp": {
+        "inVisibleText": 2,
+        "inHtml": 5
+      }
+    },
+    "inertButtons": ["Web", "macOS", "Windows", "Linux", "iOS", "Android"],
+    "freeMentions": [
+      {
+        "text": "{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"Organization\",\"@id\":\"https://www.work",
+        "top": 0,
+        "screens": 0
+      },
+      {
+        "text": "Free for up to 5 people. No credit card needed.",
+        "top": 368,
+        "screens": 0.41
+      },
+      {
+        "text": "Start free with up to 5 team members. Upgrade when you need more space, more people or mor",
+        "top": 5995,
+        "screens": 6.66
+      },
+      {
+        "text": "Up to 5 team members",
+        "top": 6514,
+        "screens": 7.24
+      },
+      {
+        "text": "Yes. The Free plan is free for teams of up to 5, with no time limit and no credit card. Yo",
+        "top": 7126,
+        "screens": 7.92
+      },
+      {
+        "text": "Start free with up to 5 people, or book a demo and we'll walk you through Workchats with y",
+        "top": 7832,
+        "screens": 8.7
+      }
+    ],
+    "firstMentions": {
+      "price": {
+        "text": "What the five cost, per user a month",
+        "screens": 6
+      },
+      "sla": {
+        "text": "99.9% uptime SLA",
+        "screens": 7.5
+      },
+      "encryption": {
+        "text": "Great teams don't need more apps. Workchats puts messages, video calls and files",
+        "screens": 0.18
+      },
+      "residency": {
+        "text": "Hosted in your region",
+        "screens": 4.7
+      },
+      "replaces": {
+        "text": "One app instead of five",
+        "screens": 5.69
+      },
+      "free5": {
+        "text": "Free for up to 5 people. No credit card needed.",
+        "screens": 0.41
+      }
+    },
+    "horizontalOverflow": false
+  }
+}
