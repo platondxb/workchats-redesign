@@ -22,7 +22,9 @@ const copyScript = `(function(){var b=document.getElementById("copy-brief"),s=do
 export function BusinessCase() {
   const { businessCase } = home;
   return (
-    <section id="business-case" aria-labelledby="business-case-title" className="pt-12 pb-section lg:pt-16">
+    // The top padding is deliberately tight: the brief's first three rows have to land inside the first
+    // two screens on a desktop, and the whole page above them accumulates ~1800px of layout.
+    <section id="business-case" aria-labelledby="business-case-title" className="pt-8 pb-section lg:pt-12">
       <div className="container-page grid-page items-start gap-y-10">
         <div className="col-span-4 md:col-span-8 lg:sticky lg:top-28 lg:col-span-5">
           <h2 id="business-case-title" className="font-display text-title">

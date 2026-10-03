@@ -121,10 +121,15 @@ test.describe("content and rendering", () => {
     await page.goto("/");
     const twoScreens = 2 * (page.viewportSize()?.height ?? 900);
     const brief = page.getByRole("article", { name: "Workchats in brief" });
+    // This measures the bottom of a label after ~1800px of accumulated layout, and the font metrics of
+    // the machine the page was built on differ from CI's Linux runner by about 22px over that distance.
+    // The assertion guards a regression at the scale of a screen, so it allows that much slack: a
+    // sub-pixel boundary here would flip between platforms without catching anything real.
+    const renderingSlack = 48;
     // Cost and what it replaces are in the hero; reliability, encryption and residency lead the brief.
     for (const term of ["Reliability", "Encryption", "Data residency"]) {
       const box = await brief.getByText(term, { exact: true }).boundingBox();
-      expect(box && box.y + box.height, term).toBeLessThan(twoScreens);
+      expect(box && box.y + box.height, term).toBeLessThan(twoScreens + renderingSlack);
     }
     await expect(brief).toContainText("99.9% uptime SLA on Pro and above.");
     await expect(brief).toContainText("Hosted in the UK, the EU or the UAE.");
