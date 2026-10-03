@@ -1,0 +1,732 @@
+{
+  "320": {
+    "viewport": {
+      "width": 320,
+      "height": 568
+    },
+    "pageHeight": 14919,
+    "screens": 26.3,
+    "domElements": 935,
+    "sections": [
+      {
+        "label": "Team chat, calls and files.Free for up to 5 people.",
+        "top": 76,
+        "height": 1256,
+        "screensFromTop": 0.13
+      },
+      {
+        "label": "Used by teams at",
+        "top": 1332,
+        "height": 216,
+        "screensFromTop": 2.34
+      },
+      {
+        "label": "The short version, for whoever signs it off",
+        "top": 1548,
+        "height": 1592,
+        "screensFromTop": 2.73
+      },
+      {
+        "label": "Five people, free, for as long as you like",
+        "top": 3140,
+        "height": 1223,
+        "screensFromTop": 5.53
+      },
+      {
+        "label": "One working day at Northgate Studio",
+        "top": 4363,
+        "height": 2265,
+        "screensFromTop": 7.68
+      },
+      {
+        "label": "On every device your team already uses",
+        "top": 6628,
+        "height": 1060,
+        "screensFromTop": 11.67
+      },
+      {
+        "label": "A typical team pays for five tools. Workchats replaces four.",
+        "top": 7688,
+        "height": 1850,
+        "screensFromTop": 13.53
+      },
+      {
+        "label": "Start free. Move to Pro when you grow.",
+        "top": 9537,
+        "height": 3070,
+        "screensFromTop": 16.79
+      },
+      {
+        "label": "Questions teams ask before they switch",
+        "top": 12607,
+        "height": 894,
+        "screensFromTop": 22.2
+      },
+      {
+        "label": "Start with five people and grow from there",
+        "top": 13501,
+        "height": 538,
+        "screensFromTop": 23.77
+      }
+    ],
+    "ctaCounts": {
+      "Start free": 5,
+      "Menu": 1,
+      "Download the appDownload for macOSDownload for WindowsDownload for LinuxDownload for iOSDownload for AndroidOpen the web app": 1,
+      "Copy link for your IT teamLink copied": 1,
+      "Book a security walkthrough": 1,
+      "Compare plans": 2,
+      "macOSApple Silicon, macOS 12+This device": 1,
+      "WindowsWindows 10 or 11This device": 1,
+      "LinuxAppImage, 64-bitThis device": 1,
+      "iPhone and iPadiOS 15+This device": 1,
+      "AndroidPhone and tabletThis device": 1,
+      "WebAny modern browserThis device": 1,
+      "Read the full cost breakdown": 1,
+      "Start with Pro": 1,
+      "Start with Max": 1,
+      "Contact sales": 1,
+      "Compare every plan in detail": 1,
+      "See all questions": 1,
+      "support@workchats.com": 1,
+      "Book a demo": 1
+    },
+    "firstViewportText": [
+      "Skip to content",
+      "Start free",
+      "Menu",
+      "Team chat, calls and files.",
+      "Free for up to 5 people.",
+      "Workchats replaces the separate chat, meeting and recording tools your team pays for. End-to-end encrypted on every plan.",
+      "Start free"
+    ],
+    "competitorHits": {},
+    "inertButtons": [
+      "Copy link for your IT teamLink copied",
+      "macOSApple Silicon, macOS 12+This device",
+      "WindowsWindows 10 or 11This device",
+      "LinuxAppImage, 64-bitThis device",
+      "iPhone and iPadiOS 15+This device",
+      "AndroidPhone and tabletThis device",
+      "WebAny modern browserThis device"
+    ],
+    "freeMentions": [
+      {
+        "text": "{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"Organization\",\"@id\":\"https://www.work",
+        "top": 0,
+        "screens": 0
+      },
+      {
+        "text": "Free for up to 5 people.",
+        "top": 206,
+        "screens": 0.36
+      },
+      {
+        "text": "Free for up to 5 people. Pro is £3 and Max £5 per person a month, billed annually.",
+        "top": 2133,
+        "screens": 3.75
+      },
+      {
+        "text": "Yes. A team of up to 5 people uses Workchats free, with no time limit. You get channels, D",
+        "top": 12999,
+        "screens": 22.89
+      },
+      {
+        "text": "Free for up to 5, with no time limit. For a bigger rollout, book a demo and we'll walk you",
+        "top": 13682,
+        "screens": 24.09
+      }
+    ],
+    "firstMentions": {
+      "price": {
+        "text": "No credit card needed, no time limit. Pro is £3 a person a month when you grow.",
+        "screens": 1.13
+      },
+      "sla": {
+        "text": "99.9% uptime SLA on Pro and above.",
+        "screens": 4.28
+      },
+      "encryption": {
+        "text": "Workchats replaces the separate chat, meeting and recording tools your team pays",
+        "screens": 0.56
+      },
+      "residency": {
+        "text": "United Kingdom",
+        "screens": 4.75
+      },
+      "replaces": {
+        "text": "Workchats replaces the separate chat, meeting and recording tools your team pays",
+        "screens": 0.56
+      },
+      "free5": {
+        "text": "Free for up to 5 people.",
+        "screens": 0.36
+      }
+    },
+    "horizontalOverflow": false
+  },
+  "390": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "pageHeight": 13665,
+    "screens": 16.2,
+    "domElements": 935,
+    "sections": [
+      {
+        "label": "Team chat, calls and files.Free for up to 5 people.",
+        "top": 76,
+        "height": 1203,
+        "screensFromTop": 0.09
+      },
+      {
+        "label": "Used by teams at",
+        "top": 1279,
+        "height": 216,
+        "screensFromTop": 1.52
+      },
+      {
+        "label": "The short version, for whoever signs it off",
+        "top": 1496,
+        "height": 1439,
+        "screensFromTop": 1.77
+      },
+      {
+        "label": "Five people, free, for as long as you like",
+        "top": 2935,
+        "height": 1122,
+        "screensFromTop": 3.48
+      },
+      {
+        "label": "One working day at Northgate Studio",
+        "top": 4057,
+        "height": 2098,
+        "screensFromTop": 4.81
+      },
+      {
+        "label": "On every device your team already uses",
+        "top": 6155,
+        "height": 1003,
+        "screensFromTop": 7.29
+      },
+      {
+        "label": "A typical team pays for five tools. Workchats replaces four.",
+        "top": 7158,
+        "height": 1591,
+        "screensFromTop": 8.48
+      },
+      {
+        "label": "Start free. Move to Pro when you grow.",
+        "top": 8749,
+        "height": 2797,
+        "screensFromTop": 10.37
+      },
+      {
+        "label": "Questions teams ask before they switch",
+        "top": 11546,
+        "height": 837,
+        "screensFromTop": 13.68
+      },
+      {
+        "label": "Start with five people and grow from there",
+        "top": 12383,
+        "height": 406,
+        "screensFromTop": 14.67
+      }
+    ],
+    "ctaCounts": {
+      "Start free": 5,
+      "Menu": 1,
+      "Download the appDownload for macOSDownload for WindowsDownload for LinuxDownload for iOSDownload for AndroidOpen the web app": 1,
+      "Copy link for your IT teamLink copied": 1,
+      "Book a security walkthrough": 1,
+      "Compare plans": 2,
+      "macOSApple Silicon, macOS 12+This device": 1,
+      "WindowsWindows 10 or 11This device": 1,
+      "LinuxAppImage, 64-bitThis device": 1,
+      "iPhone and iPadiOS 15+This device": 1,
+      "AndroidPhone and tabletThis device": 1,
+      "WebAny modern browserThis device": 1,
+      "Read the full cost breakdown": 1,
+      "Start with Pro": 1,
+      "Start with Max": 1,
+      "Contact sales": 1,
+      "Compare every plan in detail": 1,
+      "See all questions": 1,
+      "support@workchats.com": 1,
+      "Book a demo": 1
+    },
+    "firstViewportText": [
+      "Skip to content",
+      "Start free",
+      "Menu",
+      "Team chat, calls and files.",
+      "Free for up to 5 people.",
+      "Workchats replaces the separate chat, meeting and recording tools your team pays for. End-to-end encrypted on every plan.",
+      "Start free",
+      "Download for macOS",
+      "No credit card needed, no time limit. Pro is £3 a person a month when you grow.",
+      "09:41",
+      "Chats",
+      "DN",
+      "09:20",
+      "Tom: Thanks. I'll update the homepage mockups…",
+      "PS",
+      "#spring-launch",
+      "Priya started a call",
+      "Decline",
+      "Join"
+    ],
+    "competitorHits": {},
+    "inertButtons": [
+      "Copy link for your IT teamLink copied",
+      "macOSApple Silicon, macOS 12+This device",
+      "WindowsWindows 10 or 11This device",
+      "LinuxAppImage, 64-bitThis device",
+      "iPhone and iPadiOS 15+This device",
+      "AndroidPhone and tabletThis device",
+      "WebAny modern browserThis device"
+    ],
+    "freeMentions": [
+      {
+        "text": "{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"Organization\",\"@id\":\"https://www.work",
+        "top": 0,
+        "screens": 0
+      },
+      {
+        "text": "Free for up to 5 people.",
+        "top": 206,
+        "screens": 0.24
+      },
+      {
+        "text": "Free for up to 5 people. Pro is £3 and Max £5 per person a month, billed annually.",
+        "top": 2018,
+        "screens": 2.39
+      },
+      {
+        "text": "Yes. A team of up to 5 people uses Workchats free, with no time limit. You get channels, D",
+        "top": 11904,
+        "screens": 14.1
+      },
+      {
+        "text": "Free for up to 5, with no time limit. For a bigger rollout, book a demo and we'll walk you",
+        "top": 12531,
+        "screens": 14.85
+      }
+    ],
+    "firstMentions": {
+      "price": {
+        "text": "No credit card needed, no time limit. Pro is £3 a person a month when you grow.",
+        "screens": 0.72
+      },
+      "sla": {
+        "text": "99.9% uptime SLA on Pro and above.",
+        "screens": 2.69
+      },
+      "encryption": {
+        "text": "Workchats replaces the separate chat, meeting and recording tools your team pays",
+        "screens": 0.38
+      },
+      "residency": {
+        "text": "United Kingdom",
+        "screens": 2.98
+      },
+      "replaces": {
+        "text": "Workchats replaces the separate chat, meeting and recording tools your team pays",
+        "screens": 0.38
+      },
+      "free5": {
+        "text": "Free for up to 5 people.",
+        "screens": 0.24
+      }
+    },
+    "horizontalOverflow": false
+  },
+  "1024": {
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "pageHeight": 9661,
+    "screens": 12.6,
+    "domElements": 935,
+    "sections": [
+      {
+        "label": "Team chat, calls and files.Free for up to 5 people.",
+        "top": 84,
+        "height": 1257,
+        "screensFromTop": 0.11
+      },
+      {
+        "label": "Used by teams at",
+        "top": 1341,
+        "height": 167,
+        "screensFromTop": 1.75
+      },
+      {
+        "label": "The short version, for whoever signs it off",
+        "top": 1508,
+        "height": 988,
+        "screensFromTop": 1.96
+      },
+      {
+        "label": "Five people, free, for as long as you like",
+        "top": 2496,
+        "height": 722,
+        "screensFromTop": 3.25
+      },
+      {
+        "label": "One working day at Northgate Studio",
+        "top": 3218,
+        "height": 1546,
+        "screensFromTop": 4.19
+      },
+      {
+        "label": "On every device your team already uses",
+        "top": 4765,
+        "height": 660,
+        "screensFromTop": 6.2
+      },
+      {
+        "label": "A typical team pays for five tools. Workchats replaces four.",
+        "top": 5425,
+        "height": 1042,
+        "screensFromTop": 7.06
+      },
+      {
+        "label": "Start free. Move to Pro when you grow.",
+        "top": 6467,
+        "height": 1721,
+        "screensFromTop": 8.42
+      },
+      {
+        "label": "Questions teams ask before they switch",
+        "top": 8188,
+        "height": 583,
+        "screensFromTop": 10.66
+      },
+      {
+        "label": "Start with five people and grow from there",
+        "top": 8771,
+        "height": 484,
+        "screensFromTop": 11.42
+      }
+    ],
+    "ctaCounts": {
+      "Features": 1,
+      "Solutions": 1,
+      "Pricing": 1,
+      "Resources": 1,
+      "Sign in": 1,
+      "Download": 1,
+      "Book a demo": 2,
+      "Start free": 5,
+      "Download the appDownload for macOSDownload for WindowsDownload for LinuxDownload for iOSDownload for AndroidOpen the web app": 1,
+      "Copy link for your IT teamLink copied": 1,
+      "Book a security walkthrough": 1,
+      "Compare plans": 2,
+      "macOSApple Silicon, macOS 12+This device": 1,
+      "WindowsWindows 10 or 11This device": 1,
+      "LinuxAppImage, 64-bitThis device": 1,
+      "iPhone and iPadiOS 15+This device": 1,
+      "AndroidPhone and tabletThis device": 1,
+      "WebAny modern browserThis device": 1,
+      "Read the full cost breakdown": 1,
+      "Start with Pro": 1,
+      "Start with Max": 1,
+      "Contact sales": 1,
+      "Compare every plan in detail": 1,
+      "See all questions": 1,
+      "support@workchats.com": 1
+    },
+    "firstViewportText": [
+      "Skip to content",
+      "Pricing",
+      "Sign in",
+      "Download",
+      "Book a demo",
+      "Start free",
+      "Team chat, calls and files.",
+      "Free for up to 5 people.",
+      "Workchats replaces the separate chat, meeting and recording tools your team pays for. End-to-end encrypted on every plan.",
+      "Start free",
+      "Download for macOS",
+      "No credit card needed, no time limit. Pro is £3 a person a month when you grow.",
+      "NS",
+      "Northgate Studio",
+      "AO",
+      "Channels",
+      "spring-launch",
+      "8 members",
+      "Spring launch check-in",
+      "Started by Priya · 3 in the call",
+      "PS",
+      "AO",
+      "DN",
+      "Join"
+    ],
+    "competitorHits": {},
+    "inertButtons": [
+      "Copy link for your IT teamLink copied",
+      "macOSApple Silicon, macOS 12+This device",
+      "WindowsWindows 10 or 11This device",
+      "LinuxAppImage, 64-bitThis device",
+      "iPhone and iPadiOS 15+This device",
+      "AndroidPhone and tabletThis device",
+      "WebAny modern browserThis device"
+    ],
+    "freeMentions": [
+      {
+        "text": "{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"Organization\",\"@id\":\"https://www.work",
+        "top": 0,
+        "screens": 0
+      },
+      {
+        "text": "Free for up to 5 people.",
+        "top": 251,
+        "screens": 0.33
+      },
+      {
+        "text": "Free for up to 5 people. Pro is £3 and Max £5 per person a month, billed annually.",
+        "top": 1698,
+        "screens": 2.21
+      },
+      {
+        "text": "Yes. A team of up to 5 people uses Workchats free, with no time limit. You get channels, D",
+        "top": 8349,
+        "screens": 10.87
+      },
+      {
+        "text": "Free for up to 5, with no time limit. For a bigger rollout, book a demo and we'll walk you",
+        "top": 8979,
+        "screens": 11.69
+      }
+    ],
+    "firstMentions": {
+      "price": {
+        "text": "No credit card needed, no time limit. Pro is £3 a person a month when you grow.",
+        "screens": 0.66
+      },
+      "sla": {
+        "text": "99.9% uptime SLA on Pro and above.",
+        "screens": 2.47
+      },
+      "encryption": {
+        "text": "Workchats replaces the separate chat, meeting and recording tools your team pays",
+        "screens": 0.45
+      },
+      "residency": {
+        "text": "United Kingdom",
+        "screens": 2.72
+      },
+      "replaces": {
+        "text": "Workchats replaces the separate chat, meeting and recording tools your team pays",
+        "screens": 0.45
+      },
+      "free5": {
+        "text": "Free for up to 5 people.",
+        "screens": 0.33
+      }
+    },
+    "horizontalOverflow": false
+  },
+  "1440": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "pageHeight": 9356,
+    "screens": 10.4,
+    "domElements": 935,
+    "sections": [
+      {
+        "label": "Team chat, calls and files.Free for up to 5 people.",
+        "top": 84,
+        "height": 1270,
+        "screensFromTop": 0.09
+      },
+      {
+        "label": "Used by teams at",
+        "top": 1354,
+        "height": 167,
+        "screensFromTop": 1.5
+      },
+      {
+        "label": "The short version, for whoever signs it off",
+        "top": 1521,
+        "height": 862,
+        "screensFromTop": 1.69
+      },
+      {
+        "label": "Five people, free, for as long as you like",
+        "top": 2383,
+        "height": 692,
+        "screensFromTop": 2.65
+      },
+      {
+        "label": "One working day at Northgate Studio",
+        "top": 3074,
+        "height": 1512,
+        "screensFromTop": 3.42
+      },
+      {
+        "label": "On every device your team already uses",
+        "top": 4586,
+        "height": 652,
+        "screensFromTop": 5.1
+      },
+      {
+        "label": "A typical team pays for five tools. Workchats replaces four.",
+        "top": 5238,
+        "height": 985,
+        "screensFromTop": 5.82
+      },
+      {
+        "label": "Start free. Move to Pro when you grow.",
+        "top": 6223,
+        "height": 1649,
+        "screensFromTop": 6.91
+      },
+      {
+        "label": "Questions teams ask before they switch",
+        "top": 7872,
+        "height": 583,
+        "screensFromTop": 8.75
+      },
+      {
+        "label": "Start with five people and grow from there",
+        "top": 8455,
+        "height": 498,
+        "screensFromTop": 9.39
+      }
+    ],
+    "ctaCounts": {
+      "Features": 1,
+      "Solutions": 1,
+      "Pricing": 1,
+      "Resources": 1,
+      "Sign in": 1,
+      "Download": 1,
+      "Book a demo": 2,
+      "Start free": 5,
+      "Download the appDownload for macOSDownload for WindowsDownload for LinuxDownload for iOSDownload for AndroidOpen the web app": 1,
+      "Copy link for your IT teamLink copied": 1,
+      "Book a security walkthrough": 1,
+      "Compare plans": 2,
+      "macOSApple Silicon, macOS 12+This device": 1,
+      "WindowsWindows 10 or 11This device": 1,
+      "LinuxAppImage, 64-bitThis device": 1,
+      "iPhone and iPadiOS 15+This device": 1,
+      "AndroidPhone and tabletThis device": 1,
+      "WebAny modern browserThis device": 1,
+      "Read the full cost breakdown": 1,
+      "Start with Pro": 1,
+      "Start with Max": 1,
+      "Contact sales": 1,
+      "Compare every plan in detail": 1,
+      "See all questions": 1,
+      "support@workchats.com": 1
+    },
+    "firstViewportText": [
+      "Skip to content",
+      "Pricing",
+      "Sign in",
+      "Download",
+      "Book a demo",
+      "Start free",
+      "Team chat, calls and files.",
+      "Free for up to 5 people.",
+      "Workchats replaces the separate chat, meeting and recording tools your team pays for. End-to-end encrypted on every plan.",
+      "Start free",
+      "Download for macOS",
+      "No credit card needed, no time limit. Pro is £3 a person a month when you grow.",
+      "NS",
+      "Northgate Studio",
+      "AO",
+      "Channels",
+      "Direct messages",
+      "PS",
+      "spring-launch",
+      "8 members",
+      "AO",
+      "Amara Okafor",
+      "09:12",
+      "Spring launch check-in",
+      "Started by Priya · 3 in the call",
+      "PS",
+      "AO",
+      "DN",
+      "Join",
+      "PS",
+      "#spring-launch",
+      "Priya started a call",
+      "Decline",
+      "Join"
+    ],
+    "competitorHits": {},
+    "inertButtons": [
+      "Copy link for your IT teamLink copied",
+      "macOSApple Silicon, macOS 12+This device",
+      "WindowsWindows 10 or 11This device",
+      "LinuxAppImage, 64-bitThis device",
+      "iPhone and iPadiOS 15+This device",
+      "AndroidPhone and tabletThis device",
+      "WebAny modern browserThis device"
+    ],
+    "freeMentions": [
+      {
+        "text": "{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"Organization\",\"@id\":\"https://www.work",
+        "top": 0,
+        "screens": 0
+      },
+      {
+        "text": "Free for up to 5 people.",
+        "top": 258,
+        "screens": 0.29
+      },
+      {
+        "text": "Free for up to 5 people. Pro is £3 and Max £5 per person a month, billed annually.",
+        "top": 1710,
+        "screens": 1.9
+      },
+      {
+        "text": "Yes. A team of up to 5 people uses Workchats free, with no time limit. You get channels, D",
+        "top": 8033,
+        "screens": 8.93
+      },
+      {
+        "text": "Free for up to 5, with no time limit. For a bigger rollout, book a demo and we'll walk you",
+        "top": 8677,
+        "screens": 9.64
+      }
+    ],
+    "firstMentions": {
+      "price": {
+        "text": "No credit card needed, no time limit. Pro is £3 a person a month when you grow.",
+        "screens": 0.58
+      },
+      "sla": {
+        "text": "99.9% uptime SLA on Pro and above.",
+        "screens": 2.1
+      },
+      "encryption": {
+        "text": "Workchats replaces the separate chat, meeting and recording tools your team pays",
+        "screens": 0.4
+      },
+      "residency": {
+        "text": "United Kingdom",
+        "screens": 2.26
+      },
+      "replaces": {
+        "text": "Workchats replaces the separate chat, meeting and recording tools your team pays",
+        "screens": 0.4
+      },
+      "free5": {
+        "text": "Free for up to 5 people.",
+        "screens": 0.29
+      }
+    },
+    "horizontalOverflow": false
+  }
+}

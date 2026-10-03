@@ -48,8 +48,9 @@ next-env.d.ts
 # keep the committed example env file
 !.env.example
 
-# local tooling (Claude Code preview config and session worktrees)
+# local tooling (Claude Code preview config, vendored agent skills and session worktrees)
 /.claude/
+/.agents/
 
 # third-party mood references for the redesign (not licensed for redistribution; see docs/redesign/assets.md)
 /docs/redesign/references/

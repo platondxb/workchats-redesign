@@ -22,7 +22,7 @@ const copyScript = `(function(){var b=document.getElementById("copy-brief"),s=do
 export function BusinessCase() {
   const { businessCase } = home;
   return (
-    <section id="business-case" aria-labelledby="business-case-title" className="py-section">
+    <section id="business-case" aria-labelledby="business-case-title" className="pt-12 pb-section lg:pt-16">
       <div className="container-page grid-page items-start gap-y-10">
         <div className="col-span-4 md:col-span-8 lg:sticky lg:top-28 lg:col-span-5">
           <h2 id="business-case-title" className="font-display text-title">

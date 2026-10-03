@@ -36,7 +36,7 @@ export function ContainerScroll({
   return (
     <div className={cx("relative perspective-stage", className)}>
       <Header>{titleComponent}</Header>
-      <div role="img" aria-label={label} className="relative mx-auto mt-12 max-w-window md:mt-16">
+      <div role="img" aria-label={label} className="relative mx-auto mt-12 max-w-window md:mt-14">
         <Card>{children}</Card>
         {aside}
       </div>
@@ -58,7 +58,7 @@ export function Card({ children }: { children: ReactNode }) {
       data-device="laptop"
       className="hidden cs-card rounded-lg bg-(image:--gradient-device-edge) p-1 shadow-device md:block"
     >
-      <div className="h-152 rounded-lg bg-device-bezel p-2 lg:h-160 lg:p-3">
+      <div className="h-152 rounded-lg bg-device-bezel p-2 lg:p-3">
         <div className="h-full overflow-hidden rounded-md bg-canvas">{children}</div>
       </div>
     </div>

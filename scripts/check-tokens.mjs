@@ -87,7 +87,11 @@ if (existsSync(cssDir)) {
     .map((file) => readFileSync(file, "utf8"))
     .join("\n");
 
-  const escapeClass = (name) => name.replace(/[^a-zA-Z0-9_-]/g, (char) => `\\${char}`);
+  // As CSS.escape: punctuation gets a backslash, and a leading digit (2xl:…) becomes a hex escape (\32 xl).
+  const escapeClass = (name) => {
+    const escaped = name.replace(/[^a-zA-Z0-9_-]/g, (char) => `\\${char}`);
+    return /^[0-9]/.test(escaped) ? `\\3${escaped[0]} ${escaped.slice(1)}` : escaped;
+  };
   const classStrings = [];
   for (const file of walk(srcDir, [".tsx", ".ts"])) {
     const rel = path.relative(root, file);

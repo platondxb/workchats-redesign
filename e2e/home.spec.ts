@@ -119,9 +119,13 @@ test.describe("content and rendering", () => {
   test("puts the business case inside the first two screens on a desktop", async ({ page }) => {
     test.skip(isMobile(page), "the brief's two-screen rule is for desktop");
     await page.goto("/");
-    const top = await page.locator("#business-case").evaluate((el) => el.getBoundingClientRect().top);
-    expect(top).toBeLessThan(2 * (page.viewportSize()?.height ?? 900));
+    const twoScreens = 2 * (page.viewportSize()?.height ?? 900);
     const brief = page.getByRole("article", { name: "Workchats in brief" });
+    // Cost and what it replaces are in the hero; reliability, encryption and residency lead the brief.
+    for (const term of ["Reliability", "Encryption", "Data residency"]) {
+      const box = await brief.getByText(term, { exact: true }).boundingBox();
+      expect(box && box.y + box.height, term).toBeLessThan(twoScreens);
+    }
     await expect(brief).toContainText("99.9% uptime SLA on Pro and above.");
     await expect(brief).toContainText("Hosted in the UK, the EU or the UAE.");
   });
@@ -620,16 +624,33 @@ test.describe("layout", () => {
         const logo = header.querySelector('a[href="/"]')!.getBoundingClientRect();
         const actions = header.querySelector(".nav-gather-end")!.getBoundingClientRect();
         const nav = header.querySelector("nav")!.getBoundingClientRect();
+        const glass = header.querySelector(".nav-glass")!.getBoundingClientRect();
         const visibleNav = nav.width > 0;
         return {
+          // The actions stay inside the glass bar, never past its edge.
+          overhang: Math.round(actions.right - glass.right),
           logoToActions: Math.round(actions.left - logo.right),
           logoToNav: visibleNav ? Math.round(nav.left - logo.right) : null,
           navToActions: visibleNav ? Math.round(actions.left - nav.right) : null,
         };
       });
       expect(gaps.logoToActions).toBeGreaterThanOrEqual(8);
+      expect(gaps.overhang).toBeLessThanOrEqual(0);
       if (gaps.logoToNav !== null) expect(gaps.logoToNav).toBeGreaterThanOrEqual(8);
       if (gaps.navToActions !== null) expect(gaps.navToActions).toBeGreaterThanOrEqual(8);
+    });
+  }
+
+  for (const width of [1024, 1280, 1440]) {
+    test(`the hero's laptop and phone stay on screen at ${width}px`, async ({ page }) => {
+      test.skip(isMobile(page), "desktop widths");
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/");
+      for (const device of ['[data-device="laptop"]', '[data-device="phone"]']) {
+        const box = await page.locator(device).boundingBox();
+        expect(box?.x ?? -1, device).toBeGreaterThanOrEqual(0);
+        expect((box?.x ?? 0) + (box?.width ?? 0), device).toBeLessThanOrEqual(width);
+      }
     });
   }
 

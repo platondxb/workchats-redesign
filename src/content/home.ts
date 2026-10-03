@@ -114,7 +114,16 @@ export const home = {
     copyLink: { label: "Copy link for your IT team", done: "Link copied" },
     walkthrough: { label: "Book a security walkthrough", href: site.links.bookDemo },
     sheetTitle: "Workchats in brief",
+    /** Led by what the hero doesn't already say, so reliability and residency sit inside the first two
+     *  screens on a desktop; cost and what it replaces are in the hero's lead and caption. */
     rows: [
+      { id: "reliability", term: "Reliability", detail: "99.9% uptime SLA on Pro and above." },
+      {
+        id: "encryption",
+        term: "Encryption",
+        detail: "End-to-end encryption on every message, call and file.",
+      },
+      { id: "residency", term: "Data residency", detail: `Hosted in ${regionList}. GDPR compliant.` },
       {
         id: "cost",
         term: "Cost",
@@ -125,13 +134,6 @@ export const home = {
         term: "What it replaces",
         detail: `A chat app, a meeting tool, a screen recorder and the messenger your team falls back to. For ${seats} people, ${gbp(savingAt50)} a year less at list prices.`,
       },
-      { id: "reliability", term: "Reliability", detail: "99.9% uptime SLA on Pro and above." },
-      {
-        id: "encryption",
-        term: "Encryption",
-        detail: "End-to-end encryption on every message, call and file.",
-      },
-      { id: "residency", term: "Data residency", detail: `Hosted in ${regionList}. GDPR compliant.` },
       {
         id: "compliance",
         term: "Compliance",

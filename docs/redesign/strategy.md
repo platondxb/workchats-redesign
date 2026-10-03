@@ -109,13 +109,14 @@ Used by teams at AWS, Microsoft, Google, GoDaddy, IBM, Ericsson and EPAM.
 - **Heading:** The short version, for whoever signs it off
 - **Intro:** Cost, reliability, security and where your data lives, on one page you can forward.
 - **Actions:** Copy link for your IT team · Book a security walkthrough
-- **Sheet, "Workchats in brief":**
-  - Cost: Free for up to 5 people. Pro is £3 per person a month, billed annually. Max is £5.
-  - What it replaces: A chat app, a meeting tool, a screen recorder and the messenger your team falls back
-    to. For 50 people, £15,744 a year less at list prices.
+- **Sheet, "Workchats in brief"** (led by what the hero doesn't already say, so reliability and residency
+  land inside the first two screens on a desktop):
   - Reliability: 99.9% uptime SLA on Pro and above.
   - Encryption: End-to-end encryption on every message, call and file.
   - Data residency: Hosted in the UK, the EU or the UAE. GDPR compliant.
+  - Cost: Free for up to 5 people. Pro is £3 and Max £5 per person a month, billed annually.
+  - What it replaces: A chat app, a meeting tool, a screen recorder and the messenger your team falls back
+    to. For 50 people, £15,744 a year less at list prices.
   - Compliance: Compliance and audit logs, and data export, on Pro and above.
   - Privacy: Granular privacy settings: every team member controls who sees their role, status and messages.
 
@@ -156,9 +157,9 @@ Used by teams at AWS, Microsoft, Google, GoDaddy, IBM, Ericsson and EPAM.
 
 ### 7. Cost
 
-- **Quote:** "We built Workchats because our own team was paying for five tools to do what one should."
-  Yaseen Deen, founder.
 - **Heading:** A typical team pays for five tools. Workchats replaces four.
+- **Quote** (beside the stack, after the link): "We built Workchats because our own team was paying for five
+  tools to do what one should." Yaseen Deen, founder. Workchats has teams in Dubai, London and Pune.
 - **The stack, per person a month:** A team chat app £7.25 · A separate video-meeting tool £11.99 · A
   screen-recording tool £10 · A personal messenger the team falls back to £0 · An office suite £12 (you keep
   this one)
@@ -173,7 +174,7 @@ Used by teams at AWS, Microsoft, Google, GoDaddy, IBM, Ericsson and EPAM.
 - **Heading:** Start free. Move to Pro when you grow.
 - **Intro:** Billed in pounds sterling. Prices in other currencies are approximate.
 - **Free:** For teams of up to 5. £0. Start free.
-- **Pro:** Recommended once you pass 5 people. £3 per person a month, billed annually. Start with Pro.
+- **Pro:** Recommended once you pass 5 people. £3 per user a month, billed annually. Start with Pro.
 - **Max:** For larger teams with advanced security needs. £5. Start with Max.
 - **Enterprise:** For large or regulated organisations. Custom. Contact sales.
 - **Link:** Compare every plan in detail

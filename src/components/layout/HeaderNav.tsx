@@ -32,8 +32,8 @@ export function HeaderNav({ entries, mobileNav, actions, icons }: HeaderNavProps
   return (
     <>
       <DesktopNav entries={entries} caret={icons.caret} />
-      <div className="flex shrink-0 nav-gather-end items-center gap-2">
-        <div className="hidden items-center gap-2 lg:flex">{actions.desktop}</div>
+      <div className="flex shrink-0 nav-gather-end items-center gap-2 lg:gap-1.5 xl:gap-2">
+        <div className="hidden items-center gap-1.5 lg:flex xl:gap-2">{actions.desktop}</div>
         {actions.primary}
         <MobileMenu nav={mobileNav} actions={actions.menu} icons={icons} />
       </div>
@@ -103,7 +103,7 @@ function DesktopNav({ entries, caret }: { entries: HeaderEntry[]; caret: ReactNo
               <li key={entry.label}>
                 <a
                   href={entry.href}
-                  className="inline-flex min-h-11 items-center rounded-full px-2.5 text-small font-semibold text-on-night-muted hover:text-on-night xl:px-4"
+                  className="inline-flex min-h-11 items-center rounded-full px-2 text-small font-semibold text-on-night-muted hover:text-on-night xl:px-4"
                 >
                   {entry.label}
                 </a>
@@ -142,7 +142,7 @@ function DesktopNav({ entries, caret }: { entries: HeaderEntry[]; caret: ReactNo
                   if (isOpen && Date.now() - openedByHoverAt.current < 600) return;
                   open(isOpen ? null : index);
                 }}
-                className="group inline-flex min-h-11 items-center gap-1.5 rounded-full px-2.5 text-small font-semibold text-on-night-muted hover:text-on-night aria-expanded:text-on-night xl:px-4"
+                className="group inline-flex min-h-11 items-center gap-1 rounded-full px-2 text-small font-semibold text-on-night-muted hover:text-on-night aria-expanded:text-on-night xl:gap-1.5 xl:px-4"
               >
                 {entry.label}
                 {caret}

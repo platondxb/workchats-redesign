@@ -36,13 +36,13 @@ export function SiteHeader() {
             className="pointer-events-none absolute nav-glass inset-y-0 rounded-md border border-night-line bg-night-glass shadow-float backdrop-blur-glass"
           />
           <div className="relative nav-inset">
-            <div className="flex h-(--header-height) items-center justify-between gap-4 px-3 xs:px-4 lg:px-5">
+            <div className="flex h-(--header-height) items-center justify-between gap-4 px-3 xs:px-4 lg:gap-3 lg:px-4 xl:px-5">
               {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- the only route in this app; see SiteLink */}
               <a
                 href="/"
                 className="inline-flex min-h-11 shrink-0 nav-gather-start items-center rounded-sm text-on-night"
               >
-                <Logo className="h-5 w-auto xs:h-6 lg:h-7" />
+                <Logo className="h-5 w-auto xs:h-6 xl:h-7" />
               </a>
               <HeaderNav
                 entries={entries}
@@ -52,7 +52,7 @@ export function SiteHeader() {
                     <>
                       <a
                         href={signIn.href}
-                        className="inline-flex min-h-11 items-center rounded-full px-3 text-small font-semibold whitespace-nowrap text-on-night-muted hover:text-on-night"
+                        className="inline-flex min-h-11 items-center rounded-full px-2 text-small font-semibold whitespace-nowrap text-on-night-muted hover:text-on-night xl:px-3"
                       >
                         {signIn.label}
                       </a>
@@ -70,13 +70,19 @@ export function SiteHeader() {
                           Download
                         </span>
                       </LiquidButton>
-                      <LiquidButton href={demo.href} tone="glass" size="sm" data-cta="header-demo">
+                      <LiquidButton
+                        href={demo.href}
+                        tone="glass"
+                        size="sm"
+                        data-cta="header-demo"
+                        className="max-xl:px-4"
+                      >
                         {demo.label}
                       </LiquidButton>
                     </>
                   ),
                   primary: (
-                    <LiquidButton href={start.href} size="sm" data-cta="header">
+                    <LiquidButton href={start.href} size="sm" data-cta="header" className="lg:max-xl:px-4">
                       {start.label}
                     </LiquidButton>
                   ),
