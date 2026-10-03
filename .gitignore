@@ -48,9 +48,33 @@ next-env.d.ts
 # keep the committed example env file
 !.env.example
 
-# local tooling (Claude Code preview config, vendored agent skills and session worktrees)
+# local tooling (Claude Code preview config, vendored agent skills, editor settings and worktrees)
 /.claude/
 /.agents/
+/.vscode/
+
+# working files: development artifacts rather than anything the site ships.
+# Every path below is already tracked, so these rules only keep NEW files out — git ignores untracked
+# paths, never tracked ones. Untracking is a separate, deliberate step (see git rm --cached).
+/CLAUDE.md
+/AGENTS.md
+/docs/
+/scripts/
+/skills-lock.json
+
+# deploy credentials: an ssh key generated inside the repository would be root on the server
+deploy_key
+deploy_key.pub
+
+# logs and OS droppings
+*.log
+logs/
+._*
+.Spotlight-V100/
+.Trashes
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
 # third-party mood references for the redesign (not licensed for redistribution; see docs/redesign/assets.md)
 /docs/redesign/references/

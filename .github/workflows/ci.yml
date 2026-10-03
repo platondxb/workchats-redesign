@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on:
   push:
@@ -8,7 +8,9 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # main queues instead of cancelling. A run on main is also the deploy, and cancelling one mid-deploy
+  # would kill the remote script while it is rebuilding. Pull requests cancel, for quick feedback.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   quality:
@@ -55,3 +57,88 @@ jobs:
           name: playwright-report
           path: playwright-report
           retention-days: 7
+
+  # Delivery, behind the same gate as everything else: it runs only once quality and build have both
+  # passed on main, so a broken commit never reaches the server.
+  #
+  # The server is expected to have this repository cloned at /root/workchats-redesign, checked out on
+  # main with a clean working tree, and the app running under pm2 as "workchats".
+  #
+  # Required repository secrets. They are secrets rather than literals because this repository is public:
+  #   DEPLOY_HOST     the server, e.g. 72.56.252.127
+  #   DEPLOY_USER     the ssh user, e.g. root
+  #   DEPLOY_SSH_KEY  the private half of a deploy key whose public half is in that user's authorized_keys
+  deploy:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+    needs: [quality, build]
+    # Never on a pull request, and never from a branch other than main.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Check the deploy secrets are set
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          for name in DEPLOY_HOST DEPLOY_USER DEPLOY_SSH_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Repository secret $name is not set"
+              exit 1
+            fi
+          done
+
+      - name: Set up the deploy key
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          # Pin the host key on first sight. Swap this for a known-hosts secret if you want it verified
+          # against a value you control rather than whatever answers on the network today.
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Pull, build and restart on the server
+        run: |
+          # -l matters: a non-interactive ssh session starts with a bare PATH, and node, npm and pm2 are
+          # often installed through nvm or into /usr/local/bin, which only a login shell picks up.
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" 'bash -l -s' <<'REMOTE'
+          set -euo pipefail
+
+          # Fail rather than hang if the server has no credentials for the remote.
+          export GIT_TERMINAL_PROMPT=0
+
+          cd /root/workchats-redesign
+
+          for tool in git npm pm2; do
+            if ! command -v "$tool" >/dev/null 2>&1; then
+              echo "FAILED: $tool is not on PATH for this ssh session (PATH=$PATH)"
+              exit 1
+            fi
+          done
+
+          before="$(git rev-parse HEAD)"
+          git pull --ff-only
+          after="$(git rev-parse HEAD)"
+
+          if [ "$before" = "$after" ]; then
+            echo "Server is already at ${after:0:8}; nothing to deploy."
+            exit 0
+          fi
+          echo "Deploying ${before:0:8} -> ${after:0:8}"
+
+          # npm install is the slow step, and it is only needed when the manifest or the lockfile moved.
+          # The revision that just landed is the one to ask, not the commit message.
+          if git diff --quiet "$before" "$after" -- package.json package-lock.json; then
+            echo "package.json and package-lock.json are unchanged; skipping npm install."
+          else
+            echo "Dependencies changed; running npm install."
+            npm install
+          fi
+
+          npm run build
+          pm2 restart workchats
+
+          echo "Deployed ${after:0:8}."
+          REMOTE
