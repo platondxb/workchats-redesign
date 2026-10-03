@@ -10,6 +10,12 @@ import { home } from "@/content/home";
  * read CSS custom properties: the colours below mirror src/styles/tokens.css and must be kept in step.
  */
 const color = {
+  night: "#0b1220",
+  nightLine: "#27324a",
+  onNight: "#f5f7fb",
+  onNightMuted: "#a8b3c7",
+  onNightSubtle: "#8a94a6",
+  deviceBezel: "#0e1526",
   canvas: "#f6f8fb",
   surface: "#ffffff",
   tint: "#eef2f8",
@@ -73,9 +79,11 @@ export default async function OpenGraphImage() {
         display: "flex",
         width: "100%",
         height: "100%",
-        background: color.canvas,
+        backgroundColor: color.night,
+        backgroundImage:
+          "radial-gradient(60% 70% at 0% 0%, rgba(0,119,255,0.38), transparent 72%), radial-gradient(60% 70% at 100% 0%, rgba(0,119,255,0.38), transparent 72%)",
         fontFamily: "Stack Sans Text",
-        color: color.ink,
+        color: color.onNight,
       }}
     >
       <div
@@ -89,19 +97,27 @@ export default async function OpenGraphImage() {
       >
         <svg width={186} height={40} viewBox="0 0 586 126">
           <path d={MARK_PATH} fill={color.brand} />
-          <path d={WORDMARK_PATH} fill={color.ink} />
+          <path d={WORDMARK_PATH} fill={color.onNight} />
         </svg>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div
-            style={{ fontFamily: "Stack Sans Headline", fontSize: 64, lineHeight: 1.02, letterSpacing: -2 }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              fontFamily: "Stack Sans Headline",
+              fontSize: 60,
+              lineHeight: 1.04,
+              letterSpacing: -2,
+            }}
           >
-            {home.hero.title}
+            <div style={{ color: color.onNight }}>{home.hero.title[0]}</div>
+            <div style={{ color: color.onNightSubtle }}>{home.hero.title[1]}</div>
           </div>
-          <div style={{ marginTop: 26, fontSize: 26, lineHeight: 1.4, color: color.inkMuted }}>
+          <div style={{ marginTop: 26, fontSize: 24, lineHeight: 1.4, color: color.onNightMuted }}>
             {home.og.subline}
           </div>
         </div>
-        <div style={{ fontSize: 20, color: color.inkSubtle }}>workchats.com</div>
+        <div style={{ fontSize: 20, color: color.onNightSubtle }}>workchats.com</div>
       </div>
 
       <div
@@ -109,26 +125,21 @@ export default async function OpenGraphImage() {
           display: "flex",
           position: "relative",
           flex: 1,
-          margin: "40px 40px 0 0",
-          padding: "56px 0 0 44px",
-          borderRadius: "28px 28px 0 0",
-          background: color.accent,
+          margin: "64px 0 0 0",
+          padding: "12px 0 0 12px",
+          borderRadius: "28px 0 0 0",
+          background: color.deviceBezel,
+          border: `4px solid ${color.nightLine}`,
+          borderRight: "none",
+          borderBottom: "none",
           overflow: "hidden",
         }}
       >
-        <svg
-          width={420}
-          height={420}
-          viewBox="0 0 126 126"
-          style={{ position: "absolute", left: -90, bottom: -150 }}
-        >
-          <path d={MARK_PATH} fill={color.brand} />
-        </svg>
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            width: 480,
+            width: 520,
             borderRadius: "16px 0 0 0",
             background: color.surface,
             overflow: "hidden",

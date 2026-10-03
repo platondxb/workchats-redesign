@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
+import { findCompetitorNames } from "@/content/competitors";
 import { faq } from "@/content/faq";
 import { Faq } from "./Faq";
 
@@ -8,20 +9,32 @@ describe("Faq", () => {
   it("has a heading and one disclosure per question", () => {
     const { container } = render(<Faq />);
     expect(
-      screen.getByRole("heading", { level: 2, name: "Questions? We're glad you asked." }),
+      screen.getByRole("heading", { level: 2, name: "Questions teams ask before they switch" }),
     ).toBeInTheDocument();
     const items = container.querySelectorAll("details");
     expect(items).toHaveLength(faq.length);
     items.forEach((item, index) => {
       expect(item.querySelector("summary")).toHaveTextContent(faq[index]?.question ?? "");
       expect(item).not.toHaveAttribute("open");
+      // Names the question for the faq_open event.
+      expect(item).toHaveAttribute("data-faq", faq[index]?.id);
     });
   });
 
   it("keeps every answer in the HTML, closed until asked for", () => {
     const { container } = render(<Faq />);
     const first = container.querySelector("details");
-    expect(first).toHaveTextContent("5 GB of storage per user");
+    expect(first).toHaveTextContent("5 GB of storage per person");
+  });
+
+  it("explains moving over without naming another product", () => {
+    const switching = faq.find((item) => item.id === "switching");
+    expect(switching?.answer).toContain("Import your message history from the chat tool you use today");
+    expect(findCompetitorNames(JSON.stringify(faq))).toEqual([]);
+  });
+
+  it("answers what happens at the sixth person, with the Pro price", () => {
+    expect(faq.find((item) => item.id === "sixth-person")?.answer).toContain("£3 per person a month");
   });
 
   it("offers a way to ask something else", () => {

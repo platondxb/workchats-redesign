@@ -1,18 +1,23 @@
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { findCompetitorNames } from "./competitors";
 import { faq } from "./faq";
 import { home } from "./home";
 import { comingSoon, primaryNav, isNavGroup } from "./navigation";
+import { quotas } from "./pricing";
 
-/** Every piece of copy on the page, as one string. */
+/** Every piece of copy on the page, as one string (the competitor list itself is left out). */
 function allCopy(): string {
   const dir = path.resolve(import.meta.dirname);
   return readdirSync(dir)
-    .filter((file) => file.endsWith(".ts") && !file.endsWith(".test.ts"))
+    .filter((file) => file.endsWith(".ts") && !file.endsWith(".test.ts") && file !== "competitors.ts")
     .map((file) => readFileSync(path.join(dir, file), "utf8"))
     .join("\n");
 }
+
+/** The copy as rendered strings only, without source comments. */
+const renderedCopy = JSON.stringify({ home, faq });
 
 describe("metadata", () => {
   it("keeps the title within 60 characters and the description within 155", () => {
@@ -33,27 +38,68 @@ describe("copy rules", () => {
     expect(copy).not.toMatch(/\[[A-Z][A-Z ]{3,}\]/); // e.g. [NEEDS CONTENT]
   });
 
-  it("avoids the banned words", () => {
-    for (const word of ["seamless", "supercharge", "unlock", "effortless", "next-level", "game-changer"]) {
-      expect(copy.toLowerCase()).not.toContain(word);
+  it("avoids the brief's banned words", () => {
+    for (const word of [
+      "seamless",
+      "elevate",
+      "unleash",
+      "supercharge",
+      "next-gen",
+      "game-changer",
+      "effortless",
+      "all-in-one solution",
+      "unlock",
+      "next-level",
+    ]) {
+      expect(renderedCopy.toLowerCase()).not.toContain(word);
     }
   });
 
-  it("says 'No credit card needed' exactly once, next to the hero call to action", () => {
-    expect(copy.match(/no credit card needed/gi)).toHaveLength(1);
-    expect(home.hero.note).toContain("No credit card needed");
+  it("says 'No credit card needed' once, beside the hero's action, and nowhere else mentions a card", () => {
+    expect(renderedCopy.match(/no credit card needed/gi)).toHaveLength(1);
+    expect(renderedCopy.match(/credit card|card details/gi)).toHaveLength(1);
+    expect(home.hero.caption).toContain("No credit card needed");
+  });
+
+  it("asks no rhetorical questions in section headings", () => {
+    const titles = [
+      home.businessCase.title,
+      home.freePlan.title,
+      home.day.title,
+      home.download.title,
+      home.cost.title,
+      home.pricing.title,
+      home.faq.title,
+      home.finalCta.title,
+    ];
+    for (const title of titles) expect(title).not.toMatch(/\?$/);
+    expect(titles.join(" ")).not.toMatch(/\. Nothing |^Not .+, but /);
   });
 
   it("uses action labels instead of 'Get Started Free' or early-access language", () => {
-    expect(copy).not.toMatch(/get started free|early access|waitlist|founding member/i);
+    expect(renderedCopy).not.toMatch(/get started free|early access|waitlist|founding member/i);
   });
 
   it("uses UK spelling", () => {
     expect(copy).not.toMatch(/\borganization|\bcolor\b|\boptimize|\bcenter\b/);
   });
 
-  it("keeps one static headline, the current site's own", () => {
-    expect(home.hero.title).toBe("A simpler way to talk with your whole team");
+  it("never names a competing product in anything the page renders", () => {
+    expect(findCompetitorNames(renderedCopy)).toEqual([]);
+  });
+});
+
+describe("the hero", () => {
+  it("says what Workchats is, then what trying it costs", () => {
+    expect(home.hero.title).toEqual([
+      "Team chat, calls and files.",
+      `Free for up to ${quotas.free.members} people.`,
+    ]);
+  });
+
+  it("pairs the action with the free plan and the price of the next step", () => {
+    expect(home.hero.caption).toMatch(/no time limit/);
+    expect(home.hero.caption).toContain("Pro is £3 a person a month");
   });
 });
 
@@ -61,7 +107,7 @@ describe("unreleased features", () => {
   const unreleased = /social feed|\bevents\b|polls/i;
 
   it("are never described as available in the page copy", () => {
-    expect(JSON.stringify({ home, faq })).not.toMatch(unreleased);
+    expect(renderedCopy).not.toMatch(unreleased);
   });
 
   it("are always flagged as coming soon wherever they are linked", () => {
@@ -77,20 +123,51 @@ describe("unreleased features", () => {
   });
 });
 
+describe("the business case", () => {
+  const detail = (id: string) => home.businessCase.rows.find((row) => row.id === id)?.detail ?? "";
+
+  it("covers cost, reliability, security and residency, in the owner's approved words", () => {
+    expect(detail("cost")).toContain("Pro is £3");
+    expect(detail("reliability")).toBe("99.9% uptime SLA on Pro and above.");
+    expect(detail("encryption")).toBe("End-to-end encryption on every message, call and file.");
+    expect(detail("residency")).toBe("Hosted in the UK, the EU or the UAE. GDPR compliant.");
+    expect(detail("privacy")).toMatch(/who sees their role, status and messages/);
+  });
+
+  it("quotes the saving the calculator computes", () => {
+    expect(detail("replaces")).toContain("£15,744 a year less");
+  });
+});
+
+describe("the free plan", () => {
+  it("prices the sixth person from the Pro list price", () => {
+    expect(home.freePlan.sixth.price).toBe("6 people on Pro: £18 a month, billed annually.");
+  });
+});
+
 describe("the cost calculator", () => {
-  it("adds up for the blog's 50-person example, from list prices", () => {
-    const { calculator } = home.comparison;
+  const { calculator, stack } = home.cost;
+
+  it("adds up for the cost breakdown's 50-person example, from list prices", () => {
     expect(calculator.seats).toBe(50);
-    expect(calculator.fiveTools.totalGbp).toBe(24744);
+    expect(calculator.stack.totalGbp).toBe(24744);
     expect(calculator.workchats.totalGbp).toBe(9000);
     expect(calculator.saving.totalGbp).toBe(15744);
   });
 
-  it("prices per user, so any team size works, and switches to Max above Pro's limit", () => {
-    const { fiveTools, workchats } = home.comparison.calculator;
-    expect(fiveTools.perUser).toBe(41.24);
-    expect(workchats.pro.perUser).toBe(15); // Pro £3 + Google Workspace £12
-    expect(workchats.max.perUser).toBe(17); // Max £5 + Google Workspace £12
-    expect(workchats.proLimit).toBe(50);
+  it("prices per person, so any team size works, and switches to Max above Pro's limit", () => {
+    expect(calculator.stack.perUser).toBe(41.24);
+    expect(calculator.workchats.pro.perUser).toBe(15); // Pro £3 + the office suite £12
+    expect(calculator.workchats.max.perUser).toBe(17); // Max £5 + the office suite £12
+    expect(calculator.workchats.proLimit).toBe(50);
+  });
+
+  it("names categories, not products, keeps the office suite and dates the prices", () => {
+    expect(stack).toHaveLength(5);
+    expect(stack.filter((item) => item.kept).map((item) => item.category)).toEqual(["An office suite"]);
+    expect(home.cost.title).toBe("A typical team pays for five tools. Workchats replaces four.");
+    expect(calculator.note).toMatch(
+      /List prices per person, billed annually, before VAT, checked [A-Z][a-z]+ \d{4}\./,
+    );
   });
 });

@@ -3,21 +3,30 @@
 
 /*
  * Stateful UI without JavaScript. Each switch is a set of native radio inputs; CSS reads which one is
- * checked. So the feature switcher, billing period and currency all work before (and without) JS.
+ * checked. So the billing period and both currency switches work before (and without) JS.
  */
 @custom-variant billing-monthly (&:where(.pricing:has(#billing-monthly:checked) *));
-@custom-variant feature-meetings (&:where(.features:has(#feature-meetings:checked) *));
-@custom-variant feature-files (&:where(.features:has(#feature-files:checked) *));
 @custom-variant currency-usd (&:where(.pricing:has(#currency-usd:checked) *));
 @custom-variant currency-eur (&:where(.pricing:has(#currency-eur:checked) *));
 @custom-variant currency-aed (&:where(.pricing:has(#currency-aed:checked) *));
 @custom-variant currency-rub (&:where(.pricing:has(#currency-rub:checked) *));
 
 /* The cost calculator carries the same five currencies, under its own radio group and its own ids. */
-@custom-variant cost-currency-usd (&:where(.comparison:has(#cost-currency-usd:checked) *));
-@custom-variant cost-currency-eur (&:where(.comparison:has(#cost-currency-eur:checked) *));
-@custom-variant cost-currency-aed (&:where(.comparison:has(#cost-currency-aed:checked) *));
-@custom-variant cost-currency-rub (&:where(.comparison:has(#cost-currency-rub:checked) *));
+@custom-variant cost-currency-usd (&:where(.cost:has(#cost-currency-usd:checked) *));
+@custom-variant cost-currency-eur (&:where(.cost:has(#cost-currency-eur:checked) *));
+@custom-variant cost-currency-aed (&:where(.cost:has(#cost-currency-aed:checked) *));
+@custom-variant cost-currency-rub (&:where(.cost:has(#cost-currency-rub:checked) *));
+
+/*
+ * The visitor's platform, set on <html> by the <head> script in lib/platform.ts before the first paint.
+ * The hero's download label and the "This device" marker read it; without it the neutral labels stay.
+ */
+@custom-variant os-macos (&:where([data-os="macos"] *));
+@custom-variant os-windows (&:where([data-os="windows"] *));
+@custom-variant os-linux (&:where([data-os="linux"] *));
+@custom-variant os-ios (&:where([data-os="ios"] *));
+@custom-variant os-android (&:where([data-os="android"] *));
+@custom-variant os-web (&:where([data-os="web"] *));
 
 /*
  * Size-matched fallbacks, so text wraps the same before and after the web fonts arrive (no layout shift).
@@ -52,8 +61,8 @@
   padding-inline: var(--gutter);
 }
 
-/* The floating header's container. Wider than the page content, so the bar frames the page rather than
-   hugging the text, and capped so it stays a bar on very wide screens. */
+/* The header's container. At the top of the page the header runs wider than the content, as in the
+   owner's reference; it gathers to the content's width as the page scrolls (nav-gather below). */
 @utility container-nav {
   width: 100%;
   max-width: calc(var(--container-nav) + 2 * var(--gutter));
@@ -76,8 +85,8 @@
   }
 }
 
-/* The calculator's slider on the dark card: accent fill up to the thumb (--fill is set by the inline
-   script), a dark track, a white thumb. The 44px-tall input keeps a full-size touch target. */
+/* The calculator's slider: accent fill up to the thumb (--fill is set by the inline script), a dark
+   track, a light thumb. The 44px-tall input keeps a full-size touch target. */
 @utility range {
   appearance: none;
   background: transparent;
@@ -96,7 +105,7 @@
     height: 1.5rem;
     margin-top: -0.5rem;
     border-radius: 9999px;
-    background: var(--color-surface);
+    background: var(--color-on-night);
     box-shadow: 0 0 0 0.25rem color-mix(in oklab, var(--color-accent) 45%, transparent);
   }
   &::-moz-range-track {
@@ -114,7 +123,7 @@
     height: 1.5rem;
     border: 0;
     border-radius: 9999px;
-    background: var(--color-surface);
+    background: var(--color-on-night);
   }
 }
 
@@ -124,7 +133,7 @@
   &::before {
     content: "";
     flex-shrink: 0;
-    width: 1.5rem;
+    width: 1.25rem;
     aspect-ratio: 4 / 3;
     border-radius: 0.1875rem;
     background: var(--flag) center / cover no-repeat;
@@ -144,76 +153,184 @@
   --flag: url("/flags/ae.svg");
 }
 
+/* The liquid glass buttons refract the page behind them through the #liquid-glass filter in the root
+   layout. Chromium only: elsewhere this declaration is dropped and the glass rim and fill remain. */
+@utility liquid-backdrop {
+  backdrop-filter: url(#liquid-glass);
+}
+
 /* ── Motion ──────────────────────────────────────────────────────────────────────
- * Rules: transform and opacity only; text is never hidden waiting for a scroll; everything is
- * removed (not shortened) under prefers-reduced-motion; scroll-linked effects are progressive
- * enhancement through CSS scroll timelines, with no JavaScript.
+ * Rules: transform and opacity only; page text is never hidden waiting for a scroll; scroll-linked
+ * effects follow the scroll position and never change its speed or direction; each is progressive
+ * enhancement through CSS scroll timelines (no JavaScript), and each element's resting style is its
+ * final frame, so without support, or with reduced motion, the page simply shows the settled state.
  */
 
-/* Product frames rise a little as they come into view. Opacity is untouched, so nothing is hidden. */
-@utility rise-in {
-  @supports (animation-timeline: view()) {
-    animation: rise linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 30%;
-  }
+/* The header. At the top of the page it is wide and transparent; as content moves under it, the bar
+   gathers into a floating glass pill the width of the content (the owner's reference). The bar's resting
+   layout is the pill, inset by --nav-gather on each side; at the top of the page the logo and the actions
+   are translated out to the wide positions and the glass is transparent. */
+:root {
+  --nav-gather: max(
+    0px,
+    calc(
+      (
+          min(100vw - 2 * var(--gutter), var(--container-nav)) -
+            min(100vw - 2 * var(--gutter), var(--container-content))
+        ) /
+        2
+    )
+  );
 }
 
-@keyframes rise {
-  from {
-    translate: 0 48px;
-  }
-  to {
-    translate: 0 0;
-  }
+@utility nav-inset {
+  padding-inline: var(--nav-gather);
 }
 
-/* The floating header's glass surface fades in as the page scrolls, so at the top of the page the bar is
-   invisible and the navigation sits straight on the canvas; once content moves under it, the surface and
-   its halo appear. Without scroll timelines (or with reduced motion) it keeps the solid, scrolled style. */
 @utility nav-glass {
+  inset-inline: var(--nav-gather);
   @supports (animation-timeline: scroll()) {
-    animation: nav-glass linear both;
+    animation: nav-glass-in linear both;
     animation-timeline: scroll(root);
-    animation-range: 0 96px;
+    animation-range: 0 6rem;
   }
 }
 
-@keyframes nav-glass {
+@utility nav-gather-start {
+  @supports (animation-timeline: scroll()) {
+    animation: nav-gather-start linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 6rem;
+  }
+}
+
+@utility nav-gather-end {
+  @supports (animation-timeline: scroll()) {
+    animation: nav-gather-end linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 6rem;
+  }
+}
+
+@keyframes nav-glass-in {
   from {
     opacity: 0;
   }
-  to {
-    opacity: 1;
-  }
 }
 
-/* Bars in the cost comparison grow from the left as they scroll into view (decorative; the figures are text). */
-@utility grow-in {
-  transform-box: fill-box;
-  transform-origin: left center;
-  @supports (animation-timeline: view()) {
-    animation: grow-x linear both;
-    animation-timeline: view();
-    animation-range: entry 20% cover 45%;
-  }
-}
-
-@keyframes grow-x {
+@keyframes nav-gather-start {
   from {
-    scale: 0.08 1;
+    translate: calc(-1 * var(--nav-gather)) 0;
   }
+}
+
+@keyframes nav-gather-end {
+  from {
+    translate: var(--nav-gather) 0;
+  }
+}
+
+/* The hero's container scroll (components/ui/container-scroll-animation.tsx), over the first 70% of a
+   screen of scrolling: the title lifts 100px, the card goes from tilted back to flat. */
+@utility cs-title {
+  /* The original lifts 100px; on phones the title is most of the screen, so it lifts less. */
+  --cs-lift: -100px;
+  @media (width < 48rem) {
+    --cs-lift: -40px;
+  }
+  @supports (animation-timeline: scroll()) {
+    animation: cs-title linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 70vh;
+  }
+}
+
+@keyframes cs-title {
   to {
-    scale: 1 1;
+    translate: 0 var(--cs-lift);
+  }
+}
+
+@utility cs-card {
+  --cs-from-scale: 1.05;
+  @media (width < 48rem) {
+    --cs-from-scale: 0.92;
+  }
+  @supports (animation-timeline: scroll()) {
+    animation: cs-card linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 70vh;
+  }
+}
+
+@keyframes cs-card {
+  from {
+    transform: rotateX(20deg) scale(var(--cs-from-scale));
+  }
+}
+
+/* The phone beside the laptop rises into place as the laptop settles. */
+@utility cs-aside {
+  @supports (animation-timeline: scroll()) {
+    animation: cs-aside linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 70vh;
+  }
+}
+
+@keyframes cs-aside {
+  from {
+    translate: 0 6rem;
+  }
+}
+
+/* Cause and effect: the call banner drops into the desktop app, then the call drops onto the phone, the
+   way notifications arrive, from above the edge of the screen that clips them. Transform only: nothing
+   fades through the text underneath. */
+@utility cs-banner {
+  @supports (animation-timeline: scroll()) {
+    animation: cs-drop var(--ease-out) both;
+    animation-timeline: scroll(root);
+    animation-range: 8vh 34vh;
+  }
+}
+
+@utility cs-ring {
+  @supports (animation-timeline: scroll()) {
+    animation: cs-drop var(--ease-out) both;
+    animation-timeline: scroll(root);
+    animation-range: 26vh 52vh;
+  }
+}
+
+@keyframes cs-drop {
+  from {
+    translate: 0 calc(-100% - 3rem);
+  }
+}
+
+/* The working day's line fills as the day scrolls past: decorative, the times carry the sequence. */
+@utility day-progress {
+  transform-origin: top;
+  @supports (animation-timeline: view()) {
+    animation: day-progress linear both;
+    animation-timeline: view();
+    animation-range: cover 15% cover 85%;
+  }
+}
+
+@keyframes day-progress {
+  from {
+    scale: 1 0;
   }
 }
 
 /* Header menu panels appear with a short fade and settle. They are only in the DOM while open. */
 @utility pop-in {
   transition:
-    opacity 200ms var(--ease-out),
-    translate 200ms var(--ease-out),
-    scale 200ms var(--ease-out);
+    opacity var(--transition-duration-base) var(--ease-out),
+    translate var(--transition-duration-base) var(--ease-out),
+    scale var(--transition-duration-base) var(--ease-out);
   @starting-style {
     opacity: 0;
     translate: 0 -6px;
@@ -226,10 +343,10 @@
   opacity: 0;
   translate: 0 -12px;
   transition:
-    opacity 260ms var(--ease-out),
-    translate 260ms var(--ease-out),
-    display 260ms allow-discrete,
-    overlay 260ms allow-discrete;
+    opacity var(--transition-duration-slow) var(--ease-out),
+    translate var(--transition-duration-slow) var(--ease-out),
+    display var(--transition-duration-slow) allow-discrete,
+    overlay var(--transition-duration-slow) allow-discrete;
   &[open] {
     opacity: 1;
     translate: 0 0;
@@ -242,35 +359,12 @@
   }
 }
 
-/* Feature panels cross-fade: they share one grid cell, and visibility flips with the fade (visible at
-   once when showing, hidden after the fade when hiding), so the outgoing panel never takes a click. */
-@utility switch-in {
-  transition:
-    opacity 320ms var(--ease-out),
-    visibility 320ms;
-}
-
-/* Lift on hover for cards that link somewhere. */
-@utility lift {
-  transition:
-    translate 180ms var(--ease-out),
-    box-shadow 180ms var(--ease-out),
-    border-color 180ms var(--ease-out);
-  &:hover {
-    translate: 0 -3px;
-    box-shadow: var(--shadow-raised);
-  }
-}
-
-/* A price that appears when the currency changes. The four that are not chosen are display: none, so the
-   box is always exactly as wide as the figure on screen; a CSS animation restarts when an element becomes
-   rendered, so the new figure rises into place instead of appearing. Transform and opacity only, so
-   nothing around the price moves.
-   An earlier pass cross-faded the two figures by stacking all five in one grid cell. It read better, but
-   the cell sized to the widest currency on the page (₽1,653,120), which left a visible gap between a
-   shorter figure and the "a year" that follows it. */
+/* A price that appears when the currency or the billing period changes. The figures that are not chosen
+   are display: none, so the box is always exactly as wide as the figure on screen; a CSS animation
+   restarts when an element becomes rendered, so the new figure rises into place instead of appearing.
+   Transform and opacity only, so nothing around the price moves. */
 @utility price-in {
-  animation: price-in 360ms var(--ease-out) both;
+  animation: price-in var(--transition-duration-slow) var(--ease-out) both;
 }
 
 @keyframes price-in {
@@ -284,11 +378,6 @@
   }
 }
 
-/* The hero demo stops while it's off screen: an inline IntersectionObserver sets data-paused. */
-[data-demo][data-paused] * {
-  animation-play-state: paused !important;
-}
-
 /* Disclosure panels open smoothly where the browser supports animating to auto height. */
 @supports (interpolate-size: allow-keywords) {
   :root {
@@ -299,8 +388,8 @@
     block-size: 0;
     overflow: clip;
     transition:
-      block-size 320ms var(--ease-out),
-      content-visibility 320ms allow-discrete;
+      block-size var(--transition-duration-slow) var(--ease-out),
+      content-visibility var(--transition-duration-slow) allow-discrete;
   }
 
   details[open]::details-content {
@@ -310,14 +399,25 @@
 
 @layer base {
   html {
-    color-scheme: light;
+    color-scheme: dark;
+    background-color: var(--color-night);
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
 
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* The night stage, lit from the top in the brand blue. A background, so it costs no element. */
   body {
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
+    background-color: var(--color-night);
+    background-image: var(--gradient-stage-light);
+    background-repeat: no-repeat;
+    background-size: 100% 56rem;
+    color: var(--color-on-night);
     font-family: var(--font-sans);
     font-size: var(--text-body);
     line-height: var(--text-body--line-height);
@@ -328,17 +428,17 @@
   *,
   ::before,
   ::after {
-    border-color: var(--color-line);
+    border-color: var(--color-night-line);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-accent-on-night);
     outline-offset: 2px;
   }
 
   ::selection {
-    background-color: var(--color-accent-subtle);
-    color: var(--color-ink);
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
   }
 
   h1,

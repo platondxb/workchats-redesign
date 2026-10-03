@@ -2,10 +2,14 @@
  * Workchats design tokens: the single source of truth.
  *
  * Tailwind builds its utilities from this @theme block, and Tailwind's own defaults are reset first,
- * so a component can only use a colour, size, radius, shadow or animation that exists here.
- * scripts/check-tokens.mjs fails the build if a component reaches for a raw value instead.
+ * so a component can only use a colour, size, radius, shadow, easing, duration, layer or animation that
+ * exists here. scripts/check-tokens.mjs fails the build if a component reaches for a raw value instead.
  *
- * Contrast notes (WCAG 2.2): ratios are against --color-surface (#fff) unless stated.
+ * The page is dark: a night stage lit in the brand blue from the top. Light is kept for real artefacts
+ * on that stage (the app's own screens and the one-page brief), which use the light tokens below.
+ *
+ * Contrast notes (WCAG 2.2): light tokens are measured against --color-surface (#fff), dark tokens
+ * against --color-night (#0b1220), unless stated.
  */
 
 @theme {
@@ -25,15 +29,31 @@
   --perspective-*: initial;
   --animate-*: initial;
   --container-*: initial;
+  --ease-*: initial;
+  --transition-duration-*: initial;
+  --z-index-*: initial;
 
   /* One breakpoint below Tailwind's sm: the narrowest phones (360px), where the header has to shed a
      little width so the wordmark, the primary action and the menu button all still fit. */
   --breakpoint-xs: 22.5rem;
 
-  /* ── Colour: neutrals ───────────────────────────────────────────────────────── */
-  --color-canvas: #f6f8fb; /* page background: surfaces sit on it in layers */
-  --color-surface: #ffffff; /* cards, menus, product UI */
-  --color-surface-glass: rgb(255 255 255 / 0.72); /* the floating header: content reads through it */
+  /* ── Colour: the night stage (the page) ─────────────────────────────────────── */
+  --color-night: #0b1220; /* page background */
+  --color-night-raised: #141d30; /* panels on the page */
+  --color-night-overlay: #1b2640; /* menus, selected controls, raised chips */
+  --color-night-line: #27324a; /* hairlines on the page */
+  --color-night-line-strong: #5a6884; /* boundaries of controls, 3.3:1 (3.0:1 on night-raised) */
+  --color-night-glass: rgb(11 18 32 / 0.72); /* the floating header bar: content reads through it */
+  --color-on-night: #f5f7fb; /* primary text, 17.9:1 */
+  --color-on-night-muted: #a8b3c7; /* secondary text, 8.9:1 (8.0:1 on night-raised) */
+  --color-on-night-subtle: #8a94a6; /* tertiary text and the headline's second line, 6.1:1 */
+  --color-accent-on-night: #5ca8ff; /* links, focus rings and selected states on the page, 7.6:1 */
+  --color-glass-fill: rgb(255 255 255 / 0.06); /* glass buttons and chips on the page */
+  --color-glass-fill-hover: rgb(255 255 255 / 0.1);
+
+  /* ── Colour: light artefacts (the app's screens, the one-page brief) ────────── */
+  --color-canvas: #f6f8fb; /* the light app's own background */
+  --color-surface: #ffffff; /* the app's panels, the brief's sheet */
   --color-tint: #eef2f8; /* quiet fills inside surfaces */
   --color-ink: #0e1626; /* primary text, 18.4:1 */
   --color-ink-muted: #475467; /* secondary text, 7.6:1 (7.1:1 on canvas) */
@@ -42,22 +62,19 @@
   --color-line-strong: #8a94a6; /* boundaries of controls, 3.1:1 */
 
   /* ── Colour: brand blue ─────────────────────────────────────────────────────── */
-  --color-brand: #0077ff; /* logo mark and large display use (4.1:1 with white) */
-  --color-accent: #0068e6; /* filled buttons and the CTA band, 5.1:1 with white */
-  --color-accent-hover: #0057c2; /* 6.7:1 */
-  --color-accent-subtle: #e8f0fe; /* product stage, selected states */
+  --color-brand: #0077ff; /* logo mark and the stage light (4.5:1 on night) */
+  --color-accent: #0068e6; /* filled buttons, 5.1:1 with white; 3.7:1 against night */
+  --color-accent-hover: #0057c2; /* 6.7:1 with white */
+  --color-accent-subtle: #e8f0fe; /* selected states inside the light app */
   --color-accent-ink: #0057c2; /* links and accent text on light surfaces, 6.7:1 */
   --color-on-accent: #ffffff;
 
-  /* ── Colour: the one dark section ───────────────────────────────────────────── */
-  --color-night: #0b1220;
-  --color-night-raised: #141d30;
-  --color-night-line: #27324a;
-  --color-on-night: #f5f7fb; /* 17.9:1 on night */
-  --color-on-night-muted: #a8b3c7; /* 8.9:1 on night */
+  /* ── Colour: devices ────────────────────────────────────────────────────────── */
+  --color-device-frame: #3d4a64; /* the machined edge around a screen */
+  --color-device-bezel: #0e1526; /* the black glass around the display */
 
   /* ── Colour: states only ────────────────────────────────────────────────────── */
-  --color-success: #12805c; /* online status, 4.9:1 */
+  --color-success: #12805c; /* online status, 4.9:1 on white */
   --color-warning: #8a5300;
   --color-warning-subtle: #fdf3e1;
   --color-error: #c42b1c; /* leave-call button, 5.4:1 with white */
@@ -120,29 +137,42 @@
   --text-nano: 0.75rem;
   --text-nano--line-height: 1.35;
 
-  /* Small upper-case labels inside product widgets ("AES-256 AT REST"). */
-  --tracking-label: 0.08em;
-
   /* ── Shape ──────────────────────────────────────────────────────────────────── */
   --radius-sm: 10px; /* inputs, small controls, chips */
-  --radius-md: 16px; /* cards, product panels */
-  --radius-lg: 28px; /* product stage, large sections */
+  --radius-md: 16px; /* panels, the app window, the floating header */
+  --radius-lg: 28px; /* the device card, large panels */
   --radius-full: 9999px; /* buttons, avatars, pills */
-  --radius-device: 2.25rem; /* the handset's body in the hero */
+  --radius-device: 2.25rem; /* a handset's body */
 
-  /* Two elevations. Raised: product windows and hovered cards. Overlay: menus and dialogs.
-     Float: the header bar, a wide soft halo rather than a hard edge. */
-  --shadow-raised: 0 1px 2px rgb(14 22 38 / 0.04), 0 10px 30px -8px rgb(14 22 38 / 0.12);
-  --shadow-overlay: 0 4px 12px rgb(14 22 38 / 0.08), 0 28px 64px -12px rgb(14 22 38 / 0.28);
-  --shadow-float: 0 1px 2px rgb(14 22 38 / 0.04), 0 4px 80px -16px rgb(14 22 38 / 0.24);
+  /* Elevations, shaded for a dark stage. Raised: panels and hovered controls. Overlay: menus and dialogs.
+     Float: the header bar. Device: the layered contact shadow under a screen held at an angle. */
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px -8px rgb(0 0 0 / 0.45);
+  --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.35), 0 28px 64px -12px rgb(0 0 0 / 0.6);
+  --shadow-float: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 40px -12px rgb(0 0 0 / 0.7);
+  --shadow-device:
+    0 0 rgb(0 0 0 / 0.3), 0 9px 20px rgb(0 0 0 / 0.29), 0 37px 37px rgb(0 0 0 / 0.26),
+    0 84px 50px rgb(0 0 0 / 0.15), 0 149px 60px rgb(0 0 0 / 0.04), 0 233px 65px rgb(0 0 0 / 0.01);
+  /* Inside the app's light screens, where a shadow tuned for the night stage would be too heavy. */
+  --shadow-ui: 0 1px 2px rgb(14 22 38 / 0.04), 0 10px 30px -8px rgb(14 22 38 / 0.12);
+  --shadow-ui-overlay: 0 4px 12px rgb(14 22 38 / 0.08), 0 20px 48px -12px rgb(14 22 38 / 0.24);
+  /* The liquid glass edge: light catching a rounded rim (inset highlights), with a soft drop. */
+  --shadow-liquid:
+    0 0 8px rgb(0 0 0 / 0.03), 0 2px 6px rgb(0 0 0 / 0.08),
+    inset 3px 3px 0.5px -3.5px rgb(255 255 255 / 0.09), inset -3px -3px 0.5px -3.5px rgb(255 255 255 / 0.85),
+    inset 1px 1px 1px -0.5px rgb(255 255 255 / 0.6), inset -1px -1px 1px -0.5px rgb(255 255 255 / 0.6),
+    inset 0 0 6px 6px rgb(255 255 255 / 0.12), inset 0 0 2px 2px rgb(255 255 255 / 0.06),
+    0 0 12px rgb(0 0 0 / 0.15);
+  /* The primary button's glow on hover: the brand blue lighting the stage under it. */
+  --shadow-accent-glow: 0 10px 32px -6px rgb(0 119 255 / 0.55);
 
   /* ── Layout ─────────────────────────────────────────────────────────────────── */
   --container-text: 38rem; /* ~65 characters of body text */
+  --container-lead: 40rem; /* the hero's lead paragraph */
   --container-content: 76rem; /* 1216px content width */
-  --container-nav: 87.5rem; /* 1400px: the floating header runs wider than the content */
-  --container-window: 66rem; /* the desktop app window in the hero */
-  --container-phone: 15rem; /* the phone in the hero */
-  --aspect-device: 393 / 852; /* a current iPhone's screen, so the handset reads as one */
+  --container-nav: 87.5rem; /* 1400px: the header runs wider than the content at the top of the page */
+  --container-window: 64rem; /* the device card around the desktop app */
+  --container-phone: 15rem; /* a handset */
+  --aspect-device: 393 / 852; /* a current phone's screen proportions */
   --container-menu-sm: 22rem; /* header menu panels */
   --container-menu-md: 34rem;
   --container-menu-lg: 44rem;
@@ -151,119 +181,103 @@
   --spacing-section: 4rem;
   --spacing-section-lg: 5rem;
 
+  /* The stage the device card tilts in. */
+  --perspective-stage: 1000px;
+
+  /* ── Layers ─────────────────────────────────────────────────────────────────── */
+  --z-index-behind: -1; /* decoration inside an isolated component */
+  --z-index-raised: 1; /* a device in front of another */
+  --z-index-header: 40;
+  --z-index-menu: 50;
+  --z-index-banner: 60; /* the cookie choices */
+  --z-index-skip: 70; /* the skip link, above everything when focused */
+
   /* ── Motion ─────────────────────────────────────────────────────────────────── */
-  --default-transition-duration: 180ms;
-  --default-transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Durations: instant feedback, small controls, panels, larger moves, and the slow reveal. */
+  --transition-duration-instant: 100ms;
+  --transition-duration-fast: 160ms;
+  --transition-duration-base: 240ms;
+  --transition-duration-slow: 360ms;
+  --transition-duration-slower: 600ms;
+  --default-transition-duration: 160ms;
+
+  /* Easing: ease-out for things arriving, in-out for things moving between states, and two springs
+     (generated from a damped spring, ζ = 0.62 and 0.78) for controls that answer a press. */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: linear(
+    0,
+    0.055 3.6%,
+    0.187 7.1%,
+    0.355 10.7%,
+    0.529 14.3%,
+    0.689 17.9%,
+    0.823 21.4%,
+    0.927 25%,
+    1.002 28.6%,
+    1.049 32.1%,
+    1.075 35.7%,
+    1.083 39.3%,
+    1.08 42.9%,
+    1.07 46.4%,
+    1.057 50%,
+    1.042 53.6%,
+    1.028 57.1%,
+    1.017 60.7%,
+    1.007 64.3%,
+    1.001 67.9%,
+    0.996 71.4%,
+    0.994 75%,
+    0.993 82.1%,
+    0.996 92.9%,
+    1
+  );
+  --ease-spring-gentle: linear(
+    0,
+    0.035 3.6%,
+    0.12 7.1%,
+    0.232 10.7%,
+    0.353 14.3%,
+    0.473 17.9%,
+    0.584 21.4%,
+    0.683 25%,
+    0.766 28.6%,
+    0.835 32.1%,
+    0.89 35.7%,
+    0.933 39.3%,
+    0.964 42.9%,
+    0.987 46.4%,
+    1.002 50%,
+    1.012 53.6%,
+    1.017 57.1%,
+    1.02 62.5%,
+    1.017 71.4%,
+    1.012 78.6%,
+    1.006 89.3%,
+    1
+  );
+  --default-transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 
   /* The floating header's glass: content shows through it, softened. */
   --blur-glass: 16px;
-
-  /* The hero stage settles into place on load. Transform only, so the headline (LCP) is unaffected. */
-  --animate-stage-in: stage-in 900ms var(--ease-out) both;
-  /* The "live" dot on a call. */
-  --animate-live: live 1.6s ease-in-out infinite;
-
-  @keyframes stage-in {
-    from {
-      transform: translateY(40px);
-    }
-    to {
-      transform: none;
-    }
-  }
-
-  @keyframes live {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.35;
-    }
-  }
-
-  /* The hero demo: one 14-second loop in which a message turns into a call. */
-  --animate-demo-typing: demo-typing 14s var(--ease-out) infinite;
-  --animate-demo-message: demo-message 14s var(--ease-out) infinite;
-  --animate-demo-call: demo-call 14s var(--ease-out) infinite;
-  --animate-demo-ring: demo-ring 14s var(--ease-out) infinite;
-
-  @keyframes demo-typing {
-    0%,
-    8% {
-      opacity: 0;
-      transform: translateY(6px);
-    }
-    11%,
-    24% {
-      opacity: 1;
-      transform: none;
-    }
-    27%,
-    100% {
-      opacity: 0;
-      transform: none;
-    }
-  }
-
-  @keyframes demo-message {
-    0%,
-    25% {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    30%,
-    90% {
-      opacity: 1;
-      transform: none;
-    }
-    96%,
-    100% {
-      opacity: 0;
-      transform: none;
-    }
-  }
-
-  @keyframes demo-call {
-    0%,
-    38% {
-      opacity: 0;
-      transform: translateY(-12px) scale(0.98);
-    }
-    44%,
-    90% {
-      opacity: 1;
-      transform: none;
-    }
-    96%,
-    100% {
-      opacity: 0;
-      transform: none;
-    }
-  }
-
-  @keyframes demo-ring {
-    0%,
-    50% {
-      opacity: 0;
-      transform: translateY(-14px);
-    }
-    56%,
-    90% {
-      opacity: 1;
-      transform: none;
-    }
-    96%,
-    100% {
-      opacity: 0;
-      transform: none;
-    }
-  }
 }
 
-/* Values that change with the viewport. Utilities reference the variables, so this is enough. */
+/*
+ * Values that aren't Tailwind utilities: the stage light, and the sizes that change with the viewport.
+ * Utilities and the CSS in globals.css reference these variables.
+ */
 :root {
+  /* The stage light: one still key light in the brand blue, falling from the top edge, brightest at the
+     corners as in the owner's references. Painted on the body, so it costs no element. */
+  --gradient-stage-light:
+    radial-gradient(42% 60% at 0% 0%, rgb(0 119 255 / 0.34), transparent 72%),
+    radial-gradient(42% 60% at 100% 0%, rgb(0 119 255 / 0.34), transparent 72%),
+    radial-gradient(80% 42% at 50% -6%, rgb(0 104 230 / 0.3), transparent 78%);
+  /* The same light from below, behind the closing band. */
+  --gradient-stage-light-low: radial-gradient(70% 90% at 50% 120%, rgb(0 119 255 / 0.32), transparent 70%);
+  /* The machined edge of a device: light at the top, falling away at the bottom. */
+  --gradient-device-edge: linear-gradient(160deg, #5f6d89 0%, #3d4a64 38%, #232c40 100%);
+
   --gutter: 1rem; /* 16px side gutter on phones */
   --header-height: 3.75rem;
 }

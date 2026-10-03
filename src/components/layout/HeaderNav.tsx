@@ -1,23 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { buttonClasses } from "@/components/ui/button-classes";
 
 /** A top-level entry: a plain link, or a group whose menu panel is rendered on the server. */
 export type HeaderEntry = { label: string; href: string } | { label: string; panel: ReactNode };
-
-interface HeaderLink {
-  label: string;
-  href: string;
-}
 
 interface HeaderNavProps {
   entries: HeaderEntry[];
   /** The phone menu's navigation, rendered on the server. */
   mobileNav: ReactNode;
-  signIn: HeaderLink;
-  demo: HeaderLink;
-  start: HeaderLink;
+  /**
+   * The header's actions, rendered on the server: `desktop` beside the links from lg, `primary` (Start free)
+   * at every width, and `menu`, the stacked actions at the foot of the phone menu.
+   */
+  actions: { desktop: ReactNode; primary: ReactNode; menu: ReactNode };
   /** Icons are rendered on the server and passed in, so no icon code ships to the browser. */
   icons: { caret: ReactNode; menu: ReactNode; close: ReactNode };
 }
@@ -25,33 +21,21 @@ interface HeaderNavProps {
 /**
  * Header navigation.
  *
- * Desktop: disclosure menus (a button and a panel of links). They open on click, Enter or Space, and
- * on hover with a short delay for mouse users; Escape, a click outside, or moving focus or the pointer
- * away closes them. Panels are rendered on the server and only mounted once first opened, which keeps
- * them out of the initial DOM.
+ * Desktop: disclosure menus (a button and a panel of links), between the logo and the actions.
+ * They open on click, Enter or Space, and on hover with a short delay for mouse users; Escape, a click
+ * outside, or moving focus or the pointer away closes them. Panels are rendered on the server and only
+ * mounted once first opened, which keeps them out of the initial DOM.
  *
  * Phones: a modal <dialog>, which gives focus trapping, Escape to close and an inert page behind it.
  */
-export function HeaderNav({ entries, mobileNav, signIn, demo, start, icons }: HeaderNavProps) {
+export function HeaderNav({ entries, mobileNav, actions, icons }: HeaderNavProps) {
   return (
     <>
       <DesktopNav entries={entries} caret={icons.caret} />
-      <div className="ml-auto flex items-center gap-2 lg:gap-3">
-        <div className="hidden items-center gap-2 lg:flex">
-          <a
-            href={signIn.href}
-            className="inline-flex min-h-11 items-center rounded-full px-3 text-small font-semibold whitespace-nowrap text-ink hover:bg-tint xl:px-4"
-          >
-            {signIn.label}
-          </a>
-          <a href={demo.href} className={buttonClasses("secondary", "sm")}>
-            {demo.label}
-          </a>
-        </div>
-        <a href={start.href} className={buttonClasses("primary", "sm")}>
-          {start.label}
-        </a>
-        <MobileMenu nav={mobileNav} signIn={signIn} demo={demo} start={start} icons={icons} />
+      <div className="flex shrink-0 nav-gather-end items-center gap-2">
+        <div className="hidden items-center gap-2 lg:flex">{actions.desktop}</div>
+        {actions.primary}
+        <MobileMenu nav={mobileNav} actions={actions.menu} icons={icons} />
       </div>
     </>
   );
@@ -111,15 +95,15 @@ function DesktopNav({ entries, caret }: { entries: HeaderEntry[]; caret: ReactNo
   useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
 
   return (
-    <nav ref={navRef} aria-label="Main" className="ml-4 hidden lg:block xl:ml-8">
-      <ul className="flex items-center gap-1">
+    <nav ref={navRef} aria-label="Main" className="hidden lg:block">
+      <ul className="flex items-center xl:gap-1">
         {entries.map((entry, index) => {
           if (!("panel" in entry)) {
             return (
               <li key={entry.label}>
                 <a
                   href={entry.href}
-                  className="inline-flex min-h-11 items-center rounded-full px-3 text-small font-semibold text-ink hover:bg-tint xl:px-4"
+                  className="inline-flex min-h-11 items-center rounded-full px-2.5 text-small font-semibold text-on-night-muted hover:text-on-night xl:px-4"
                 >
                   {entry.label}
                 </a>
@@ -158,12 +142,16 @@ function DesktopNav({ entries, caret }: { entries: HeaderEntry[]; caret: ReactNo
                   if (isOpen && Date.now() - openedByHoverAt.current < 600) return;
                   open(isOpen ? null : index);
                 }}
-                className="group inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-small font-semibold text-ink hover:bg-tint aria-expanded:bg-tint xl:px-4"
+                className="group inline-flex min-h-11 items-center gap-1.5 rounded-full px-2.5 text-small font-semibold text-on-night-muted hover:text-on-night aria-expanded:text-on-night xl:px-4"
               >
                 {entry.label}
                 {caret}
               </button>
-              <div id={panelId} hidden={!isOpen} className="absolute top-full left-0 z-50 pt-3">
+              <div
+                id={panelId}
+                hidden={!isOpen}
+                className="absolute top-full left-1/2 z-menu -translate-x-1/2 pt-3"
+              >
                 {mounted.has(index) ? entry.panel : null}
               </div>
             </li>
@@ -176,15 +164,11 @@ function DesktopNav({ entries, caret }: { entries: HeaderEntry[]; caret: ReactNo
 
 function MobileMenu({
   nav,
-  signIn,
-  demo,
-  start,
+  actions,
   icons,
 }: {
   nav: ReactNode;
-  signIn: HeaderLink;
-  demo: HeaderLink;
-  start: HeaderLink;
+  actions: ReactNode;
   icons: HeaderNavProps["icons"];
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -233,7 +217,7 @@ function MobileMenu({
           setOpen(true);
           dialogRef.current?.showModal();
         }}
-        className="inline-flex size-11 items-center justify-center rounded-full text-ink hover:bg-tint lg:hidden"
+        className="inline-flex size-11 items-center justify-center rounded-full text-on-night hover:bg-glass-fill lg:hidden"
       >
         {icons.menu}
         <span className="sr-only">Menu</span>
@@ -242,19 +226,19 @@ function MobileMenu({
       <dialog
         ref={dialogRef}
         aria-labelledby={titleId}
-        className="m-0 h-dvh max-h-dvh w-full max-w-full sheet overflow-y-auto bg-canvas p-0 text-ink backdrop:bg-ink/40"
+        className="m-0 h-dvh max-h-dvh w-full max-w-full sheet overflow-y-auto bg-night p-0 text-on-night backdrop:bg-night/70"
       >
         {/* Mounted on first open only, so the menu adds nothing to the initial DOM. */}
         {mounted ? (
           <div className="flex min-h-full flex-col px-(--gutter) pb-8">
             <div className="flex h-(--header-height) shrink-0 items-center justify-between">
-              <h2 id={titleId} className="text-small font-semibold text-ink-muted">
+              <h2 id={titleId} className="text-small font-semibold text-on-night-muted">
                 Menu
               </h2>
               <button
                 type="button"
                 onClick={close}
-                className="inline-flex size-11 items-center justify-center rounded-full text-ink hover:bg-tint"
+                className="inline-flex size-11 items-center justify-center rounded-full text-on-night hover:bg-glass-fill"
               >
                 {icons.close}
                 <span className="sr-only">Close menu</span>
@@ -263,17 +247,7 @@ function MobileMenu({
 
             {nav}
 
-            <div className="mt-auto grid gap-3 pt-8">
-              <a href={start.href} className={buttonClasses("primary", "md")}>
-                {start.label}
-              </a>
-              <a href={demo.href} className={buttonClasses("secondary", "md")}>
-                {demo.label}
-              </a>
-              <a href={signIn.href} className={buttonClasses("ghost", "md")}>
-                {signIn.label}
-              </a>
-            </div>
+            <div className="mt-auto grid gap-3 pt-8">{actions}</div>
           </div>
         ) : null}
       </dialog>

@@ -1,12 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Stack_Sans_Headline, Stack_Sans_Text } from "next/font/google";
 import { ConsentManager } from "@/components/consent/ConsentManager";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SkipLink } from "@/components/layout/SkipLink";
+import { LiquidGlassFilter } from "@/components/ui/liquid-glass-button";
 import { home } from "@/content/home";
 import { site } from "@/content/site";
 import { gaMeasurementId } from "@/lib/analytics";
+import { analyticsEventsScript } from "@/lib/analytics-events";
+import { platformScript } from "@/lib/platform";
+import { metaColours } from "@/styles/meta-colours";
 import "./globals.css";
 
 // One superfamily in two optical styles, self-hosted by next/font: two WOFF2 files, Latin subset.
@@ -35,9 +39,26 @@ export const metadata: Metadata = {
   applicationName: site.name,
 };
 
+/** The site is dark: browser chrome and form controls follow it. */
+export const viewport: Viewport = {
+  colorScheme: "dark",
+  themeColor: metaColours.night,
+};
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang={site.language} className={`${stackText.variable} ${stackHeadline.variable}`}>
+    // suppressHydrationWarning: the <head> script sets data-os on <html> before React hydrates.
+    <html
+      lang={site.language}
+      className={`${stackText.variable} ${stackHeadline.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* Runs before the first paint: the visitor's platform, for the download labels (lib/platform.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: platformScript }} />
+        {/* Analytics events, sent only once gtag exists, which is only after consent (lib/analytics-events.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: analyticsEventsScript }} />
+      </head>
       <body>
         <SkipLink />
         <SiteHeader />
@@ -45,6 +66,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </main>
         <SiteFooter />
+        <LiquidGlassFilter />
         {gaMeasurementId ? (
           <ConsentManager gaId={gaMeasurementId} policyHref={site.links.cookiePolicy} />
         ) : null}

@@ -10,7 +10,22 @@ describe("Pricing", () => {
       const card = screen.getByRole("article", { name: plan.name });
       const action = within(card).getByRole("link", { name: plan.cta.label });
       expect(action).toHaveAttribute("href", plan.cta.href);
+      expect(action).toHaveAttribute("data-cta", `pricing-${plan.id}`);
     }
+  });
+
+  it("marks Pro as the recommended next step in words, not by colour alone", () => {
+    render(<Pricing />);
+    const pro = screen.getByRole("article", { name: "Pro" });
+    expect(within(pro).getByText("Recommended once you pass 5 people")).toBeInTheDocument();
+    expect(within(screen.getByRole("article", { name: "Free" })).queryByText(/Recommended/)).toBeNull();
+  });
+
+  it("starts the path with Free and Pro, and groups Max and Enterprise for larger organisations", () => {
+    render(<Pricing />);
+    const articles = screen.getAllByRole("article").map((article) => article.getAttribute("aria-labelledby"));
+    expect(articles).toEqual(["plan-free", "plan-pro", "plan-max", "plan-enterprise"]);
+    expect(screen.getByText("For larger teams and regulated organisations")).toBeInTheDocument();
   });
 
   it("renders both billing periods and every display currency into the HTML", () => {
@@ -25,8 +40,9 @@ describe("Pricing", () => {
     }
   });
 
-  it("defaults to pounds sterling, the billing currency, and names each currency in full", () => {
+  it("defaults to annual billing in pounds sterling, the billing currency, and names each currency in full", () => {
     render(<Pricing />);
+    expect(screen.getByRole("radio", { name: /Annually/ })).toBeChecked();
     expect(screen.getByRole("radio", { name: "Pound sterling (GBP)" })).toBeChecked();
     expect(screen.getByRole("radio", { name: "US dollar (USD)" })).not.toBeChecked();
     expect(screen.getByText(/Prices in other currencies are approximate/)).toBeInTheDocument();

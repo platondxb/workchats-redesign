@@ -1,10 +1,20 @@
 import { faq } from "@/content/faq";
 import { home } from "@/content/home";
 import { billingCurrency, plans } from "@/content/pricing";
-import { platforms, site } from "@/content/site";
+import { platforms, site, type PlatformId } from "@/content/site";
 import { gbpPrice } from "./pricing";
 
 type JsonLdNode = Record<string, unknown>;
+
+/** Schema.org wants operating systems by name; the page's labels ("iPhone and iPad") read better on screen. */
+const operatingSystemNames: Record<PlatformId, string> = {
+  web: "Web",
+  macos: "macOS",
+  windows: "Windows",
+  linux: "Linux",
+  ios: "iOS",
+  android: "Android",
+};
 
 export const brandLogo = { path: "/brand/workchats-logo.png", width: 512, height: 512 } as const;
 
@@ -69,7 +79,7 @@ export function homeJsonLd(): JsonLdNode {
       "@type": "Organization",
       "@id": organizationId,
       name: site.name,
-      legalName: site.company.tradingName,
+      legalName: site.company.legalName,
       url: site.url,
       email: site.company.supportEmail,
       logo: {
@@ -79,11 +89,6 @@ export function homeJsonLd(): JsonLdNode {
         height: brandLogo.height,
       },
       founder: { "@type": "Person", name: site.founder.name, jobTitle: site.founder.role },
-      parentOrganization: {
-        "@type": "Organization",
-        name: site.company.operator,
-        address: { "@type": "PostalAddress", addressLocality: "Dubai", addressCountry: "AE" },
-      },
       sameAs: site.social.map((profile) => profile.href),
     },
     {
@@ -110,7 +115,7 @@ export function homeJsonLd(): JsonLdNode {
       name: site.name,
       applicationCategory: "BusinessApplication",
       applicationSubCategory: "Team communication",
-      operatingSystem: platforms.map((platform) => platform.label).join(", "),
+      operatingSystem: platforms.map((platform) => operatingSystemNames[platform.id]).join(", "),
       url: site.url,
       publisher: { "@id": organizationId },
       offers: planOffers(),

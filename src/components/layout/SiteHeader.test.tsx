@@ -30,17 +30,24 @@ async function openMenu(name: string): Promise<HTMLElement> {
 }
 
 describe("SiteHeader", () => {
-  it("floats the bar on a glass surface the scroll reveals", () => {
+  it("gathers into a floating glass bar as the page scrolls", () => {
     const { container } = render(<SiteHeader />);
     const glass = container.querySelector("header [aria-hidden='true']");
-    expect(glass).toHaveClass("nav-glass", "bg-surface-glass", "shadow-float", "backdrop-blur-glass");
+    expect(glass).toHaveClass("nav-glass", "bg-night-glass", "shadow-float", "backdrop-blur-glass");
+    // The logo and the actions start wide and slide in as the glass appears (transform only).
+    expect(container.querySelector(".nav-gather-start")).toHaveAttribute("href", "/");
+    expect(container.querySelector(".nav-gather-end")).not.toBeNull();
   });
 
-  it("keeps every header action reachable", () => {
+  it("keeps Sign in, Download and Book a demo beside Start free", () => {
     render(<SiteHeader />);
-    for (const name of ["Sign in", "Book a demo", "Start free"]) {
+    for (const name of ["Sign in", "Download", "Book a demo", "Start free"]) {
       expect(screen.getByRole("link", { name })).toBeInTheDocument();
     }
+    // Download goes to the platforms on this page and reports the visitor's platform.
+    expect(screen.getByRole("link", { name: "Download" })).toHaveAttribute("href", "#download");
+    expect(screen.getByRole("link", { name: "Download" })).toHaveAttribute("data-download", "auto");
+    expect(screen.getByRole("link", { name: "Start free" })).toHaveAttribute("data-cta", "header");
   });
 
   it("lays the Features menu out as one grid of rich items, unreleased ones flagged in place", async () => {

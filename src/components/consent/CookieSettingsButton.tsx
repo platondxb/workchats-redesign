@@ -8,7 +8,7 @@ export function CookieSettingsButton() {
     <button
       type="button"
       onClick={resetChoice}
-      className="inline-flex min-h-11 shrink-0 items-center text-micro font-semibold text-ink underline underline-offset-4 hover:decoration-2"
+      className="inline-flex min-h-11 shrink-0 items-center text-micro font-semibold text-on-night-muted underline underline-offset-4 hover:decoration-2"
     >
       Cookie settings
     </button>

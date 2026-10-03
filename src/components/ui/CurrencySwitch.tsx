@@ -12,41 +12,24 @@ import { cx } from "@/lib/cx";
 export function CurrencySwitch({
   name,
   legend,
-  tone = "light",
   className,
 }: {
   /** The radio group's name, e.g. "currency" or "cost-currency". Ids are built from it. */
   name: string;
   legend: string;
-  tone?: "light" | "dark";
   className?: string;
 }) {
-  const dark = tone === "dark";
   return (
     <fieldset className={cx("flex flex-wrap items-center gap-x-3 gap-y-2", className)}>
-      <legend
-        className={cx(
-          "float-left mr-1 text-small font-semibold",
-          dark ? "text-on-night-muted" : "text-ink-muted",
-        )}
-      >
-        {legend}
-      </legend>
-      <span
-        className={cx(
-          "inline-flex flex-wrap rounded-full border p-1",
-          dark ? "border-night-line bg-night" : "border-line bg-surface",
-        )}
-      >
+      <legend className="float-left mr-1 text-small font-semibold text-on-night-muted">{legend}</legend>
+      <span className="inline-flex flex-wrap rounded-full border border-night-line bg-night p-1">
         {displayCurrencies.map((currency) => (
           <label
             key={currency.code}
             className={cx(
-              "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full px-3 text-micro font-semibold transition-colors",
-              "has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent",
-              dark
-                ? "text-on-night-muted hover:text-on-night has-checked:bg-surface has-checked:text-ink"
-                : "text-ink-muted hover:text-ink has-checked:bg-ink has-checked:text-on-accent",
+              "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full px-3 text-micro font-semibold text-on-night-muted transition-colors duration-fast",
+              "hover:text-on-night has-checked:bg-on-night has-checked:text-night",
+              "has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent-on-night",
             )}
           >
             <input

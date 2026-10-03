@@ -1,10 +1,12 @@
 import { formatDisplayPrice, gbpPrice, lowestPaidPrice, maxAnnualSaving } from "@/lib/pricing";
 import { plans, quotas } from "./pricing";
-import { site } from "./site";
+import { calendarIntegrations, customers, hostingRegions, site } from "./site";
 
 /**
- * Home page copy. Facts come from workchats.com: the home page, /features/*, /faq, /about, /download,
- * /terms-conditions, /privacy-policy and the five-tools cost breakdown on the blog. UK English.
+ * Home page copy. Facts come from workchats.com (the home page, /features/*, /faq, /about, /download,
+ * /terms-conditions, /privacy-policy and the five-tools cost breakdown on the blog) and from the site
+ * owner's answers of 3 October 2026. The structure and the reasons behind it are in
+ * docs/redesign/strategy.md. UK English, sentence case.
  */
 
 function requireAmount(amount: number | null | undefined, what: string): number {
@@ -15,149 +17,214 @@ function requireAmount(amount: number | null | undefined, what: string): number 
 const proPlan = plans.find((plan) => plan.id === "pro");
 const maxPlan = plans.find((plan) => plan.id === "max");
 const proAnnual = requireAmount(proPlan ? gbpPrice(proPlan, "annual") : null, "the Pro annual price");
+const proMonthly = requireAmount(proPlan ? gbpPrice(proPlan, "monthly") : null, "the Pro monthly price");
 const maxAnnual = requireAmount(maxPlan ? gbpPrice(maxPlan, "annual") : null, "the Max annual price");
 const fromPrice = formatDisplayPrice(
   requireAmount(lowestPaidPrice(plans, "annual")?.amount, "a paid price"),
   "GBP",
 );
-
-/** The five-tool stack from the blog breakdown: list price per user a month, annual billing. */
-const fiveToolStack = [
-  { tool: "Slack Pro", job: "Channels and DMs", price: 7.25 },
-  { tool: "Zoom Pro", job: "Meetings", price: 11.99 },
-  { tool: "Google Workspace Business Standard", job: "Email, calendar and Drive", price: 12 },
-  { tool: "Loom Business", job: "Async video", price: 10 },
-  { tool: "WhatsApp", job: "Everything that fits nowhere else", price: 0 },
-] as const;
-const keptTool = fiveToolStack[2];
-const seats = 50;
-const yearly = (perUserMonthly: number) => Math.round(perUserMonthly * seats * 12);
-const fiveToolsYear = fiveToolStack.reduce((sum, item) => sum + yearly(item.price), 0);
-const consolidatedYear = yearly(proAnnual) + yearly(keptTool.price);
-/** Per user a month, so the calculator can scale every figure with the team size. */
-const fiveToolsPerUser = Math.round(fiveToolStack.reduce((sum, item) => sum + item.price, 0) * 100) / 100;
-
 const gbp = (amount: number) => formatDisplayPrice(amount, "GBP");
+const freeMembers = quotas.free.members;
+
+/** Small counts read better as words in a sentence ("five tools", not "5 tools"). */
+const numberWords = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+function inWords(count: number): string {
+  return numberWords[count] ?? String(count);
+}
+const capitalise = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+
+/** "the UK, the EU or the UAE", from the hosting regions. */
+const regionList = (() => {
+  const names = hostingRegions.map((region) => `the ${region.short}`);
+  return `${names.slice(0, -1).join(", ")} or ${names.at(-1) ?? ""}`;
+})();
+
+/**
+ * The cost case: what a typical team pays, per person a month at list prices billed annually, for the
+ * tools Workchats replaces. The figures are the owner's, from the cost breakdown on the blog; the live
+ * /pricing page states its competitor prices were "verified May 2026" and converted to GBP at prevailing
+ * exchange rates. The owner approved this comparison, anonymised, on 3 October 2026, and confirmed that
+ * Workchats replaces the screen-recording tool.
+ *
+ * Product names stay in these comments so the figures can be audited (product, plan, price, date checked).
+ * They are never rendered: the page names categories only, and src/app/page.test.tsx and
+ * e2e/home.spec.ts fail if any name in content/competitors.ts reaches the page.
+ *
+ * Spot check from this repository on 3 October 2026, from an EU network (so not GBP list prices): Google
+ * Workspace Business Standard showed €13.60 per user a month, Loom Business $18 a month on monthly
+ * billing. Re-check the GBP list prices before launch and update `pricesChecked`.
+ */
+const stack = [
+  // Slack Pro, billed annually: £7.25 per user a month. Cost breakdown; /faq "around £7.25". Checked May 2026.
+  { id: "chat", category: "A team chat app", price: 7.25, replaced: true },
+  // Zoom Workplace Pro, billed annually: £11.99 per user a month. Cost breakdown; /faq. Checked May 2026.
+  { id: "meetings", category: "A separate video-meeting tool", price: 11.99, replaced: true },
+  // Loom Business: £10 per user a month. Cost breakdown. Checked May 2026.
+  { id: "recording", category: "A screen-recording tool", price: 10, replaced: true },
+  // WhatsApp: free.
+  { id: "messenger", category: "A personal messenger the team falls back to", price: 0, replaced: true },
+  // Google Workspace Business Standard, billed annually: £12 per user a month. Cost breakdown. Kept: email,
+  // calendar and documents are not a chat problem. Checked May 2026.
+  { id: "suite", category: "An office suite", price: 12, replaced: false },
+] as const;
+
+const pricesChecked = "May 2026";
+const seats = 50;
+const kept = stack.filter((item) => !item.replaced);
+const keptPerUser = kept.reduce((sum, item) => sum + item.price, 0);
+const yearly = (perUserMonthly: number) => Math.round(perUserMonthly * seats * 12);
+const stackYear = stack.reduce((sum, item) => sum + yearly(item.price), 0);
+const consolidatedYear = yearly(proAnnual) + kept.reduce((sum, item) => sum + yearly(item.price), 0);
+/** Per person a month, so the calculator can scale every figure with the team size. */
+const stackPerUser = Math.round(stack.reduce((sum, item) => sum + item.price, 0) * 100) / 100;
+const savingAt50 = stackYear - consolidatedYear;
+const replacedCount = stack.filter((item) => item.replaced).length;
+
+/** The sixth person: what a team that grows past the Free plan pays on Pro. */
+const sixthPersonTeam = freeMembers + 1;
+const sixPeopleMonthly = sixthPersonTeam * proAnnual;
 
 export const home = {
   meta: {
     title: "Workchats: team chat, video calls and files in one app",
-    description: `Team chat, video calls and file search in one app for teams of 10 to 500. Free for up to ${quotas.free.members} people. Pro from ${fromPrice} per user a month, billed annually.`,
+    description: `Team chat, video calls and file search in one app. Free for up to ${freeMembers} people. Pro from ${fromPrice} per user a month, billed annually.`,
   },
 
   og: {
-    alt: `Workchats: a simpler way to talk with your whole team. Free for up to ${quotas.free.members} people, Pro from ${fromPrice} per user a month.`,
-    subline: `Free for up to ${quotas.free.members} people. Pro from ${fromPrice} per user a month.`,
+    alt: `Workchats: team chat, calls and files in one app. Free for up to ${freeMembers} people, Pro from ${fromPrice} per user a month.`,
+    subline: `Free for up to ${freeMembers} people. Pro from ${fromPrice} per user a month.`,
   },
 
   hero: {
-    title: "A simpler way to talk with your whole team",
-    lead: "Great teams don't need more apps. Workchats puts messages, video calls and files in one calm place, with no time limit on calls and end-to-end encryption on every plan.",
+    /** Two lines, set in two tones: what it is, then what trying it costs. */
+    title: ["Team chat, calls and files.", `Free for up to ${freeMembers} people.`] as const,
+    lead: "Workchats replaces the separate chat, meeting and recording tools your team pays for. End-to-end encrypted on every plan.",
     primary: { label: "Start free", href: site.links.signUp },
-    secondary: { label: "Book a demo", href: site.links.bookDemo },
-    note: `Free for up to ${quotas.free.members} people. No credit card needed.`,
+    download: { href: "#download" },
+    caption: `No credit card needed, no time limit. Pro is ${fromPrice} a person a month when you grow.`,
     productLabel:
-      "The Workchats app. In the #spring-launch channel, Priya Shah suggests a quick check-in and starts a call from the conversation; the call arrives on a teammate's phone.",
+      "Workchats on a laptop and a phone. In the #spring-launch channel, Priya Shah posts “Quick check-in at 10? I'll start a call here.” and starts a call, which rings on Daniel Novak's phone while he is out on a site visit.",
   },
 
-  /**
-   * The downloads bar. Every platform is a real, pressable button. There is no downloads route in this
-   * app yet, so in this MVP the buttons take a press and do nothing else: no navigation, no swap.
-   */
-  downloads: {
-    label: "Supported platforms",
-    title: "Workchats runs on",
-    hint: "Choose a platform to see what you'll need.",
-  },
+  customers,
 
-  features: {
-    title: "Everything your team needs. Nothing they don't.",
-    intro:
-      "Workchats keeps your conversations, calls, files and calendar in one place. Each part works on its own, and better together.",
-    all: { label: "Explore all features", href: site.links.features },
-    legend: "Choose a feature",
-    tabs: [
+  businessCase: {
+    title: "The short version, for whoever signs it off",
+    intro: "Cost, reliability, security and where your data lives, on one page you can forward.",
+    copyLink: { label: "Copy link for your IT team", done: "Link copied" },
+    walkthrough: { label: "Book a security walkthrough", href: site.links.bookDemo },
+    sheetTitle: "Workchats in brief",
+    rows: [
       {
-        id: "messaging",
-        tab: "Messaging",
-        title: "Every kind of conversation, in one place",
-        body: "DMs for quick questions, channels for team plans, voice notes for the long stories.",
-        points: [
-          "Public, private and announcement channels",
-          "Threads, reactions and pinned messages",
-          "Works offline: draft now, sends later",
-        ],
-        link: { label: "Explore messaging", href: "/features/messaging" },
-        productLabel:
-          "The #design channel in Workchats, with a pinned launch date, a message with reactions and a two-reply thread, and a read receipt.",
+        id: "cost",
+        term: "Cost",
+        detail: `Free for up to ${freeMembers} people. Pro is ${fromPrice} and Max ${gbp(maxAnnual)} per person a month, billed annually.`,
       },
       {
-        id: "meetings",
-        tab: "Video and meetings",
-        title: "Calls that start where the conversation lives",
-        body: "One click from any chat. No meeting link to paste, no separate app.",
-        points: [
-          `Group calls for up to ${quotas.pro.groupCallPeople} on Pro, ${quotas.max.groupCallPeople} on Max`,
-          "Screen sharing with live annotation",
-          "Recordings with AI transcripts and summaries",
-        ],
-        link: { label: "Explore video and meetings", href: "/features/video-meetings" },
-        productLabel:
-          "A Workchats call that has run for over an hour: Tom Hughes is sharing his screen, Priya Shah is speaking, and the toolbar has microphone, camera, screen sharing, chat and leave controls.",
+        id: "replaces",
+        term: "What it replaces",
+        detail: `A chat app, a meeting tool, a screen recorder and the messenger your team falls back to. For ${seats} people, ${gbp(savingAt50)} a year less at list prices.`,
+      },
+      { id: "reliability", term: "Reliability", detail: "99.9% uptime SLA on Pro and above." },
+      {
+        id: "encryption",
+        term: "Encryption",
+        detail: "End-to-end encryption on every message, call and file.",
+      },
+      { id: "residency", term: "Data residency", detail: `Hosted in ${regionList}. GDPR compliant.` },
+      {
+        id: "compliance",
+        term: "Compliance",
+        detail: "Compliance and audit logs, and data export, on Pro and above.",
       },
       {
-        id: "files",
-        tab: "Files and search",
-        title: "Share a file once. Find it forever.",
-        body: "Files stay with the message they came with, and one search bar finds everything.",
-        points: [
-          "PDF previews right in the chat",
-          "Filter by who sent it, when and where",
-          "Nothing archived after 90 days, on any plan",
-        ],
-        link: { label: "Explore files and search", href: "/features/files-search" },
-        productLabel:
-          "Workchats search results for “brand guidelines”: the PDF shared by Amara Okafor, the message it came with, and Sofia Marín from brand and marketing.",
+        id: "privacy",
+        term: "Privacy",
+        detail:
+          "Granular privacy settings: every team member controls who sees their role, status and messages.",
       },
     ],
   },
 
-  bento: {
-    title: "Built for teams who actually talk",
-    intro: "Designed by studying how real teams communicate, not by copying what already exists.",
-    tiles: {
-      calls: {
-        title: "No time limit on calls",
-        body: "Every call runs as long as it needs to. No cutoffs and no upgrade prompts, on any plan.",
-      },
-      hours: {
-        title: "Working hours, respected",
-        body: "Set start and end times for each day. Teammates see your hours on your profile, so nobody gets pinged on a Sunday.",
-      },
-      workspaces: {
-        title: "Every company, one account",
-        body: "Switch between the organisations you belong to without signing out. Each keeps its own channels and settings.",
-      },
-      offline: {
-        title: "Works offline",
-        body: "Read, draft and queue messages with no connection. They send the moment you're back.",
-      },
-      connections: {
-        title: "Quiet inboxes",
-        body: "People outside your immediate team send a connection request before they can message you. No cold outreach.",
-      },
+  freePlan: {
+    title: "Five people, free, for as long as you like",
+    intro: `The Free plan has no trial period and no end date. This is what a team of ${freeMembers} gets.`,
+    includes: [
+      "Channels, DMs and group chats",
+      "1:1 voice and video calls with screen sharing",
+      "Calls with no time limit",
+      `${quotas.free.storagePerUserGb} GB of storage per person`,
+      "End-to-end encryption",
+      "Message history that is never archived after 90 days",
+      "Email and calendar integrations",
+      "Apps for the web, desktop and mobile",
+    ],
+    sixth: {
+      title: "Invite to Northgate Studio",
+      note: "Adding a sixth person moves the team to Pro.",
+      price: `${sixthPersonTeam} people on Pro: ${gbp(sixPeopleMonthly)} a month, billed annually.`,
+      carryOver: "Everything you have carries over.",
+      action: "Upgrade and invite",
     },
+    primary: { label: "Start free", href: site.links.signUp },
+    compare: { label: "Compare plans", href: "#pricing" },
   },
 
-  comparison: {
-    title: "One app instead of five",
-    intro:
-      "Most teams pay for Slack, Zoom, Google Workspace and Loom, then end up in WhatsApp anyway. Workchats replaces all of it except email.",
-    pricesLabel: "What the five cost, per user a month",
-    stack: fiveToolStack.map((item) => ({
-      tool: item.tool.replace(" Business Standard", ""),
+  day: {
+    title: "One working day at Northgate Studio",
+    intro: "Five details that make Workchats quieter than the tools it replaces.",
+    moments: [
+      {
+        id: "offline",
+        time: "08:47",
+        title: "Works offline",
+        body: "Daniel writes from a site with no signal. The message waits, then sends when he is back online.",
+      },
+      {
+        id: "hours",
+        time: "09:00",
+        title: "Working hours",
+        body: "Tom's day starts at 09:00, and his profile says so. Nobody has to guess whether he's around.",
+      },
+      {
+        id: "call",
+        time: "09:41",
+        title: "Calls start in the chat",
+        body: "Priya starts a call from the #spring-launch thread. No link to paste and no time limit.",
+      },
+      {
+        id: "summary",
+        time: "10:32",
+        title: "Recordings with summaries",
+        body: "The recording lands in the channel with an AI summary of the decisions and action items.",
+      },
+      {
+        id: "connect",
+        time: "14:10",
+        title: "Connection requests",
+        body: "Someone outside the team asks to connect before they can message Sofia. No cold outreach.",
+      },
+    ],
+  },
+
+  download: {
+    title: "On every device your team already uses",
+    intro: "Your workspace follows you from the browser to the desktop to your phone.",
+    thisDevice: "This device",
+    calendars: `Syncs with ${calendarIntegrations.slice(0, -1).join(", ")} and ${calendarIntegrations.at(-1) ?? ""}.`,
+  },
+
+  cost: {
+    quote: "We built Workchats because our own team was paying for five tools to do what one should.",
+    title: `A typical team pays for ${inWords(stack.length)} tools. Workchats replaces ${inWords(replacedCount)}.`,
+    stackLabel: "What each person costs a month, at list prices",
+    stack: stack.map((item) => ({
+      id: item.id,
+      category: item.category,
       price: gbp(item.price),
+      kept: !item.replaced,
     })),
+    keptNote: "You keep this one",
     calculator: {
       label: "Team size",
       unit: "people",
@@ -167,105 +234,64 @@ export const home = {
       step: 10,
       currencyLegend: "Show the totals in",
       /** Totals are whole pounds; the section shows them in the visitor's chosen currency. */
-      fiveTools: { label: "Five separate tools", perUser: fiveToolsPerUser, totalGbp: fiveToolsYear },
+      stack: {
+        label: `${capitalise(inWords(stack.length))} separate tools`,
+        perUser: stackPerUser,
+        totalGbp: stackYear,
+      },
       workchats: {
         /** Pro covers up to 50 people; larger teams need Max. */
         proLimit: quotas.pro.members,
-        pro: {
-          label: `Workchats Pro + ${keptTool.tool.replace(" Business Standard", "")}`,
-          perUser: proAnnual + keptTool.price,
-        },
-        max: {
-          label: `Workchats Max + ${keptTool.tool.replace(" Business Standard", "")}`,
-          perUser: maxAnnual + keptTool.price,
-        },
+        pro: { label: "Workchats Pro + your office suite", perUser: proAnnual + keptPerUser },
+        max: { label: "Workchats Max + your office suite", perUser: maxAnnual + keptPerUser },
         totalGbp: consolidatedYear,
       },
-      saving: { label: "You save", totalGbp: fiveToolsYear - consolidatedYear, suffix: "a year" },
+      saving: { label: "You save", totalGbp: savingAt50 },
       perYear: "a year",
-      cta: { label: "Start free", href: site.links.signUp },
-      note: `List prices per user, billed annually, before VAT. Above ${quotas.pro.members} people the sum uses Workchats Max. Converted totals are approximate.`,
+      note: `List prices per person, billed annually, before VAT, checked ${pricesChecked}. Above ${quotas.pro.members} people the sum uses Workchats Max. Totals in other currencies are approximate.`,
     },
+    compare: { label: "Compare plans", href: "#pricing" },
     source: { label: "Read the full cost breakdown", href: site.links.costBreakdown },
   },
 
   pricing: {
-    title: "Pricing that's simple and affordable",
-    intro: `Start free with up to ${quotas.free.members} team members. Upgrade when you need more space, more people or more control.`,
+    title: "Start free. Move to Pro when you grow.",
+    intro: "Billed in pounds sterling. Prices in other currencies are approximate.",
     periodLegend: "Billing period",
     annual: "Annually",
     monthly: "Monthly",
     saving: `Save up to ${maxAnnualSaving(plans)}%`,
     currencyLegend: "Show prices in",
-    currencyNote: "Billed in pounds sterling. Prices in other currencies are approximate.",
+    recommended: `Recommended once you pass ${freeMembers} people`,
+    larger: "For larger teams and regulated organisations",
     compare: { label: "Compare every plan in detail", href: site.links.pricing },
   },
 
-  security: {
-    title: "Your team's data stays your team's data",
-    regionsLabel: "Hosted in your region",
-    regions: [
-      { id: "gb", name: "United Kingdom" },
-      { id: "eu", name: "European Union" },
-      { id: "ae", name: "Middle East" },
-    ],
-    cards: {
-      encryption: {
-        title: "End-to-end encryption",
-        body: "On every message, call and file. Even on Free.",
-      },
-      privacy: {
-        title: "Granular privacy settings",
-        body: "Everyone controls who sees their role, status and messages.",
-      },
-      compliance: {
-        title: "GDPR compliant",
-        body: "With audit logs, data export and hosting in your region.",
-      },
-    },
-    /** What the product pictures in the cards show. Plan availability from /faq and the pricing cards. */
-    encryption: { covers: ["Messages", "Calls", "Files"], specs: ["AES-256 at rest", "TLS in transit"] },
-    compliance: [
-      { id: "gdpr", label: "GDPR compliant", plan: "All plans" },
-      { id: "export", label: "Full data export", plan: "From Pro" },
-      { id: "audit", label: "Audit logs", plan: "From Pro" },
-    ],
-    review: {
-      title: "Running a security review?",
-      body: "We'll walk your IT team through it.",
-      cta: { label: "Book a demo", href: site.links.bookDemo },
-    },
-  },
-
-  roadmap: {
-    title: "Coming soon",
-    intro: "Designed and in development. Not available yet.",
-  },
-
-  founder: {
-    quote: "We built Workchats because our own team was paying for five tools to do what one should.",
-    story:
-      "Small teams shouldn't need five subscriptions to hold one conversation. So we built one calm place for messages, meetings and files.",
-    builtBy: `Workchats is built by Octogle Technologies, with teams in ${site.company.teams}.`,
-    link: { label: "About the team", href: site.links.about },
-  },
-
   faq: {
-    title: "Questions? We're glad you asked.",
+    title: "Questions teams ask before they switch",
     more: { label: "See all questions", href: site.links.faq },
     contact: "Still have a question? Write to us at",
   },
 
   finalCta: {
-    title: "Your team deserves a simpler way to work together",
-    body: `Start free with up to ${quotas.free.members} people, or book a demo and we'll walk you through Workchats with your team in mind.`,
+    title: "Start with five people and grow from there",
+    body: `Free for up to ${freeMembers}, with no time limit. For a bigger rollout, book a demo and we'll walk your team through it.`,
     primary: { label: "Start free", href: site.links.signUp },
     secondary: { label: "Book a demo", href: site.links.bookDemo },
   },
 
+  founder: {
+    teams: `Workchats has teams in ${site.company.teams}.`,
+  },
+
   footer: {
-    tagline: "Team messaging, video meetings, file sharing and search in a single app.",
+    tagline: "Team chat, video calls, files and search in one app.",
+  },
+
+  /** Facts the FAQ and the pricing copy quote, computed here so they can't drift from pricing.ts. */
+  facts: {
+    proAnnual: gbp(proAnnual),
+    proMonthly: gbp(proMonthly),
+    proMembers: quotas.pro.members,
   },
 } as const;
-
-export type FeatureTab = (typeof home.features.tabs)[number];

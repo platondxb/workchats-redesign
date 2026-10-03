@@ -2,7 +2,8 @@
  * Design-token guard.
  *
  * 1. Source check: components may not hard-code colours or use Tailwind arbitrary values with raw sizes
- *    (e.g. text-[13px], bg-[#fff], rounded-[7px]). Everything must come from src/styles/tokens.css.
+ *    (e.g. text-[13px], bg-[#fff], rounded-[7px]), nor Tailwind's raw layer, duration and easing scales
+ *    (z-50, duration-300, ease-[...]). Everything must come from src/styles/tokens.css.
  * 2. Build check (after `next build`): every class used in a className must exist in the generated CSS.
  *    With Tailwind's default scales removed, a class like `max-w-sm` or `font-normal` silently produces
  *    nothing, so this catches both typos and reaches for non-token values.
@@ -15,16 +16,17 @@ import path from "node:path";
 const root = path.resolve(import.meta.dirname, "..");
 const srcDir = path.join(root, "src");
 
-// The link preview image renders in Satori, outside the browser, and has to use literal colours.
+// The link preview image renders in Satori, outside the browser, and has to use literal colours, as does the
+// theme-color meta tag (src/styles/meta-colours.ts).
 const LITERAL_COLOUR_ALLOWED = new Set([
   "src/app/opengraph-image.tsx",
   "src/app/twitter-image.tsx",
   "src/styles/tokens.css",
+  "src/styles/meta-colours.ts",
 ]);
 // Class-like words that intentionally produce no CSS of their own.
-// (.pricing, .features and .comparison scope the radio-driven variants in globals.css; group and peer
-// are Tailwind hooks.)
-const MARKER_CLASSES = new Set(["group", "group/button", "peer", "pricing", "features", "comparison"]);
+// (.pricing and .cost scope the radio-driven variants in globals.css; group and peer are Tailwind hooks.)
+const MARKER_CLASSES = new Set(["group", "group/button", "group/segment", "peer", "pricing", "cost"]);
 
 function walk(dir, exts) {
   const out = [];
@@ -40,6 +42,9 @@ const problems = [];
 const files = walk(srcDir, [".ts", ".tsx", ".css"]);
 
 const HEX = /#[0-9a-fA-F]{3,8}\b/g;
+// Layers, durations and easing are tokens too (--z-index-*, --transition-duration-*, --ease-* in tokens.css):
+// z-40, duration-300, delay-150 and ease-[...] are Tailwind's raw scales and arbitrary values.
+const RAW_MOTION_OR_LAYER = /(?:^|[\s"'`:])(-?z-\d+|duration-\d+|delay-\d+|ease-\[[^\]]*\])(?=[\s"'`]|$)/g;
 const COLOUR_FN = /\b(?:rgb|rgba|hsl|hsla|oklch|oklab)\(/g;
 const ARBITRARY_RAW =
   /\b[\w:/-]+-\[[^\]\s]*?(?:#[0-9a-fA-F]{3,8}|\d(?:px|rem|em|vh|vw|%)|rgb|hsl|oklch)[^\]\s]*\]/g;
@@ -64,6 +69,13 @@ for (const file of files) {
     }
     for (const match of line.matchAll(ARBITRARY_RAW)) {
       problems.push(`${where}  arbitrary value "${match[0]}" (use a token)`);
+    }
+    if (rel.endsWith(".tsx") || rel.endsWith(".ts")) {
+      for (const match of line.matchAll(RAW_MOTION_OR_LAYER)) {
+        problems.push(
+          `${where}  "${match[1]}" is not a token (use a named z-*, duration-*, delay-* or ease-*)`,
+        );
+      }
     }
   });
 }

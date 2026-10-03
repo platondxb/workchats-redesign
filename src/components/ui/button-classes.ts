@@ -1,25 +1,39 @@
 import { cx } from "@/lib/cx";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "inverse" | "inverse-outline";
-export type ButtonSize = "sm" | "md";
-
-/**
- * Button styles, shared by <Button>, <ButtonLink> and the header (a client component, which imports
- * this file rather than Button.tsx so no icon code reaches the browser).
- * States: hover, focus-visible (global outline), active, disabled and loading (aria-busy).
- * Both sizes are at least 44px tall. "inverse" variants sit on the brand-blue band.
+/*
+ * The liquid glass button's classes, in a module with no JSX so client components (the consent banner)
+ * can use the same look without pulling the server-rendered button or its SVG filter into the browser.
+ * See liquid-glass-button.tsx for where the design comes from and how it was adapted.
+ *
+ * States: hover (lifts on a spring, the primary glows), focus-visible (the global ring), active (presses
+ * in), disabled, and loading (aria-busy). Every size is at least 44px tall.
  */
-export function buttonClasses(variant: ButtonVariant, size: ButtonSize, className?: string): string {
+
+export type LiquidTone = "primary" | "glass";
+export type LiquidSize = "sm" | "md" | "lg";
+
+const toneClasses: Record<LiquidTone, string> = {
+  // The main action: solid brand blue under the glass rim, so the hierarchy doesn't depend on the effect.
+  primary: "bg-accent text-on-accent hover:shadow-accent-glow",
+  glass:
+    "bg-glass-fill text-on-night hover:bg-glass-fill-hover after:pointer-events-none after:absolute after:inset-0 after:z-behind after:overflow-hidden after:rounded-full after:liquid-backdrop",
+};
+
+const sizeClasses: Record<LiquidSize, string> = {
+  sm: "min-h-11 px-5 text-small",
+  md: "min-h-12 px-6 text-body",
+  lg: "min-h-14 px-8 text-body",
+};
+
+export function liquidClasses(tone: LiquidTone, size: LiquidSize, className?: string): string {
   return cx(
-    "group/button inline-flex items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition",
-    "active:scale-98 disabled:cursor-not-allowed disabled:opacity-50 aria-busy:cursor-progress aria-busy:opacity-80",
-    size === "sm" ? "min-h-11 px-5 text-small" : "min-h-12 px-6 text-body",
-    variant === "primary" && "bg-accent text-on-accent shadow-raised hover:bg-accent-hover",
-    variant === "secondary" && "border border-line-strong bg-surface text-ink hover:border-ink",
-    variant === "ghost" && "text-ink hover:bg-tint",
-    variant === "inverse" && "bg-surface text-accent-ink hover:bg-accent-subtle",
-    variant === "inverse-outline" &&
-      "border border-on-accent/70 text-on-accent hover:border-on-accent hover:bg-on-accent/10",
+    "group/button relative isolate inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap",
+    "transition-[scale,box-shadow,background-color] duration-base ease-spring",
+    "hover:scale-104 active:scale-97 active:duration-instant",
+    "disabled:pointer-events-none disabled:opacity-50 aria-busy:cursor-progress aria-busy:opacity-80",
+    "before:pointer-events-none before:absolute before:inset-0 before:z-behind before:rounded-full before:shadow-liquid",
+    toneClasses[tone],
+    sizeClasses[size],
     className,
   );
 }

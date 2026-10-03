@@ -96,7 +96,7 @@ export const plans: readonly Plan[] = [
       `${quotas.pro.guests} guest users and all integrations`,
       "99.9% uptime SLA",
     ],
-    cta: { label: "Start with Pro", href: `${site.links.signUp}?plan=pro`, variant: "secondary" },
+    cta: { label: "Start with Pro", href: `${site.links.signUp}?plan=pro`, variant: "primary" },
   },
   {
     id: "max",

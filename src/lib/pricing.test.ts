@@ -34,7 +34,8 @@ describe("pricing data", () => {
     const labels = plans.map((p) => p.cta.label);
     expect(new Set(labels).size).toBe(plans.length);
     expect(plan("enterprise").cta).toMatchObject({ label: "Contact sales", href: "/contact" });
-    expect(plans.filter((p) => p.cta.variant === "primary").map((p) => p.id)).toEqual(["free"]);
+    // Free is where everyone starts and Pro is the next step; Max and Enterprise are quieter.
+    expect(plans.filter((p) => p.cta.variant === "primary").map((p) => p.id)).toEqual(["free", "pro"]);
   });
 
   it("lists what each tier includes", () => {

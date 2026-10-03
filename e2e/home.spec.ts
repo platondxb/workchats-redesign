@@ -1,7 +1,27 @@
 import { AxeBuilder } from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page } from "@playwright/test";
+import { findCompetitorNames } from "../src/content/competitors";
 
 const isMobile = (page: Page) => (page.viewportSize()?.width ?? 1440) < 1024;
+
+const userAgents = {
+  macos:
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
+  windows:
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
+  unknown: "Mozilla/5.0 (compatible; ExampleBot/1.0)",
+};
+
+/** Records the events the page sends, as GA4's gtag would receive them once a visitor has accepted. */
+async function stubGtag(page: Page) {
+  await page.addInitScript(() => {
+    const events: unknown[][] = [];
+    Object.assign(window, { __events: events, gtag: (...args: unknown[]) => events.push(args) });
+  });
+}
+
+const sentEvents = (page: Page) =>
+  page.evaluate(() => (window as unknown as { __events?: unknown[][] }).__events ?? []);
 
 test.describe("content and rendering", () => {
   test("serves the full page as HTML, readable without JavaScript", async ({ browser }) => {
@@ -9,7 +29,7 @@ test.describe("content and rendering", () => {
     const page = await context.newPage();
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "A simpler way to talk with your whole team",
+      "Team chat, calls and files.Free for up to 5 people.",
     );
     const pro = page.getByRole("article", { name: "Pro" });
     const pricing = page.locator("#pricing");
@@ -21,10 +41,12 @@ test.describe("content and rendering", () => {
     await expect(pro.getByText("$5", { exact: true })).toBeVisible();
     await expect(pro.getByText("£4", { exact: true })).toBeHidden();
     // The calculator's currency switch is CSS-driven too, so its server-rendered totals still convert.
-    await expect(page.locator('#cost-five [data-currency="GBP"]')).toBeVisible();
-    await page.locator("#comparison label").filter({ hasText: /^USD$/ }).click();
-    await expect(page.locator('#cost-five [data-currency="USD"]')).toBeVisible();
-    await expect(page.locator('#cost-five [data-currency="GBP"]')).toBeHidden();
+    await expect(page.locator('#cost-stack [data-currency="GBP"]')).toBeVisible();
+    await page.locator("#cost label").filter({ hasText: /^USD$/ }).click();
+    await expect(page.locator('#cost-stack [data-currency="USD"]')).toBeVisible();
+    await expect(page.locator('#cost-stack [data-currency="GBP"]')).toBeHidden();
+    // The hero's download keeps its neutral label when the platform can't be read.
+    await expect(page.getByRole("link", { name: /^Download the app/ })).toBeVisible();
     await context.close();
   });
 
@@ -48,6 +70,16 @@ test.describe("content and rendering", () => {
     expect(count).toBeLessThanOrEqual(1000);
   });
 
+  test("never names a competing product, in the HTML, the metadata or the structured data", async ({
+    page,
+    request,
+  }) => {
+    const html = await (await request.get("/")).text();
+    expect(findCompetitorNames(html)).toEqual([]);
+    await page.goto("/");
+    expect(findCompetitorNames(await page.locator("body").innerText())).toEqual([]);
+  });
+
   test("publishes structured data that matches the page and claims nothing extra", async ({ page }) => {
     await page.goto("/");
     const raw = await page.locator('script[type="application/ld+json"]').textContent();
@@ -69,8 +101,29 @@ test.describe("content and rendering", () => {
   test("presents every platform as current: nothing is beta and nothing is in review", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("body")).not.toContainText(/beta|in review/i);
-    const bar = page.locator("section[aria-label='Supported platforms']");
-    await expect(bar.getByRole("button")).toHaveCount(6);
+    await expect(page.locator("#download").getByRole("button")).toHaveCount(6);
+  });
+
+  test("says what Workchats is and that 5 people use it free, beside the first action", async ({ page }) => {
+    await page.goto("/");
+    const height = page.viewportSize()?.height ?? 900;
+    for (const locator of [
+      page.getByText("Free for up to 5 people.", { exact: true }),
+      page.locator('main [data-cta="hero"]'),
+    ]) {
+      const box = await locator.boundingBox();
+      expect(box && box.y + box.height).toBeLessThanOrEqual(height);
+    }
+  });
+
+  test("puts the business case inside the first two screens on a desktop", async ({ page }) => {
+    test.skip(isMobile(page), "the brief's two-screen rule is for desktop");
+    await page.goto("/");
+    const top = await page.locator("#business-case").evaluate((el) => el.getBoundingClientRect().top);
+    expect(top).toBeLessThan(2 * (page.viewportSize()?.height ?? 900));
+    const brief = page.getByRole("article", { name: "Workchats in brief" });
+    await expect(brief).toContainText("99.9% uptime SLA on Pro and above.");
+    await expect(brief).toContainText("Hosted in the UK, the EU or the UAE.");
   });
 
   test("has link-preview tags and a 1200 × 630 preview image", async ({ page, request }) => {
@@ -110,6 +163,13 @@ test.describe("privacy and security", () => {
     expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
     expect(headers["x-powered-by"]).toBeUndefined();
   });
+
+  test("sends no analytics event before consent, when gtag hasn't loaded", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("#download").getByRole("button").first().click();
+    await page.locator("#pricing label", { hasText: "Monthly" }).click();
+    expect(await page.evaluate(() => "gtag" in window)).toBe(false);
+  });
 });
 
 test.describe("accessibility", () => {
@@ -134,11 +194,11 @@ test.describe("accessibility", () => {
 
   test("FAQ answers open and close from the keyboard", async ({ page }) => {
     await page.goto("/");
-    const summary = page.locator("summary", { hasText: "Is Workchats really free?" });
+    const summary = page.locator("summary", { hasText: "Is the Free plan really free?" });
     await summary.focus();
     await page.keyboard.press("Enter");
     await expect(summary.locator("xpath=..")).toHaveAttribute("open", "");
-    await expect(page.getByText("5 GB of storage per user").first()).toBeVisible();
+    await expect(page.getByText("5 GB of storage per person").first()).toBeVisible();
     await page.keyboard.press("Space");
     await expect(summary.locator("xpath=..")).not.toHaveAttribute("open", "");
   });
@@ -146,7 +206,7 @@ test.describe("accessibility", () => {
   test("every focusable element shows a visible focus indicator", async ({ page }) => {
     await page.goto("/");
     const missing: string[] = [];
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 30; i++) {
       await page.keyboard.press("Tab");
       const result = await page.evaluate(() => {
         const el = document.activeElement as HTMLElement | null;
@@ -164,52 +224,94 @@ test.describe("accessibility", () => {
     expect(missing).toEqual([]);
   });
 
-  test("reduced motion removes transitions and shows the demo's final frame", async ({ browser }) => {
+  test("nothing moves on its own for more than five seconds (WCAG 2.2.2)", async ({ page }) => {
+    await page.goto("/");
+    // Every animation is either scroll-linked (the visitor drives it) or a short reply to an action.
+    const looping = await page.evaluate(() =>
+      document
+        .getAnimations()
+        .filter((animation) => animation.effect?.getComputedTiming().iterations === Infinity)
+        .map((animation) => (animation as CSSAnimation).animationName),
+    );
+    expect(looping).toEqual([]);
+  });
+
+  test("reduced motion removes transitions and shows every device in its settled state", async ({
+    browser,
+  }) => {
     const context = await browser.newContext({ reducedMotion: "reduce" });
     const page = await context.newPage();
     await page.goto("/");
     const duration = await page
-      .getByRole("link", { name: "Start free" })
-      .first()
+      .locator('main [data-cta="hero"]')
       .evaluate((el) => getComputedStyle(el).transitionDuration);
     expect(duration).toBe("0s");
-    const message = page.locator("#hero-demo [class*='animate-demo-message']");
-    expect(await message.evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
-    expect(await message.evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
-    // Nothing moves and the typing indicator would never resolve, so neither is shown.
-    await expect(page.getByText(/is typing/)).toBeHidden();
+    // The card is flat, the title hasn't moved, and the call is already on the phone.
+    const settled = await page.evaluate(() => {
+      const card = document.querySelector('[data-device="laptop"]');
+      const ring = document.querySelector(".cs-ring");
+      return {
+        card: card ? getComputedStyle(card).transform : "missing",
+        ring: ring ? getComputedStyle(ring).translate : "missing",
+        animations: document.getAnimations().length,
+      };
+    });
+    expect(settled).toEqual({ card: "none", ring: "none", animations: 0 });
+    // The header's glass is simply on, so the bar is legible over content without the scroll effect.
+    await expect(page.locator("header .nav-glass")).toHaveCSS("opacity", "1");
     await context.close();
-  });
-
-  test("the hero demo stops while it is off screen, so it never animates out of sight", async ({ page }) => {
-    await page.goto("/");
-    const demo = page.locator("#hero-demo");
-    await expect(demo).not.toHaveAttribute("data-paused", "");
-    await page.mouse.wheel(0, 4000);
-    await expect(demo).toHaveAttribute("data-paused", "");
   });
 });
 
 test.describe("interaction", () => {
-  test("every platform takes a press and leaves the page exactly as it was", async ({ page }) => {
+  test("every platform takes a press and leaves the page as it was, as the owner asked for this MVP", async ({
+    page,
+  }) => {
     await page.goto("/");
-    const bar = page.locator("section[aria-label='Supported platforms']");
-    const hint = bar.getByText("Choose a platform to see what you'll need.");
-    await expect(hint).toBeVisible();
-
-    for (const name of ["Web", "macOS", "Windows", "Linux", "iOS", "Android"]) {
-      await expect(bar.getByRole("button", { name })).toBeAttached();
+    const downloads = page.locator("#download");
+    for (const name of ["Web", "macOS", "Windows", "Linux", "iPhone and iPad", "Android"]) {
+      await expect(downloads.getByRole("button", { name: new RegExp(`^${name}`) })).toBeAttached();
     }
-
     const urlBefore = page.url();
-    const textBefore = await bar.innerText();
-    for (const name of ["Windows", "iOS", "Web"]) {
-      await bar.getByRole("button", { name }).click();
+    const textBefore = await downloads.innerText();
+    for (const name of ["Windows", "iPhone and iPad", "Web"]) {
+      await downloads.getByRole("button", { name: new RegExp(`^${name}`) }).click();
     }
-    // The MVP buttons are inert on purpose: no navigation, no swap, nothing appears or disappears.
     expect(page.url()).toBe(urlBefore);
-    expect(await bar.innerText()).toBe(textBefore);
-    await expect(hint).toBeVisible();
+    expect(await downloads.innerText()).toBe(textBefore);
+  });
+
+  test("records calls to action, downloads, pricing, the calculator and the FAQ once gtag exists", async ({
+    page,
+  }) => {
+    await stubGtag(page);
+    await page.goto("/");
+    // A press on Start free is recorded before the browser leaves; keep the page here to read it.
+    await page.locator('main [data-cta="hero"]').evaluate((el) => {
+      el.addEventListener("click", (event) => event.preventDefault(), { once: true });
+      (el as HTMLElement).click();
+    });
+    await page
+      .locator("#download")
+      .getByRole("button", { name: /^Linux/ })
+      .click();
+    await page.locator("#pricing label", { hasText: "Monthly" }).click();
+    await page.locator("#pricing label").filter({ hasText: /^EUR$/ }).click();
+    await page.getByRole("slider", { name: "Team size" }).fill("120");
+    await page.locator("summary", { hasText: "Can we move over" }).click();
+    // A disclosure's toggle event is queued, so it lands a moment after the click.
+    await expect.poll(async () => (await sentEvents(page)).some((call) => call[1] === "faq_open")).toBe(true);
+    const names = (await sentEvents(page)).map((call) => [call[1], call[2]]);
+    expect(names).toEqual(
+      expect.arrayContaining([
+        ["cta_click", { location: "hero", label: "Start free" }],
+        ["download_click", { platform: "linux", location: "downloads" }],
+        ["pricing_period_change", { period: "monthly" }],
+        ["pricing_currency_change", { currency: "EUR", location: "pricing" }],
+        ["calculator_change", { team_size: 120 }],
+        ["faq_open", { question: "switching" }],
+      ]),
+    );
   });
 
   test("the billing period switch changes the prices shown", async ({ page }) => {
@@ -217,7 +319,7 @@ test.describe("interaction", () => {
     const pro = page.getByRole("article", { name: "Pro" });
     await expect(pro.getByText("£3", { exact: true })).toBeVisible();
     // People click the visible label; the radio itself is visually hidden.
-    await page.locator("label", { hasText: "Monthly" }).click();
+    await page.locator("#pricing label", { hasText: "Monthly" }).click();
     await expect(page.getByRole("radio", { name: "Monthly" })).toBeChecked();
     await expect(pro.getByText("£4", { exact: true })).toBeVisible();
     await expect(pro.getByText("£3", { exact: true })).toBeHidden();
@@ -234,7 +336,7 @@ test.describe("interaction", () => {
     await expect(pro.getByText("€3.50", { exact: true })).toBeVisible();
     await expect(page.locator("#pricing-status")).toContainText("Pro €3.50");
     // One choice for the whole page: the calculator follows the pricing cards.
-    await expect(page.locator("#comparison").getByRole("radio", { name: "Euro (EUR)" })).toBeChecked();
+    await expect(page.locator("#cost").getByRole("radio", { name: "Euro (EUR)" })).toBeChecked();
     await expect(page.locator('#cost-saving [data-currency="EUR"]')).toBeVisible();
     await page.reload();
     await expect(pricing.getByRole("radio", { name: "Euro (EUR)" })).toBeChecked();
@@ -246,18 +348,15 @@ test.describe("interaction", () => {
   }) => {
     await page.goto("/");
     await expect(page.locator('#cost-saving [data-currency="GBP"]')).toHaveText("£15,744");
-    await page.locator("#comparison label").filter({ hasText: /^AED$/ }).click();
-    await expect(page.locator('#cost-saving [data-currency="AED"]')).toBeVisible();
+    await page.locator("#cost label").filter({ hasText: /^AED$/ }).click();
     await expect(page.locator('#cost-saving [data-currency="AED"]')).toHaveText("Dh 73,367");
-    // The pricing cards are part of the same choice, not a second one.
     await expect(page.locator("#pricing").getByRole("radio", { name: "UAE dirham (AED)" })).toBeChecked();
     await expect(
       page.getByRole("article", { name: "Pro" }).getByText("Dh 14", { exact: true }),
     ).toBeVisible();
-    // And the pick is remembered for the session.
     await page.reload();
     await expect(page.locator('#cost-saving [data-currency="AED"]')).toBeVisible();
-    await expect(page.locator("#comparison").getByRole("radio", { name: "UAE dirham (AED)" })).toBeChecked();
+    await expect(page.locator("#cost").getByRole("radio", { name: "UAE dirham (AED)" })).toBeChecked();
   });
 
   test("a changed price rises in, and the figure it replaced leaves the line", async ({ page }) => {
@@ -277,29 +376,17 @@ test.describe("interaction", () => {
         gbpDisplay: getComputedStyle(gbp).display,
       };
     });
-    // Caught mid-animation: still fading, and still on its way up.
     expect(mid.opacity).toBeLessThan(1);
     expect(mid.translate).not.toBe("0px");
-    // The figure it replaced is out of the line, so the box is only as wide as what is on screen.
     expect(mid.gbpDisplay).toBe("none");
     await expect(page.locator('#pricing [data-currency="USD"]').first()).toHaveCSS("opacity", "1");
   });
 
-  test("the calculator totals animate, and keep the 'a year' beside the figure", async ({ page }) => {
+  test("the calculator totals keep the 'a year' beside the figure", async ({ page }) => {
     await page.goto("/");
-    await page.locator("#comparison").scrollIntoViewIfNeeded();
-    const mid = await page.evaluate(async () => {
-      const label = [...document.querySelectorAll("#comparison label")].find(
-        (element) => element.textContent?.trim() === "EUR",
-      );
-      (label as HTMLElement).click();
-      await new Promise((resolve) => setTimeout(resolve, 60));
-      const eur = document.querySelector('#cost-saving [data-currency="EUR"]')!;
-      return Number(getComputedStyle(eur).opacity);
-    });
-    expect(mid).toBeLessThan(1);
-    // The suffix sits beside the figure on screen, not beside the widest currency on the page
-    // (₽1,653,120). Stacking the currencies in one grid cell left a gap here; this is that guard.
+    await page.locator("#cost").scrollIntoViewIfNeeded();
+    await page.locator("#cost label").filter({ hasText: /^EUR$/ }).click();
+    // The suffix sits beside the figure on screen, not beside the widest currency on the page.
     const gap = await page.evaluate(() => {
       const value = document.querySelector("#cost-saving")!;
       const year = value.nextElementSibling!;
@@ -316,52 +403,54 @@ test.describe("interaction", () => {
     await expect(saving).toHaveText("£15,744");
     await slider.fill("120");
     await expect(page.locator("#team-size-value")).toHaveText("120 people");
-    await expect(page.locator('#cost-five [data-currency="GBP"]')).toHaveText("£59,386");
-    await expect(page.locator("#cost-workchats-label")).toHaveText("Workchats Max + Google Workspace");
+    await expect(page.locator('#cost-stack [data-currency="GBP"]')).toHaveText("£59,386");
+    await expect(page.locator("#cost-workchats-label")).toHaveText("Workchats Max + your office suite");
     await expect(page.locator('#cost-workchats [data-currency="GBP"]')).toHaveText("£24,480");
     await expect(saving).toHaveText("£34,906");
   });
 
-  test("the feature switcher shows one feature at a time on larger screens", async ({ page }) => {
-    test.skip(isMobile(page), "the switcher is for tablet and desktop; phones show every feature");
+  test("copies a link to the business case for the IT team", async ({ page, context, browserName }) => {
+    test.skip(browserName !== "chromium", "clipboard permissions");
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await page.goto("/");
-    const messaging = page.getByRole("heading", { name: "Every kind of conversation, in one place" });
-    const meetings = page.getByRole("heading", {
-      name: "Calls that start where the conversation lives",
-    });
-    await expect(messaging).toBeVisible();
-    await expect(meetings).toBeHidden();
-    await page.locator("label", { hasText: "Video and meetings" }).click();
-    await expect(meetings).toBeVisible();
-    await expect(messaging).toBeHidden();
+    await page.getByRole("button", { name: "Copy link for your IT team" }).click();
+    await expect(page.locator("#copy-brief-status")).toContainText("Link copied");
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(/\/#business-case$/);
   });
 
-  test("phones show every feature, one after another", async ({ page }) => {
-    test.skip(!isMobile(page), "phones only");
-    await page.goto("/");
-    for (const name of [
-      "Every kind of conversation, in one place",
-      "Calls that start where the conversation lives",
-      "Share a file once. Find it forever.",
-    ]) {
-      await expect(page.getByRole("heading", { name })).toBeVisible();
-    }
-  });
-
-  test("the header floats on a glass bar that fades in as the page scrolls", async ({ page }) => {
+  test("the header gathers into a floating glass bar as the page scrolls", async ({ page }) => {
     test.skip(isMobile(page), "the desktop bar");
     await page.goto("/");
-    const bar = page.locator("header .container-nav > div");
-    const glass = bar.locator("> [aria-hidden='true']");
-    // Inset from the viewport edges, so the bar frames the page instead of touching it.
-    const box = await bar.boundingBox();
-    expect(Math.round(box?.x ?? 0)).toBeGreaterThan(0);
-    expect(Math.round(box?.width ?? 0)).toBeLessThan(1440);
-    // Invisible at the top of the page, opaque once content moves under it.
+    const glass = page.locator("header .nav-glass");
+    const logo = page.locator("header .nav-gather-start");
+    // Wide and transparent at the top of the page: the logo sits out at the wide position.
     await expect(glass).toHaveCSS("opacity", "0");
+    const wide = await logo.evaluate((el) => getComputedStyle(el).translate);
+    expect(wide).not.toBe("none");
     await page.mouse.wheel(0, 400);
     await expect(glass).toHaveCSS("opacity", "1");
     await expect(glass).toHaveCSS("backdrop-filter", "blur(16px)");
+    await expect.poll(() => logo.evaluate((el) => getComputedStyle(el).translate)).toMatch(/^(none|0px)/);
+  });
+
+  test("the header keeps Sign in, Download and Book a demo beside Start free", async ({ page }) => {
+    test.skip(isMobile(page), "desktop header");
+    await page.goto("/");
+    const header = page.getByRole("banner");
+    for (const name of ["Sign in", "Download", "Book a demo", "Start free"]) {
+      await expect(header.getByRole("link", { name })).toBeVisible();
+    }
+  });
+
+  test("the product card tilts back at the top of the page and settles as it scrolls", async ({ page }) => {
+    test.skip(isMobile(page), "the desktop card");
+    await page.goto("/");
+    const card = page.locator('[data-device="laptop"]');
+    const flat = () => card.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).isIdentity);
+    expect(await card.evaluate((el) => getComputedStyle(el).transform)).toContain("matrix3d");
+    expect(await flat()).toBe(false);
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight));
+    await expect.poll(flat).toBe(true);
   });
 
   test("a menu item is an icon, a label, its one line and a status chip", async ({ page }) => {
@@ -371,15 +460,12 @@ test.describe("interaction", () => {
     await features.click();
     const panel = page.locator(`#${await features.getAttribute("aria-controls")}`);
     await expect(panel).toBeVisible();
-    // Six features in one grid, then the footer.
     await expect(panel.getByRole("link")).toHaveCount(7);
     await expect(panel.getByRole("link", { name: /Messaging and channels/ })).toContainText(
       "One place for every team conversation.",
     );
-    // The chip rides along in the row's accessible name, so the flag is never colour-only.
     await expect(panel.getByRole("link", { name: /Social feed Coming soon/ })).toBeVisible();
     await expect(panel.getByText("Coming soon")).toHaveCount(3);
-    await expect(panel.getByRole("link", { name: "Explore all features" })).toBeVisible();
   });
 
   test("desktop menus open on hover for mouse users", async ({ page }) => {
@@ -406,35 +492,106 @@ test.describe("interaction", () => {
     await expect(features).toBeFocused();
   });
 
-  test("phones render the mobile app, not a shrunken desktop window", async ({ page }) => {
+  test("phones show the phone, not a shrunken desktop window", async ({ page }) => {
     test.skip(!isMobile(page), "phones only");
     await page.goto("/");
-    const demo = page.locator("#hero-demo");
-    await expect(demo.locator('[data-app="phone"]')).toBeVisible();
-    await expect(demo.locator('[data-app="desktop"]')).toBeHidden();
-    // A handset, not a squashed desktop window: taller than it is wide, in phone proportions.
-    const box = await demo.locator('[data-app="phone"]').boundingBox();
+    await expect(page.locator('[data-app="phone"]')).toBeVisible();
+    await expect(page.locator('[data-app="desktop"]')).toBeHidden();
+    const box = await page.locator('[data-app="phone"]').boundingBox();
     expect((box?.height ?? 0) / (box?.width ?? 1)).toBeGreaterThan(1.6);
   });
 
-  test("desktop shows the app window, with the phone as the second screen", async ({ page }) => {
+  test("desktop shows the laptop app, with the phone as the second screen", async ({ page }) => {
     test.skip(isMobile(page), "desktop only");
     await page.goto("/");
-    const demo = page.locator("#hero-demo");
-    await expect(demo.locator('[data-app="desktop"]')).toBeVisible();
-    await expect(demo.locator('[data-app="phone"]')).toBeVisible();
+    await expect(page.locator('[data-app="desktop"]')).toBeVisible();
+    await expect(page.locator('[data-app="phone"]')).toBeVisible();
   });
 
-  test("the phone menu is a dialog that leads with the free sign-up", async ({ page }) => {
+  test("the phone menu is a dialog that leads with the free sign-up and keeps every action", async ({
+    page,
+  }) => {
     test.skip(!isMobile(page), "phone navigation");
     await page.goto("/");
     await expect(page.getByRole("banner").getByRole("link", { name: "Start free" })).toBeVisible();
     await page.getByRole("button", { name: "Menu" }).click();
     const dialog = page.getByRole("dialog", { name: "Menu" });
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByRole("link", { name: "Start free" })).toBeVisible();
+    for (const name of ["Start free", "Download", "Book a demo", "Sign in"]) {
+      await expect(dialog.getByRole("link", { name })).toBeVisible();
+    }
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
+  });
+});
+
+test.describe("device-aware downloads", () => {
+  const visit = async (browser: Browser, userAgent: string) => {
+    const context = await browser.newContext({ userAgent, viewport: { width: 1440, height: 900 } });
+    const page = await context.newPage();
+    await page.goto("/");
+    return { context, page };
+  };
+
+  test("promotes the visitor's own platform, in the hero and in the platforms", async ({ browser }) => {
+    const { context, page } = await visit(browser, userAgents.windows);
+    await expect(page.locator('main [data-download="auto"]')).toHaveText("Download for Windows", {
+      useInnerText: true,
+    });
+    const windows = page.locator("#download").getByRole("button", { name: /^Windows/ });
+    await expect(windows.getByText("This device")).toBeVisible();
+    // Moved to the front of the list: the first row, the first column.
+    const boxes = await page
+      .locator("#download button")
+      .evaluateAll((buttons) =>
+        buttons.map((b) => [
+          b.textContent ?? "",
+          b.getBoundingClientRect().top,
+          b.getBoundingClientRect().left,
+        ]),
+      );
+    const [first] = [...boxes].sort((a, b) => Number(a[1]) - Number(b[1]) || Number(a[2]) - Number(b[2]));
+    expect(String(first?.[0])).toMatch(/^Windows/);
+    await context.close();
+  });
+
+  test("falls back to neutral labels when the platform can't be told", async ({ browser }) => {
+    const context = await browser.newContext({ userAgent: userAgents.unknown });
+    // Chromium also reports a platform through userAgentData; take that away too.
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, "userAgentData", { get: () => undefined });
+      Object.defineProperty(navigator, "platform", { get: () => "" });
+    });
+    const page = await context.newPage();
+    await page.goto("/");
+    await expect(page.locator('main [data-download="auto"]')).toHaveText("Download the app", {
+      useInnerText: true,
+    });
+    await expect(page.locator("#download").getByText("This device")).toHaveCount(6);
+    for (const marker of await page.locator("#download").getByText("This device").all()) {
+      await expect(marker).toBeHidden();
+    }
+    await context.close();
+  });
+
+  test("labels the button before the first paint, so nothing shifts", async ({ browser }) => {
+    const { context, page } = await visit(browser, userAgents.macos);
+    await expect(page.locator('main [data-download="auto"]')).toHaveText("Download for macOS", {
+      useInnerText: true,
+    });
+    const shift = await page.evaluate(
+      () =>
+        new Promise<number>((resolve) => {
+          let total = 0;
+          new PerformanceObserver((list) => {
+            for (const entry of list.getEntries() as (PerformanceEntry & { value: number })[])
+              total += entry.value;
+          }).observe({ type: "layout-shift", buffered: true });
+          setTimeout(() => resolve(total), 500);
+        }),
+    );
+    expect(shift).toBe(0);
+    await context.close();
   });
 });
 
@@ -451,18 +608,28 @@ test.describe("layout", () => {
     });
   }
 
-  for (const width of [320, 360, 390, 768]) {
+  for (const width of [320, 360, 390, 768, 1024, 1280]) {
     test(`the header contents never collide at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
-      const gap = await page.evaluate(() => {
+      // Scrolled, so the bar has gathered to its narrowest.
+      await page.mouse.wheel(0, 400);
+      await page.waitForTimeout(200);
+      const gaps = await page.evaluate(() => {
         const header = document.querySelector("header")!;
-        const logo = header.querySelector('a[href="/"]')!;
-        const actions = header.querySelector(".ml-auto")!;
-        return Math.round(actions.getBoundingClientRect().left - logo.getBoundingClientRect().right);
+        const logo = header.querySelector('a[href="/"]')!.getBoundingClientRect();
+        const actions = header.querySelector(".nav-gather-end")!.getBoundingClientRect();
+        const nav = header.querySelector("nav")!.getBoundingClientRect();
+        const visibleNav = nav.width > 0;
+        return {
+          logoToActions: Math.round(actions.left - logo.right),
+          logoToNav: visibleNav ? Math.round(nav.left - logo.right) : null,
+          navToActions: visibleNav ? Math.round(actions.left - nav.right) : null,
+        };
       });
-      // The wordmark, the primary action and the menu button all fit, with room between them.
-      expect(gap).toBeGreaterThanOrEqual(8);
+      expect(gaps.logoToActions).toBeGreaterThanOrEqual(8);
+      if (gaps.logoToNav !== null) expect(gaps.logoToNav).toBeGreaterThanOrEqual(8);
+      if (gaps.navToActions !== null) expect(gaps.navToActions).toBeGreaterThanOrEqual(8);
     });
   }
 
@@ -476,7 +643,10 @@ test.describe("layout", () => {
         .filter((el) => getComputedStyle(el).display !== "inline")
         .filter(
           (el) =>
-            !el.closest("dialog:not([open])") && !el.closest("[hidden]") && !el.classList.contains("sr-only"),
+            !el.closest("dialog:not([open])") &&
+            !el.closest("[hidden]") &&
+            !el.closest("[inert]") &&
+            !el.classList.contains("sr-only"),
         )
         .map((el) => ({ el, box: el.getBoundingClientRect() }))
         .filter(({ box }) => box.width > 0 && (box.width < 44 || box.height < 44))

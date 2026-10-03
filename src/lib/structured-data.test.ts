@@ -37,12 +37,13 @@ describe("structured data", () => {
     });
   });
 
-  it("names the company that builds Workchats", () => {
-    expect(json).toContain('"parentOrganization":{"@type":"Organization","name":"Octogle Technologies Ltd"');
+  it("names the company the owner chose for the home page", () => {
+    expect(json).toContain('"legalName":"Workchats Ltd"');
+    expect(json).not.toContain("Octogle");
   });
 
   it("lists every platform, including the Linux AppImage", () => {
-    expect(json).toContain('"operatingSystem":"Web, macOS, Windows, Linux, iOS, Android"');
+    expect(json).toContain('"operatingSystem":"macOS, Windows, Linux, iOS, Android, Web"');
   });
 
   it("can't break out of the script tag", () => {

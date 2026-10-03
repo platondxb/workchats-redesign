@@ -2,7 +2,7 @@
 
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { useSyncExternalStore } from "react";
-import { buttonClasses } from "@/components/ui/button-classes";
+import { liquidClasses } from "@/components/ui/button-classes";
 import { getServerSnapshot, getSnapshot, setChoice, subscribe } from "./consent-store";
 
 interface ConsentManagerProps {
@@ -25,23 +25,19 @@ export function ConsentManager({ gaId, policyHref }: ConsentManagerProps) {
   return (
     <section
       aria-label="Cookie choices"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-surface px-(--gutter) py-4 shadow-overlay md:inset-x-auto md:bottom-4 md:left-4 md:max-w-112 md:rounded-md md:border md:px-5"
+      className="fixed inset-x-0 bottom-0 z-banner border-t border-night-line bg-night-raised px-(--gutter) py-4 shadow-overlay md:inset-x-auto md:bottom-4 md:left-4 md:max-w-112 md:rounded-md md:border md:px-5"
     >
-      <p className="text-small text-ink">
+      <p className="text-small text-on-night">
         We&apos;d like to use Google Analytics cookies to see how people use this site. Nothing is set unless
         you accept.
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          className={buttonClasses("secondary", "sm")}
-          onClick={() => setChoice("granted")}
-        >
+        <button type="button" className={liquidClasses("glass", "sm")} onClick={() => setChoice("granted")}>
           Accept analytics
         </button>
         <button
           type="button"
-          className={buttonClasses("secondary", "sm")}
+          className={liquidClasses("glass", "sm")}
           onClick={() => {
             disableAnalytics(gaId);
             setChoice("denied");
@@ -51,7 +47,7 @@ export function ConsentManager({ gaId, policyHref }: ConsentManagerProps) {
         </button>
         <a
           href={policyHref}
-          className="inline-flex min-h-11 items-center px-2 text-small font-semibold text-accent-ink underline underline-offset-4"
+          className="inline-flex min-h-11 items-center px-2 text-small font-semibold text-accent-on-night underline underline-offset-4"
         >
           Cookie policy
         </a>

@@ -51,9 +51,24 @@ function setup() {
           <a href="/pricing">Pricing</a>
         </nav>
       }
-      signIn={{ label: "Sign in", href: "https://app.workchats.com/" }}
-      demo={{ label: "Book a demo", href: "/book-a-demo" }}
-      start={{ label: "Start free", href: "https://admin.workchats.com/signup/" }}
+      actions={{
+        desktop: (
+          <>
+            <a href="https://app.workchats.com/">Sign in</a>
+            <a href="#download">Download</a>
+            <a href="/book-a-demo">Book a demo</a>
+          </>
+        ),
+        primary: <a href="https://admin.workchats.com/signup/">Start free</a>,
+        menu: (
+          <>
+            <a href="https://admin.workchats.com/signup/">Start free</a>
+            <a href="#download">Download</a>
+            <a href="/book-a-demo">Book a demo</a>
+            <a href="https://app.workchats.com/">Sign in</a>
+          </>
+        ),
+      }}
       icons={{ caret: <span />, menu: <span />, close: <span /> }}
     />,
   );
@@ -125,7 +140,7 @@ describe("desktop menus", () => {
 });
 
 describe("phone menu", () => {
-  it("opens a labelled dialog with the navigation and the three actions", async () => {
+  it("opens a labelled dialog with the navigation and every action", async () => {
     const user = userEvent.setup();
     setup();
     const trigger = screen.getByRole("button", { name: "Menu" });
@@ -133,7 +148,9 @@ describe("phone menu", () => {
     expect(trigger).toHaveAttribute("aria-expanded", "true");
     const dialog = screen.getByRole("dialog", { name: "Menu" });
     const links = Array.from(dialog.querySelectorAll("a")).map((a) => a.textContent);
-    expect(links).toEqual(expect.arrayContaining(["Pricing", "Start free", "Book a demo", "Sign in"]));
+    expect(links).toEqual(
+      expect.arrayContaining(["Pricing", "Start free", "Download", "Book a demo", "Sign in"]),
+    );
   });
 
   it("closes with the close button and when a link is followed", async () => {

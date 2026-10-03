@@ -92,28 +92,6 @@ export const phoneView = {
   ],
 } as const;
 
-export const designChannel = {
-  name: "design",
-  members: 6,
-  pinned: { by: "amara" as PersonId, text: "Launch date is 14 May" },
-  messages: [
-    {
-      person: "sofia" as PersonId,
-      time: "11:02",
-      text: "Campaign visuals are ready for review in the shared folder.",
-      reactions: 3,
-      thread: 2,
-    },
-    {
-      person: "tom" as PersonId,
-      time: "11:05",
-      text: "Looks good. I've left two comments on the header spacing.",
-      seenBy: 6,
-    },
-  ],
-  voiceNote: { person: "priya" as PersonId, time: "11:07", length: "0:42" },
-} as const;
-
 export const launchCall = {
   title: "Spring launch check-in",
   channel: "spring-launch",
@@ -125,21 +103,7 @@ export const launchCall = {
   participants: ["priya", "amara", "tom", "daniel"] as PersonId[],
 } as const;
 
-export const searchExample = {
-  query: "brand guidelines",
-  filters: ["From: Amara Okafor", "In: #spring-launch", "Files"],
-  file: { ...sharedFile, sharedBy: "amara" as PersonId, channel: "spring-launch" },
-  message: {
-    person: "amara" as PersonId,
-    channel: "spring-launch",
-    before: "Final ",
-    match: "brand guidelines",
-    after: " are in. Please use v3 from today.",
-  },
-  person: "sofia" as PersonId,
-} as const;
-
-/** Bento tiles: product states for features listed on /faq. */
+/** Workspaces one person belongs to: the first is Northgate Studio, where the demo team works. */
 export const workspaces = [
   { name: "Northgate Studio", initials: "NS", tone: "blue", active: true },
   { name: "Harbour Clinic", initials: "HC", tone: "green", active: false },
@@ -148,27 +112,29 @@ export const workspaces = [
 
 export const workingHours = { days: "Mon to Fri", from: "09:00", to: "17:30", timezone: "London" } as const;
 
-/** Security section: one person's privacy settings, with the three visibility levels each setting has. */
-export const privacySettings = {
-  levels: ["Everyone", "My team", "Nobody"],
-  /** The setting shown open, with its three levels. */
-  open: { label: "Last seen", value: "My team" },
-  others: [
-    { label: "Role", value: "Everyone", tone: "green" },
-    { label: "Shared content", value: "My team", tone: "blue" },
-  ],
-} as const satisfies {
-  levels: readonly string[];
-  open: { label: string; value: string };
-  others: readonly { label: string; value: string; tone: AvatarTone }[];
-};
-
 export const offlineQueue = {
   person: "daniel" as PersonId,
   text: "Site visit done. Photos coming when I'm back on signal.",
 } as const;
 
-export const connectionRequest = {
-  person: "sofia" as PersonId,
-  note: "Brand and marketing at Northgate Studio",
+/** Someone outside the team asking Sofia to connect before they can message her (the working day, 14:10). */
+export const outsideRequest = {
+  name: "Leo Brandt",
+  initials: "LB",
+  tone: "blue",
+  company: "Harbour Clinic",
+} as const satisfies { name: string; initials: string; tone: AvatarTone; company: string };
+
+/** The recording of the check-in, as it lands in #spring-launch (the working day, 10:32). */
+export const callSummary = {
+  title: "Spring launch check-in",
+  length: "48 min",
+  decision: "Launch date stays 14 May",
+  actions: [
+    { person: "tom" as PersonId, text: "Final homepage mockups" },
+    { person: "daniel" as PersonId, text: "Site photos to #field-ops" },
+  ],
 } as const;
+
+/** Northgate Studio's five members: the whole Free plan, before the sixth invite. */
+export const freeTeam: readonly PersonId[] = ["amara", "tom", "priya", "daniel", "sofia"];
