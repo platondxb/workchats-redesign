@@ -21,7 +21,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24.21.0
           cache: npm
 
       - run: npm ci
@@ -41,7 +41,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24.21.0
           cache: npm
 
       - run: npm ci
@@ -105,11 +105,10 @@ jobs:
             "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" 'bash -s' <<'REMOTE'
           set -euo pipefail
 
-          # Prevent git from hanging waiting for credentials.
+          # Prevent git from hanging while waiting for credentials.
           export GIT_TERMINAL_PROMPT=0
 
-          # Explicitly load NVM because non-interactive SSH sessions do not
-          # necessarily load the user's shell configuration.
+          # Load NVM explicitly because this is a non-interactive SSH session.
           export NVM_DIR="/root/.nvm"
 
           if [ ! -s "$NVM_DIR/nvm.sh" ]; then
@@ -117,10 +116,9 @@ jobs:
             exit 1
           fi
 
-          # Load NVM into this SSH session.
           source "$NVM_DIR/nvm.sh"
 
-          # Use the Node.js version installed on the server.
+          # Production Node.js version.
           nvm use 24.21.0
 
           echo "Node: $(node -v)"
@@ -129,19 +127,24 @@ jobs:
 
           cd /root/workchats-redesign
 
+          # Make sure all required tools are available.
           for tool in git npm pm2; do
             if ! command -v "$tool" >/dev/null 2>&1; then
-              echo "FAILED: $tool is not available after loading NVM"
+              echo "FAILED: $tool is not available"
               echo "PATH=$PATH"
               exit 1
             fi
           done
 
+          # Remember the currently deployed revision.
           before="$(git rev-parse HEAD)"
 
-          git pull --ff-only
+          # Get the latest state of main from GitHub.
+          echo "Fetching origin/main..."
+          git fetch origin main
 
-          after="$(git rev-parse HEAD)"
+          # The GitHub repository is the source of truth.
+          after="$(git rev-parse origin/main)"
 
           if [ "$before" = "$after" ]; then
             echo "Server is already at ${after:0:8}; nothing to deploy."
@@ -150,16 +153,22 @@ jobs:
 
           echo "Deploying ${before:0:8} -> ${after:0:8}"
 
-          # Install dependencies only when package.json or package-lock.json changed.
-          if git diff --quiet "$before" "$after" -- package.json package-lock.json; then
-            echo "package.json and package-lock.json are unchanged; skipping npm install."
-          else
-            echo "Dependencies changed; running npm install."
-            npm install
-          fi
+          # Discard all local tracked changes and make the server
+          # exactly match origin/main.
+          git reset --hard origin/main
 
+          # Remove untracked files that are not part of the repository.
+          # This keeps the working tree clean while preserving runtime
+          # files managed outside Git.
+          git clean -fd
+
+          echo "Installing dependencies from package-lock.json..."
+          npm ci
+
+          echo "Building application..."
           npm run build
 
+          echo "Restarting application..."
           pm2 restart workchats
 
           echo "Deployed ${after:0:8}."
