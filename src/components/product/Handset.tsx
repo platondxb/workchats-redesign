@@ -5,32 +5,23 @@ import { cx } from "@/lib/cx";
 import { Avatar, firstName, personName } from "./ProductFrame";
 
 /**
- * A phone, drawn in three layers as a handset has them: the machined edge (lit from the top, like the
- * devices in the owner's references), the black bezel, then the screen. The camera island, home
- * indicator and side buttons are pseudo-elements, so the device chrome costs one element per layer.
- * Brand-neutral: no logos, no recognisable product's camera layout.
+ * A phone: a vector render (public/devices/phone.svg, drawn by scripts/render-devices.mjs) of a titanium
+ * band, a polished chamfer, the glass and its camera island, with the live screen behind the glass. The
+ * frame's screen area is transparent, so the app is as sharp as the page's text and the glass reflection
+ * lies over it. Brand-neutral: no logo, no other company's interface.
  */
 export function Handset({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div
-      data-device="phone"
-      className={cx(
-        "relative w-phone rounded-device bg-(image:--gradient-device-edge) p-1 shadow-device",
-        // Volume buttons on the left, the side button on the right.
-        "before:absolute before:top-24 before:-left-0.5 before:h-14 before:w-1 before:rounded-l-sm before:bg-device-frame",
-        "after:absolute after:top-32 after:-right-0.5 after:h-16 after:w-1 after:rounded-r-sm after:bg-device-frame",
-        className,
-      )}
-    >
-      <div
-        className={cx(
-          "relative aspect-device overflow-hidden rounded-lg border-4 border-device-bezel bg-surface text-ink",
-          "before:absolute before:top-1.5 before:left-1/2 before:z-raised before:h-5 before:w-18 before:-translate-x-1/2 before:rounded-full before:bg-device-bezel",
-          "after:absolute after:bottom-1.5 after:left-1/2 after:h-1 after:w-20 after:-translate-x-1/2 after:rounded-full after:bg-ink/30",
-        )}
-      >
-        {children}
-      </div>
+    <div data-device="phone" className={cx("relative device-phone w-phone drop-shadow-device", className)}>
+      <div className="phone-screen overflow-hidden bg-surface text-ink">{children}</div>
+      {/* eslint-disable-next-line @next/next/no-img-element -- a static SVG frame: next/image would add client JS */}
+      <img
+        src="/devices/phone.svg"
+        alt=""
+        width={438}
+        height={900}
+        className="pointer-events-none absolute inset-0 size-full select-none"
+      />
     </div>
   );
 }
@@ -44,8 +35,9 @@ export function PhoneChats() {
   const { call } = heroDemo;
   return (
     <div inert className="h-full select-none" data-app="phone">
-      <p className="px-4 pt-2.5 text-nano font-semibold">{phoneView.time}</p>
-      <p className="flex items-center justify-between px-4 pt-4 pb-2">
+      {/* The status bar: level with the camera island, clear of the screen's rounded corner. */}
+      <p className="flex h-10 items-center px-6 text-nano font-semibold">{phoneView.time}</p>
+      <p className="flex items-center justify-between px-4 pt-2 pb-2">
         <span className="font-display text-heading">Chats</span>
         <Avatar person={phoneView.owner} size="sm" />
       </p>
@@ -59,8 +51,10 @@ export function PhoneChats() {
             )}
             <span className="min-w-0 flex-1">
               <span className="flex items-baseline justify-between gap-2 text-micro font-semibold">
-                {chat.kind === "channel" ? chat.name : personName(chat.person)}
-                <span className="text-nano font-regular text-ink-subtle">{chat.time}</span>
+                <span className="truncate">
+                  {chat.kind === "channel" ? chat.name : personName(chat.person)}
+                </span>
+                <span className="shrink-0 text-nano font-regular text-ink-subtle">{chat.time}</span>
               </span>
               <span className="block truncate text-nano text-ink-muted">{chat.preview}</span>
             </span>
@@ -68,7 +62,7 @@ export function PhoneChats() {
         ))}
       </ul>
 
-      <div className="absolute inset-x-2 top-9 cs-ring rounded-md bg-night p-3 text-on-night shadow-ui-overlay">
+      <div className="absolute inset-x-2.5 top-10 cs-ring rounded-md bg-night p-3 text-on-night shadow-ui-overlay">
         <p className="flex items-center gap-2.5">
           <Avatar person={call.startedBy} size="sm" />
           <span className="min-w-0">

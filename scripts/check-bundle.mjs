@@ -48,6 +48,12 @@ const scripts = unique(
 );
 const styles = unique([...html.matchAll(/<link[^>]+href="(\/_next\/[^"]+\.css)"/g)].map((m) => m[1]));
 const fonts = unique([...html.matchAll(/<link[^>]+href="(\/_next\/[^"]+\.woff2)"/g)].map((m) => m[1]));
+// Same-origin images the HTML loads straight away (the device renders), served from public/.
+const images = unique(
+  [...html.matchAll(/<img[^>]+src="(\/(?!_next\/)[^"]+)"/g)]
+    .map((m) => m[1])
+    .filter((url) => existsSync(path.join(root, "public", url))),
+);
 // Resources the browser actually fetches from other origins (canonical and alternate links don't count).
 const thirdParty = unique(
   [
@@ -71,7 +77,11 @@ const jsGzip = sum(scripts, gzip);
 const cssBrotli = sum(styles, brotli);
 const fontBytes = sum(fonts, (buffer) => buffer.length); // WOFF2 is already compressed
 const htmlBrotli = brotli(Buffer.from(html));
-const totalBytes = jsBrotli + cssBrotli + fontBytes + htmlBrotli;
+const imageBrotli = images.reduce(
+  (total, url) => total + brotli(readFileSync(path.join(root, "public", url))),
+  0,
+);
+const totalBytes = jsBrotli + cssBrotli + fontBytes + htmlBrotli + imageBrotli;
 
 // Web-font families: @font-face rules that download a file. Local, size-matched fallbacks don't count.
 const families = styles.length
@@ -117,6 +127,7 @@ const rows = [
   [`  (same JavaScript gzipped)`, kb(jsGzip)],
   [`CSS, ${styles.length} file(s)`, kb(cssBrotli)],
   [`Fonts, ${fonts.length} preloaded WOFF2`, kb(fontBytes)],
+  [`Images, ${images.length} (device renders)`, kb(imageBrotli)],
   ["Total first view before consent", kb(totalBytes)],
 ];
 console.log("Compressed transfer sizes (Brotli unless stated):");
@@ -127,7 +138,7 @@ console.log(
   `  ${`Deferred JavaScript, ${deferred.length} files`.padEnd(38)} ${kb(deferredBrotli).toFixed(1).padStart(7)} KB`,
 );
 console.log(
-  `  ${"3D device assets".padEnd(38)} ${devices.length === 0 ? "none (the devices are HTML and CSS)" : devices.map(([name, bytes]) => `${name} ${kb(bytes).toFixed(0)} KB`).join(", ")}`,
+  `  ${"3D device assets".padEnd(38)} ${devices.length === 0 ? "none (the devices are vector renders)" : devices.map(([name, bytes]) => `${name} ${kb(bytes).toFixed(0)} KB`).join(", ")}`,
 );
 
 const failures = [];

@@ -33,7 +33,7 @@ const neutralLabelClasses =
 export function Hero() {
   const { hero } = home;
   return (
-    <section aria-labelledby="hero-title" className="overflow-x-clip pt-10 pb-16 md:pt-20 lg:pb-20">
+    <section aria-labelledby="hero-title" className="overflow-x-clip pt-10 pb-20 md:pt-20">
       <div className="container-page">
         <ContainerScroll
           label={hero.productLabel}
@@ -69,7 +69,7 @@ export function Hero() {
             </>
           }
           aside={
-            <Handset className="mx-auto cs-card md:hidden lg:absolute lg:right-4 lg:-bottom-20 lg:z-raised lg:block lg:cs-aside xl:-right-10 2xl:-right-20">
+            <Handset className="mx-auto cs-card md:hidden lg:absolute lg:right-4 lg:-bottom-12 lg:z-raised lg:block lg:w-56 lg:cs-aside xl:right-8 xl:w-64">
               <PhoneChats />
             </Handset>
           }

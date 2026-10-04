@@ -68,8 +68,8 @@ export function BusinessCase() {
                 key={row.id}
                 className="grid gap-1 border-b border-line py-4 last:border-b-0 last:pb-0 sm:grid-cols-3 sm:gap-6"
               >
-                <dt className="text-small font-semibold">{row.term}</dt>
-                <dd className="text-small text-ink-muted sm:col-span-2">
+                <dt className="self-start text-small font-semibold">{row.term}</dt>
+                <dd className="self-start text-small text-ink-muted sm:col-span-2">
                   {row.detail}
                   {row.id === "residency" ? (
                     <span className="mt-3 flex flex-wrap gap-2">

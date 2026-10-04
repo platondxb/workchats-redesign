@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../styles/tokens.css";
+@import "../styles/devices.css";
 
 /*
  * Stateful UI without JavaScript. Each switch is a set of native radio inputs; CSS reads which one is
@@ -251,6 +252,38 @@
   }
 }
 
+/* The laptop's lid comes up from leaning back on its hinge to square with the viewer. */
+@utility cs-lid {
+  transform-origin: 50% 100%;
+  @supports (animation-timeline: scroll()) {
+    animation: cs-lid linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 70vh;
+  }
+}
+
+@keyframes cs-lid {
+  from {
+    transform: rotateX(22deg);
+  }
+}
+
+/* The whole laptop settles from a touch closer to its size, as the original card did. */
+@utility cs-settle {
+  @supports (animation-timeline: scroll()) {
+    animation: cs-settle linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 70vh;
+  }
+}
+
+@keyframes cs-settle {
+  from {
+    scale: 1.04;
+  }
+}
+
+/* On phones the phone is the device, and takes the original card's tilt. */
 @utility cs-card {
   --cs-from-scale: 1.05;
   @media (width < 48rem) {

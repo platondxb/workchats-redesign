@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 0 438 900">
+<defs>
+<linearGradient id="band" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7d8086"/><stop offset=".12" stop-color="#4a4c51"/><stop offset=".38" stop-color="#2c2e32"/><stop offset=".7" stop-color="#1d1e21"/><stop offset=".9" stop-color="#2e3034"/><stop offset="1" stop-color="#5c5f65"/></linearGradient>
+<linearGradient id="chamfer" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3e6ea"/><stop offset=".25" stop-color="#8a8d93"/><stop offset=".55" stop-color="#3a3c40"/><stop offset=".85" stop-color="#55585d"/><stop offset="1" stop-color="#a3a6ac"/></linearGradient>
+<linearGradient id="button" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1c1d20"/><stop offset=".5" stop-color="#6f7278"/><stop offset="1" stop-color="#26282b"/></linearGradient>
+<linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".09"/><stop offset=".55" stop-color="#fff" stop-opacity=".02"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<radialGradient id="lens" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#3a4570"/><stop offset=".4" stop-color="#121628"/><stop offset="1" stop-color="#050609"/></radialGradient>
+<clipPath id="glassClip"><path d="M103.56 7H326.44C401.7 7 423 28.3 423 103.56V796.44C423 871.7 401.7 893 326.44 893H103.56C28.3 893 7 871.7 7 796.44V103.56C7 28.3 28.3 7 103.56 7Z"/></clipPath>
+</defs>
+<rect x="-3" y="150" width="5" height="34" rx="2" fill="url(#button)"/>
+<rect x="-3" y="218" width="5" height="62" rx="2" fill="url(#button)"/>
+<rect x="-3" y="294" width="5" height="62" rx="2" fill="url(#button)"/>
+<rect x="428" y="252" width="5" height="100" rx="2" fill="url(#button)"/>
+<path fill-rule="evenodd" fill="url(#band)" d="M106.08 0H323.92C406.6 0 430 23.4 430 106.08V793.92C430 876.6 406.6 900 323.92 900H106.08C23.4 900 0 876.6 0 793.92V106.08C0 23.4 23.4 0 106.08 0ZM97.88 19H332.12C393.6 19 411 36.4 411 97.88V802.12C411 863.6 393.6 881 332.12 881H97.88C36.4 881 19 863.6 19 802.12V97.88C19 36.4 36.4 19 97.88 19Z"/>
+<path d="M105.14 2.6H324.86C404.78 2.6 427.4 25.22 427.4 105.14V794.86C427.4 874.78 404.78 897.4 324.86 897.4H105.14C25.22 897.4 2.6 874.78 2.6 794.86V105.14C2.6 25.22 25.22 2.6 105.14 2.6Z" fill="none" stroke="url(#chamfer)" stroke-width="2.2"/>
+<path fill-rule="evenodd" fill="#050506" d="M103.56 7H326.44C401.7 7 423 28.3 423 103.56V796.44C423 871.7 401.7 893 326.44 893H103.56C28.3 893 7 871.7 7 796.44V103.56C7 28.3 28.3 7 103.56 7ZM97.88 19H332.12C393.6 19 411 36.4 411 97.88V802.12C411 863.6 393.6 881 332.12 881H97.88C36.4 881 19 863.6 19 802.12V97.88C19 36.4 36.4 19 97.88 19Z"/>
+<path d="M103.78 6.4H326.22C402.12 6.4 423.6 27.88 423.6 103.78V796.22C423.6 872.12 402.12 893.6 326.22 893.6H103.78C27.88 893.6 6.4 872.12 6.4 796.22V103.78C6.4 27.88 27.88 6.4 103.78 6.4Z" fill="none" stroke="#000" stroke-opacity=".7" stroke-width="1.2"/>
+<rect x="153" y="37" width="124" height="36" rx="18" fill="#000"/>
+<circle cx="258" cy="55" r="6" fill="url(#lens)"/>
+<g clip-path="url(#glassClip)"><path d="M0 0H330L0 600Z" fill="url(#sheen)"/></g>
+</svg>

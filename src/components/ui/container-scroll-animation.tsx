@@ -8,13 +8,14 @@ import { cx } from "@/lib/cx";
  * framer-motion would have added about 30 KB to a first load that has 2.2 KB of budget left (the owner
  * chose this on 3 October 2026).
  *
- * The motion is in globals.css (`cs-title`, `cs-card`, `cs-aside`) and is driven by the page's own scroll
- * position over the first 70% of a screen, so it starts tilted on load and has settled by the time the
- * next section arrives. Like the original, the title rises 100px and the card goes from 20° to flat while
- * scaling from 1.05 (0.92 on phones) to 1. It never changes the scroll speed or direction.
+ * The Card is a laptop: a vector render of the lid and the base (public/devices, drawn by
+ * scripts/render-devices.mjs) with the live screen behind the lid's glass. Over the first 70% of a screen
+ * of scrolling the lid comes up from leaning back on its hinge to square with the viewer, the laptop
+ * settles from 104% to its size and the title lifts 100px (globals.css: `cs-title`, `cs-lid`,
+ * `cs-settle`). The motion follows the scroll position and never changes the scroll's speed or direction.
  *
  * Where scroll-driven animations aren't supported (Firefox today), and whenever reduced motion is on, the
- * card is simply shown flat: its resting style is the final frame.
+ * laptop is simply shown open and square to the viewer: its resting style is the final frame.
  */
 
 export function ContainerScroll({
@@ -25,18 +26,24 @@ export function ContainerScroll({
   className,
 }: {
   titleComponent: ReactNode;
-  /** What the card holds: the product, on the screen. */
+  /** What the laptop's screen shows: the product. */
   children: ReactNode;
-  /** Something that sits in front of the card and settles with it, such as a phone beside the laptop. */
+  /** Something that stands in front of the laptop and settles with it, such as a phone. */
   aside?: ReactNode;
   /** What the devices show, in words. The devices are one picture to assistive technology. */
   label: string;
   className?: string;
 }) {
   return (
-    <div className={cx("relative perspective-stage", className)}>
+    <div className={cx("relative", className)}>
       <Header>{titleComponent}</Header>
-      <div role="img" aria-label={label} className="relative mx-auto mt-12 max-w-window md:mt-14">
+      {/* The perspective sits on the tilting devices' own parent: a 3D transform is only seen in depth by
+          its parent's perspective, two levels up it is flattened. */}
+      <div
+        role="img"
+        aria-label={label}
+        className="relative mx-auto mt-12 max-w-laptop perspective-stage md:mt-14"
+      >
         <Card>{children}</Card>
         {aside}
       </div>
@@ -49,18 +56,33 @@ export function Header({ children }: { children: ReactNode }) {
 }
 
 /**
- * The screen: a machined edge, a dark bezel, then the display. Below md the card isn't shown and the aside
- * (the phone) takes its place, because a shrunken desktop app on a phone reads as a broken layout.
+ * The laptop. The screen sits behind the lid's frame, whose display area is transparent, so the app is as
+ * sharp as the page's own text and the glass reflection lies over it. Below md the laptop isn't shown and
+ * the aside (the phone) takes its place: a shrunken desktop app on a phone reads as a broken layout.
  */
 export function Card({ children }: { children: ReactNode }) {
   return (
-    <div
-      data-device="laptop"
-      className="hidden cs-card rounded-lg bg-(image:--gradient-device-edge) p-1 shadow-device md:block"
-    >
-      <div className="h-152 rounded-lg bg-device-bezel p-2 lg:p-3">
-        <div className="h-full overflow-hidden rounded-md bg-canvas">{children}</div>
+    <div data-device="laptop" className="relative hidden cs-settle perspective-stage md:block">
+      <div data-device-part="lid" className="relative device-lid cs-lid">
+        <div className="laptop-screen overflow-hidden bg-canvas">{children}</div>
+        {/* eslint-disable-next-line @next/next/no-img-element -- a static SVG frame: next/image would add client JS */}
+        <img
+          src="/devices/laptop-lid.svg"
+          alt=""
+          width={2000}
+          height={1366}
+          fetchPriority="high"
+          className="pointer-events-none absolute inset-0 size-full select-none"
+        />
       </div>
+      {/* eslint-disable-next-line @next/next/no-img-element -- as above */}
+      <img
+        src="/devices/laptop-base.svg"
+        alt=""
+        width={2400}
+        height={104}
+        className="pointer-events-none relative device-base block w-full select-none"
+      />
     </div>
   );
 }

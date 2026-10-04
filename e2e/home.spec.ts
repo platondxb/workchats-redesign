@@ -257,7 +257,7 @@ test.describe("accessibility", () => {
     expect(duration).toBe("0s");
     // The card is flat, the title hasn't moved, and the call is already on the phone.
     const settled = await page.evaluate(() => {
-      const card = document.querySelector('[data-device="laptop"]');
+      const card = document.querySelector('[data-device-part="lid"]');
       const ring = document.querySelector(".cs-ring");
       return {
         card: card ? getComputedStyle(card).transform : "missing",
@@ -451,10 +451,12 @@ test.describe("interaction", () => {
     }
   });
 
-  test("the product card tilts back at the top of the page and settles as it scrolls", async ({ page }) => {
+  test("the laptop's lid leans back at the top of the page and comes up square as it scrolls", async ({
+    page,
+  }) => {
     test.skip(isMobile(page), "the desktop card");
     await page.goto("/");
-    const card = page.locator('[data-device="laptop"]');
+    const card = page.locator('[data-device-part="lid"]');
     const flat = () => card.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).isIdentity);
     expect(await card.evaluate((el) => getComputedStyle(el).transform)).toContain("matrix3d");
     expect(await flat()).toBe(false);

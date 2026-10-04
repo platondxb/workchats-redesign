@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 104">
+<defs>
+<linearGradient id="deck" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#303135"/><stop offset="1" stop-color="#5a5c61"/></linearGradient>
+<linearGradient id="face" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4b4c51"/><stop offset=".09" stop-color="#323338"/><stop offset=".4" stop-color="#202124"/><stop offset=".78" stop-color="#141517"/><stop offset="1" stop-color="#0a0a0b"/></linearGradient>
+<linearGradient id="ends" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".6"/><stop offset=".04" stop-color="#000" stop-opacity="0"/><stop offset=".96" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".6"/></linearGradient>
+<linearGradient id="spec" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d9dce1" stop-opacity="0"/><stop offset=".05" stop-color="#d9dce1" stop-opacity=".75"/><stop offset=".5" stop-color="#f6f7f9" stop-opacity=".95"/><stop offset=".95" stop-color="#d9dce1" stop-opacity=".75"/><stop offset="1" stop-color="#d9dce1" stop-opacity="0"/></linearGradient>
+<linearGradient id="band" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".18" stop-color="#fff" stop-opacity=".06"/><stop offset=".5" stop-color="#fff" stop-opacity=".08"/><stop offset=".82" stop-color="#fff" stop-opacity=".06"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="scoop" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d0e10"/><stop offset=".5" stop-color="#202124"/><stop offset="1" stop-color="#4c4e53"/></linearGradient>
+<radialGradient id="shadow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".75"/><stop offset=".6" stop-color="#000" stop-opacity=".35"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+</defs>
+<ellipse cx="1200" cy="94" rx="1190" ry="10" fill="url(#shadow)"/>
+<ellipse cx="270" cy="89" rx="70" ry="5" fill="#040405"/>
+<ellipse cx="2130" cy="89" rx="70" ry="5" fill="#040405"/>
+<path d="M44 0H2356L2386 7H14Z" fill="url(#deck)"/>
+<path d="M12 7H2388A12 12 0 0 1 2400 19V54A34 34 0 0 1 2366 88H34A34 34 0 0 1 0 54V19A12 12 0 0 1 12 7Z" fill="url(#face)"/>
+<rect x="0" y="16" width="2400" height="18" fill="url(#band)"/>
+<path d="M12 7H2388A12 12 0 0 1 2400 19V54A34 34 0 0 1 2366 88H34A34 34 0 0 1 0 54V19A12 12 0 0 1 12 7Z" fill="url(#ends)"/>
+<path d="M1030 7.5C1064 7.5 1068 37 1110 37H1290C1332 37 1336 7.5 1370 7.5Z" fill="url(#scoop)"/>
+<path d="M1110 36.2H1290" stroke="#8a8d93" stroke-opacity=".7" stroke-width="1.8"/>
+<path d="M22 7.9H1026M1374 7.9H2378" stroke="url(#spec)" stroke-width="3.2" stroke-linecap="round"/>
+</svg>

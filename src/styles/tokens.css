@@ -69,10 +69,6 @@
   --color-accent-ink: #0057c2; /* links and accent text on light surfaces, 6.7:1 */
   --color-on-accent: #ffffff;
 
-  /* ── Colour: devices ────────────────────────────────────────────────────────── */
-  --color-device-frame: #3d4a64; /* the machined edge around a screen */
-  --color-device-bezel: #0e1526; /* the black glass around the display */
-
   /* ── Colour: states only ────────────────────────────────────────────────────── */
   --color-success: #12805c; /* online status, 4.9:1 on white */
   --color-warning: #8a5300;
@@ -145,13 +141,10 @@
   --radius-device: 2.25rem; /* a handset's body */
 
   /* Elevations, shaded for a dark stage. Raised: panels and hovered controls. Overlay: menus and dialogs.
-     Float: the header bar. Device: the layered contact shadow under a screen held at an angle. */
+     Float: the header bar. */
   --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px -8px rgb(0 0 0 / 0.45);
   --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.35), 0 28px 64px -12px rgb(0 0 0 / 0.6);
   --shadow-float: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 40px -12px rgb(0 0 0 / 0.7);
-  --shadow-device:
-    0 0 rgb(0 0 0 / 0.3), 0 9px 20px rgb(0 0 0 / 0.29), 0 37px 37px rgb(0 0 0 / 0.26),
-    0 84px 50px rgb(0 0 0 / 0.15), 0 149px 60px rgb(0 0 0 / 0.04), 0 233px 65px rgb(0 0 0 / 0.01);
   /* Inside the app's light screens, where a shadow tuned for the night stage would be too heavy. */
   --shadow-ui: 0 1px 2px rgb(14 22 38 / 0.04), 0 10px 30px -8px rgb(14 22 38 / 0.12);
   --shadow-ui-overlay: 0 4px 12px rgb(14 22 38 / 0.08), 0 20px 48px -12px rgb(14 22 38 / 0.24);
@@ -162,6 +155,8 @@
     inset 1px 1px 1px -0.5px rgb(255 255 255 / 0.6), inset -1px -1px 1px -0.5px rgb(255 255 255 / 0.6),
     inset 0 0 6px 6px rgb(255 255 255 / 0.12), inset 0 0 2px 2px rgb(255 255 255 / 0.06),
     0 0 12px rgb(0 0 0 / 0.15);
+  /* A device standing on the stage: a tight contact shadow and a long soft one. */
+  --drop-shadow-device: 0 6px 10px rgb(0 0 0 / 0.4), 0 28px 36px rgb(0 0 0 / 0.55);
   /* The primary button's glow on hover: the brand blue lighting the stage under it. */
   --shadow-accent-glow: 0 10px 32px -6px rgb(0 119 255 / 0.55);
 
@@ -170,9 +165,8 @@
   --container-lead: 40rem; /* the hero's lead paragraph */
   --container-content: 76rem; /* 1216px content width */
   --container-nav: 87.5rem; /* 1400px: the header runs wider than the content at the top of the page */
-  --container-window: 64rem; /* the device card around the desktop app */
-  --container-phone: 15rem; /* a handset */
-  --aspect-device: 393 / 852; /* a current phone's screen proportions */
+  --container-laptop: 70rem; /* the hero's laptop, base to base */
+  --container-phone: 15rem; /* the phone in the hero */
   --container-menu-sm: 22rem; /* header menu panels */
   --container-menu-md: 34rem;
   --container-menu-lg: 44rem;
@@ -181,8 +175,8 @@
   --spacing-section: 4rem;
   --spacing-section-lg: 5rem;
 
-  /* The stage the device card tilts in. */
-  --perspective-stage: 1000px;
+  /* The depth the laptop's lid and the phone tilt in. */
+  --perspective-stage: 1400px;
 
   /* ── Layers ─────────────────────────────────────────────────────────────────── */
   --z-index-behind: -1; /* decoration inside an isolated component */
@@ -275,8 +269,6 @@
     radial-gradient(80% 42% at 50% -6%, rgb(0 104 230 / 0.3), transparent 78%);
   /* The same light from below, behind the closing band. */
   --gradient-stage-light-low: radial-gradient(70% 90% at 50% 120%, rgb(0 119 255 / 0.32), transparent 70%);
-  /* The machined edge of a device: light at the top, falling away at the bottom. */
-  --gradient-device-edge: linear-gradient(160deg, #5f6d89 0%, #3d4a64 38%, #232c40 100%);
 
   --gutter: 1rem; /* 16px side gutter on phones */
   --header-height: 3.75rem;
