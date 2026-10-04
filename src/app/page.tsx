@@ -3,7 +3,6 @@ import { JsonLd } from "@/components/ui/JsonLd";
 import { home } from "@/content/home";
 import { site } from "@/content/site";
 import { homeJsonLd } from "@/lib/structured-data";
-import { BusinessCase } from "@/sections/home/BusinessCase";
 import { Cost } from "@/sections/home/Cost";
 import { Customers } from "@/sections/home/Customers";
 import { Downloads } from "@/sections/home/Downloads";
@@ -12,6 +11,7 @@ import { FinalCta } from "@/sections/home/FinalCta";
 import { FreePlan } from "@/sections/home/FreePlan";
 import { Hero } from "@/sections/home/Hero";
 import { Pricing } from "@/sections/home/Pricing";
+import { Regions } from "@/sections/home/Regions";
 import { WorkingDay } from "@/sections/home/WorkingDay";
 
 export const metadata: Metadata = {
@@ -35,8 +35,8 @@ export const metadata: Metadata = {
 
 /**
  * The home page makes one argument, in order (docs/redesign/strategy.md): what Workchats is and that five
- * people use it free, the product working across devices, who uses it, the short version for whoever
- * signs it off, the free plan and what happens at person six, the details that make it calm, every
+ * people use it free, the product working across devices, who uses it, where its data lives and how it
+ * is kept safe, the free plan and what happens at person six, the details that make it calm, every
  * device, what it saves, what it costs, questions, then the last step. The business case starts inside
  * the first two screens on a desktop. The route is fully static: no cookies, headers or uncached data.
  */
@@ -46,7 +46,7 @@ export default function HomePage() {
       <JsonLd data={homeJsonLd()} />
       <Hero />
       <Customers />
-      <BusinessCase />
+      <Regions />
       <FreePlan />
       <WorkingDay />
       <Downloads />

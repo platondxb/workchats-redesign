@@ -1,0 +1,141 @@
+/*
+ * The region globe (src/components/globe/RegionGlobe.tsx). The planet is a picture, the poster, until the
+ * live globe takes over in a canvas. The arcs, points and labels are SVG and HTML laid over it, so they
+ * stay sharp, take the theme's colours and are there without JavaScript. Choosing a region in the list
+ * beside the globe highlights it here through :has(), with or without the live globe.
+ */
+
+/* The planet's colours, read by the live globe (globe-runtime.ts) when it starts and whenever the theme
+   changes. On the dark page the planet is night-blue with the land picked out in light, brightest where it
+   faces the viewer; on the light page it is pale with the land in shade. The rim light is the brand blue. */
+@utility globe-palette {
+  --globe-ocean: var(--color-night-raised);
+  --globe-rim: var(--color-brand);
+  --globe-dark: 1;
+  --globe-land: 0.5;
+  :where([data-theme="light"]) & {
+    --globe-ocean: var(--color-night-overlay);
+    --globe-dark: 0;
+    --globe-land: 1.4;
+  }
+}
+
+/* Which region is chosen, read from the section's radio inputs. */
+@custom-variant region-chosen (&:where(#regions:has([name="region"]:checked) *));
+@custom-variant pin-chosen (&:where(#regions:has(#region-gb:checked) [data-pin="gb"] *, #regions:has(#region-eu:checked) [data-pin="eu"] *, #regions:has(#region-ae:checked) [data-pin="ae"] *));
+@custom-variant arc-chosen (&:where(#regions:has(#region-gb:checked) :is([data-from="gb"], [data-to="gb"]), #regions:has(#region-eu:checked) :is([data-from="eu"], [data-to="eu"]), #regions:has(#region-ae:checked) :is([data-from="ae"], [data-to="ae"])));
+
+/* Where each region's pin sits in the resting view, as a share of the globe's box: globe-math.ts's
+   pinAt(point, viewOf(homeCentre)), which globe-math.test.ts checks these against. The live globe moves
+   the pins as it turns by setting --pin-x, --pin-y and --pin-facing on them. */
+@utility globe-pin {
+  position: absolute;
+  left: var(--pin-x, var(--pin-home-x));
+  top: var(--pin-y, var(--pin-home-y));
+  opacity: var(--pin-facing, 1);
+}
+
+@utility globe-pin-gb {
+  --pin-home-x: 39.57%;
+  --pin-home-y: 32.33%;
+}
+
+@utility globe-pin-eu {
+  --pin-home-x: 43.64%;
+  --pin-home-y: 35.87%;
+}
+
+@utility globe-pin-ae {
+  --pin-home-x: 68.49%;
+  --pin-home-y: 51.75%;
+}
+
+/* A region's point: a bright dot in a ring of the accent, lit by a soft glow. */
+@utility globe-dot {
+  position: absolute;
+  width: 0.625rem;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 9999px;
+  background: var(--color-on-night);
+  box-shadow:
+    0 0 0 0.1875rem color-mix(in oklab, var(--color-accent-on-night) 60%, transparent),
+    0 0 1rem 0.25rem color-mix(in oklab, var(--color-brand) 45%, transparent);
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -0.625rem;
+    border-radius: 9999px;
+    border: 0.09375rem solid var(--color-accent-on-night);
+    opacity: 0;
+  }
+}
+
+/* A chosen point sends out one ring, once, as the globe turns to it. */
+@utility globe-ping {
+  &::after {
+    animation: globe-ping calc(2 * var(--transition-duration-slower)) var(--ease-out) both;
+  }
+}
+
+@keyframes globe-ping {
+  from {
+    scale: 0.4;
+    opacity: 1;
+  }
+  to {
+    scale: 2.2;
+    opacity: 0;
+  }
+}
+
+/* The arcs between the regions. pathLength="1" on each path makes the dash the whole arc, so moving the
+   dash offset from 1 to 0 draws it in. */
+@utility globe-arc {
+  fill: none;
+  stroke: var(--color-accent-on-night);
+  stroke-width: 1.5px;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  vector-effect: non-scaling-stroke;
+  transition:
+    stroke-dashoffset calc(2 * var(--transition-duration-slower)) var(--ease-out),
+    opacity var(--transition-duration-base) var(--ease-out),
+    stroke-width var(--transition-duration-base) var(--ease-out);
+  [data-intro="waiting"] & {
+    stroke-dashoffset: 1;
+    transition: none;
+  }
+  [data-intro="playing"] &:nth-child(2) {
+    transition-delay: var(--transition-duration-fast);
+  }
+  [data-intro="playing"] &:nth-child(3) {
+    transition-delay: calc(2 * var(--transition-duration-fast));
+  }
+}
+
+/* The points and labels arrive after the arcs have started to draw. */
+@utility globe-mark {
+  transition: opacity var(--transition-duration-slow) var(--ease-out);
+  [data-intro="waiting"] & {
+    opacity: 0;
+    transition: none;
+  }
+  [data-intro="playing"] & {
+    transition-delay: var(--transition-duration-slower);
+  }
+}
+
+/* The arcs glow in the brand blue, as the planet's rim does. */
+@utility globe-arcs {
+  filter: drop-shadow(0 0 0.375rem color-mix(in oklab, var(--color-brand) 70%, transparent));
+}
+
+/* A soft light behind the planet, so it sits in the page instead of on it. */
+@utility globe-glow {
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--color-brand) 22%, transparent),
+    transparent 78%
+  );
+}

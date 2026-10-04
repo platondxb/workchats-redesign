@@ -6,6 +6,7 @@ import { faq } from "./faq";
 import { home } from "./home";
 import { comingSoon, primaryNav, isNavGroup } from "./navigation";
 import { quotas } from "./pricing";
+import { hostingRegions } from "./site";
 
 /** Every piece of copy on the page, as one string (the competitor list itself is left out). */
 function allCopy(): string {
@@ -63,7 +64,7 @@ describe("copy rules", () => {
 
   it("asks no rhetorical questions in section headings", () => {
     const titles = [
-      home.businessCase.title,
+      home.regions.title,
       home.freePlan.title,
       home.day.title,
       home.download.title,
@@ -123,19 +124,19 @@ describe("unreleased features", () => {
   });
 });
 
-describe("the business case", () => {
-  const detail = (id: string) => home.businessCase.rows.find((row) => row.id === id)?.detail ?? "";
-
-  it("covers cost, reliability, security and residency, in the owner's approved words", () => {
-    expect(detail("cost")).toContain("Pro is £3");
-    expect(detail("reliability")).toBe("99.9% uptime SLA on Pro and above.");
-    expect(detail("encryption")).toBe("End-to-end encryption on every message, call and file.");
-    expect(detail("residency")).toBe("Hosted in the UK, the EU or the UAE. GDPR compliant.");
-    expect(detail("privacy")).toMatch(/who sees their role, status and messages/);
+describe("where the data lives", () => {
+  it("names the three hosting regions, in the owner's approved words", () => {
+    expect(home.regions.title).toBe("Hosted in the UK, the EU or the UAE");
+    expect(home.regions.compliance).toMatch(/^GDPR compliant, with audit logs and data export/);
   });
 
-  it("quotes the saving the calculator computes", () => {
-    expect(detail("replaces")).toContain("£15,744 a year less");
+  it("keeps the security facts beside the regions, so the business case starts in the first two screens", () => {
+    expect(home.regions.intro).toContain("end-to-end encrypted");
+    expect(home.regions.intro).toContain("99.9% uptime SLA on Pro and above");
+  });
+
+  it("describes the globe in words, naming every region", () => {
+    for (const region of hostingRegions) expect(home.regions.globeLabel).toContain(region.name);
   });
 });
 

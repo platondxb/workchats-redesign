@@ -120,19 +120,18 @@ test.describe("content and rendering", () => {
     test.skip(isMobile(page), "the brief's two-screen rule is for desktop");
     await page.goto("/");
     const twoScreens = 2 * (page.viewportSize()?.height ?? 900);
-    const brief = page.getByRole("article", { name: "Workchats in brief" });
-    // This measures the bottom of a label after ~1800px of accumulated layout, and the font metrics of
+    const regions = page.getByRole("region", { name: "Hosted in the UK, the EU or the UAE" });
+    // This measures the bottom of a paragraph after ~1800px of accumulated layout, and the font metrics of
     // the machine the page was built on differ from CI's Linux runner by about 22px over that distance.
     // The assertion guards a regression at the scale of a screen, so it allows that much slack: a
     // sub-pixel boundary here would flip between platforms without catching anything real.
     const renderingSlack = 48;
-    // Cost and what it replaces are in the hero; reliability, encryption and residency lead the brief.
-    for (const term of ["Reliability", "Encryption", "Data residency"]) {
-      const box = await brief.getByText(term, { exact: true }).boundingBox();
-      expect(box && box.y + box.height, term).toBeLessThan(twoScreens + renderingSlack);
-    }
-    await expect(brief).toContainText("99.9% uptime SLA on Pro and above.");
-    await expect(brief).toContainText("Hosted in the UK, the EU or the UAE.");
+    // Cost and what it replaces are in the hero; residency, encryption and reliability lead the next section.
+    const intro = regions.getByText(/^Choose where your workspace lives/);
+    const box = await intro.boundingBox();
+    expect(box && box.y + box.height).toBeLessThan(twoScreens + renderingSlack);
+    await expect(intro).toContainText("end-to-end encrypted");
+    await expect(intro).toContainText("99.9% uptime SLA on Pro and above");
   });
 
   test("has link-preview tags and a 1200 × 630 preview image", async ({ page, request }) => {
@@ -416,15 +415,6 @@ test.describe("interaction", () => {
     await expect(page.locator("#cost-workchats-label")).toHaveText("Workchats Max + your office suite");
     await expect(page.locator('#cost-workchats [data-currency="GBP"]')).toHaveText("£24,480");
     await expect(saving).toHaveText("£34,906");
-  });
-
-  test("copies a link to the business case for the IT team", async ({ page, context, browserName }) => {
-    test.skip(browserName !== "chromium", "clipboard permissions");
-    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-    await page.goto("/");
-    await page.getByRole("button", { name: "Copy link for your IT team" }).click();
-    await expect(page.locator("#copy-brief-status")).toContainText("Link copied");
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(/\/#business-case$/);
   });
 
   test("the header gathers into a floating glass bar as the page scrolls", async ({ page }) => {

@@ -167,6 +167,7 @@
   --container-nav: 87.5rem; /* 1400px: the header runs wider than the content at the top of the page */
   --container-laptop: 70rem; /* the hero's laptop, base to base */
   --container-phone: 15rem; /* the phone in the hero */
+  --container-globe: 38rem; /* the region globe, rim to rim with its glow */
   --container-menu-sm: 22rem; /* header menu panels */
   --container-menu-md: 34rem;
   --container-menu-lg: 44rem;

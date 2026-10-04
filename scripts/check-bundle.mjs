@@ -18,9 +18,9 @@ const BUDGET = {
   totalKb: 800, // first view, before consent
   fontFiles: 4,
   fontFamilies: 2,
-  // Loaded after the first view (brief §6.3): client chunks the page imports lazily, and any 3D device
-  // assets under public/3d/<device>/. Today both are zero: the devices are HTML and CSS
-  // (docs/redesign/adr-3d-devices.md), and these budgets keep it honest if that changes.
+  // Loaded after the first view (brief §6.3): client chunks the page imports lazily (today the region
+  // globe's planet: cobe and the code that turns it), and any 3D device assets under public/3d/<device>/
+  // (none: the devices are vector renders, docs/redesign/adr-3d-devices.md).
   deferredJsKb: 180, // Brotli
   deviceAssetsKb: 1536, // per device folder: model plus textures
 };
@@ -48,12 +48,18 @@ const scripts = unique(
 );
 const styles = unique([...html.matchAll(/<link[^>]+href="(\/_next\/[^"]+\.css)"/g)].map((m) => m[1]));
 const fonts = unique([...html.matchAll(/<link[^>]+href="(\/_next\/[^"]+\.woff2)"/g)].map((m) => m[1]));
-// Same-origin images the HTML loads straight away (the device renders), served from public/.
-const images = unique(
-  [...html.matchAll(/<img[^>]+src="(\/(?!_next\/)[^"]+)"/g)]
-    .map((m) => m[1])
-    .filter((url) => existsSync(path.join(root, "public", url))),
-);
+// Same-origin images, served from public/: the ones the HTML loads straight away (the device renders) and
+// the lazy ones the browser fetches only as they near the screen (the globe's posters). For an image in a
+// <picture>, a current browser fetches its first <source> (the AVIF), so that is the one measured.
+const publicImages = (lazy) =>
+  unique(
+    [...html.matchAll(/(?:<picture>(?:<source[^>]*\ssrcSet="([^"]+)"[^>]*>)?)?<img[^>]+src="(\/(?!_next\/)[^"]+)"[^>]*>/gi)]
+      .filter((m) => /\sloading="lazy"/.test(m[0]) === lazy)
+      .map((m) => m[1] ?? m[2])
+      .filter((url) => existsSync(path.join(root, "public", url))),
+  );
+const images = publicImages(false);
+const lazyImages = publicImages(true);
 // Resources the browser actually fetches from other origins (canonical and alternate links don't count).
 const thirdParty = unique(
   [
@@ -77,10 +83,10 @@ const jsGzip = sum(scripts, gzip);
 const cssBrotli = sum(styles, brotli);
 const fontBytes = sum(fonts, (buffer) => buffer.length); // WOFF2 is already compressed
 const htmlBrotli = brotli(Buffer.from(html));
-const imageBrotli = images.reduce(
-  (total, url) => total + brotli(readFileSync(path.join(root, "public", url))),
-  0,
-);
+const imagesSize = (urls) =>
+  urls.reduce((total, url) => total + brotli(readFileSync(path.join(root, "public", url))), 0);
+const imageBrotli = imagesSize(images);
+const lazyImageBytes = imagesSize(lazyImages);
 const totalBytes = jsBrotli + cssBrotli + fontBytes + htmlBrotli + imageBrotli;
 
 // Web-font families: @font-face rules that download a file. Local, size-matched fallbacks don't count.
@@ -97,15 +103,16 @@ const families = styles.length
   : [];
 
 // Deferred JavaScript: chunks the page's client components can load, minus the ones the HTML already loads.
+// That is every chunk in the page's client reference manifest, and every chunk those chunks import on
+// demand (a dynamic import() names its chunk as a string, "static/chunks/….js").
+const chunkUrls = (text) =>
+  [...text.matchAll(/static\/chunks\/[^"'\\]+?\.js/g)].map((m) => `/_next/${m[0]}`);
 const manifestFile = path.join(root, ".next", "server", "app", "page_client-reference-manifest.js");
-const pageChunks = existsSync(manifestFile)
-  ? unique(
-      [...readFileSync(manifestFile, "utf8").matchAll(/static\/chunks\/[^"'\\]+?\.js/g)].map(
-        (m) => `/_next/${m[0]}`,
-      ),
-    )
-  : [];
-const deferred = pageChunks.filter((url) => !scripts.includes(url) && existsSync(assetPath(url)));
+const reachable = new Set([...scripts, ...(existsSync(manifestFile) ? chunkUrls(readFileSync(manifestFile, "utf8")) : [])]);
+for (const url of reachable) {
+  if (existsSync(assetPath(url))) for (const next of chunkUrls(read(url).toString("utf8"))) reachable.add(next);
+}
+const deferred = [...reachable].filter((url) => !scripts.includes(url) && existsSync(assetPath(url)));
 const deferredBrotli = sum(deferred, brotli);
 
 // 3D device assets, if any: each folder in public/3d is one device.
@@ -129,6 +136,7 @@ const rows = [
   [`Fonts, ${fonts.length} preloaded WOFF2`, kb(fontBytes)],
   [`Images, ${images.length} (device renders)`, kb(imageBrotli)],
   ["Total first view before consent", kb(totalBytes)],
+  [`Lazy images, ${lazyImages.length} (posters, 1 per theme)`, kb(lazyImageBytes)],
 ];
 console.log("Compressed transfer sizes (Brotli unless stated):");
 for (const [label, value] of rows) console.log(`  ${label.padEnd(38)} ${value.toFixed(1).padStart(7)} KB`);

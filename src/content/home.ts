@@ -108,44 +108,23 @@ export const home = {
 
   customers,
 
-  businessCase: {
-    title: "The short version, for whoever signs it off",
-    intro: "Cost, reliability, security and where your data lives, on one page you can forward.",
-    copyLink: { label: "Copy link for your IT team", done: "Link copied" },
+  /**
+   * Where data lives, on a globe the visitor can turn. The intro carries the reliability and security
+   * facts as well, so the business case (cost and encryption in the hero, residency and the SLA here)
+   * lands inside the first two screens on a desktop.
+   */
+  regions: {
+    title: `Hosted in ${regionList}`,
+    intro:
+      "Choose where your workspace lives. Its data stays inside that region, end-to-end encrypted, with a 99.9% uptime SLA on Pro and above.",
+    legend: "Show a region on the globe",
+    compliance: "GDPR compliant, with audit logs and data export on Pro and above.",
     walkthrough: { label: "Book a security walkthrough", href: site.links.bookDemo },
-    sheetTitle: "Workchats in brief",
-    /** Led by what the hero doesn't already say, so reliability and residency sit inside the first two
-     *  screens on a desktop; cost and what it replaces are in the hero's lead and caption. */
-    rows: [
-      { id: "reliability", term: "Reliability", detail: "99.9% uptime SLA on Pro and above." },
-      {
-        id: "encryption",
-        term: "Encryption",
-        detail: "End-to-end encryption on every message, call and file.",
-      },
-      { id: "residency", term: "Data residency", detail: `Hosted in ${regionList}. GDPR compliant.` },
-      {
-        id: "cost",
-        term: "Cost",
-        detail: `Free for up to ${freeMembers} people. Pro is ${fromPrice} and Max ${gbp(maxAnnual)} per person a month, billed annually.`,
-      },
-      {
-        id: "replaces",
-        term: "What it replaces",
-        detail: `A chat app, a meeting tool, a screen recorder and the messenger your team falls back to. For ${seats} people, ${gbp(savingAt50)} a year less at list prices.`,
-      },
-      {
-        id: "compliance",
-        term: "Compliance",
-        detail: "Compliance and audit logs, and data export, on Pro and above.",
-      },
-      {
-        id: "privacy",
-        term: "Privacy",
-        detail:
-          "Granular privacy settings: every team member controls who sees their role, status and messages.",
-      },
-    ],
+    globeLabel: `A globe showing the three regions Workchats is hosted in, ${hostingRegions
+      .map((region) => region.name)
+      .join(", ")
+      .replace(/, (?=[^,]*$)/, " and ")}, linked by arcs.`,
+    dragHint: "Drag to turn the globe",
   },
 
   freePlan: {

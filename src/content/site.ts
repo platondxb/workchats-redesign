@@ -92,9 +92,43 @@ export const customers = {
 /** Calendar integrations, live per the owner (3 Oct 2026) and /features/video-meetings. */
 export const calendarIntegrations = ["Google Calendar", "Outlook", "iCal"] as const;
 
-/** Where data is hosted (FAQ). The owner confirmed the United Arab Emirates for the Middle East region. */
+/**
+ * Where data is hosted (FAQ: "the UK, EU, or Middle East"; the owner confirmed the United Arab Emirates for
+ * the Middle East, 3 October 2026), and the data-protection law that applies in each (Terms, "Data
+ * protection": UK GDPR, EU GDPR and the UAE's PDPL).
+ *
+ * `point` places the region on the globe, at its geographic centre: it marks the region, not a data centre.
+ * (Capitals would put the UK's and the EU's points almost on top of each other: London and Brussels are
+ * 320 km apart.)
+ */
 export const hostingRegions = [
-  { id: "gb", name: "United Kingdom", short: "UK" },
-  { id: "eu", name: "European Union", short: "EU" },
-  { id: "ae", name: "United Arab Emirates", short: "UAE" },
-] as const;
+  {
+    id: "gb",
+    name: "United Kingdom",
+    short: "UK",
+    law: "UK GDPR",
+    point: [54, -2], // CIA World Factbook, "Geographic coordinates"
+  },
+  {
+    id: "eu",
+    name: "European Union",
+    short: "EU",
+    law: "EU GDPR",
+    point: [49.8431, 9.9019], // Gadheim, Bavaria: the EU's geographic midpoint since 2020 (IGN)
+  },
+  {
+    id: "ae",
+    name: "United Arab Emirates",
+    short: "UAE",
+    law: "UAE PDPL, Federal Decree-Law No. 45 of 2021",
+    point: [24, 54], // CIA World Factbook, "Geographic coordinates"
+  },
+] as const satisfies readonly {
+  id: string;
+  name: string;
+  short: string;
+  law: string;
+  point: readonly [number, number];
+}[];
+
+export type RegionId = (typeof hostingRegions)[number]["id"];

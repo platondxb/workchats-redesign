@@ -1,7 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { findCompetitorNames } from "@/content/competitors";
-import { customers, platforms } from "@/content/site";
+import { customers, hostingRegions, platforms } from "@/content/site";
 import { homeJsonLd } from "@/lib/structured-data";
 import HomePage, { metadata } from "./page";
 
@@ -64,12 +64,21 @@ describe("the home page", () => {
     expect(strip.querySelector("img, svg")).toBeNull();
   });
 
-  it("starts the business case with the facts an approver asks for", () => {
+  it("says where the data lives, in a list anyone can use and on a globe described in words", () => {
     renderPage();
-    const brief = screen.getByRole("article", { name: "Workchats in brief" });
-    for (const term of ["Cost", "What it replaces", "Reliability", "Encryption", "Data residency"]) {
-      expect(within(brief).getByText(term)).toBeInTheDocument();
+    const section = screen.getByRole("region", { name: "Hosted in the UK, the EU or the UAE" });
+    const list = within(section).getByRole("group", { name: "Show a region on the globe" });
+    for (const region of hostingRegions) {
+      const radio = within(list).getByRole("radio", { name: new RegExp(`^${region.name}`) });
+      expect(radio).not.toBeChecked();
+      expect(within(list).getByText(region.law)).toBeInTheDocument();
     }
+    expect(
+      within(section).getByRole("img", { name: /^A globe showing the three regions/ }),
+    ).toBeInTheDocument();
+    // The arcs and labels are in the HTML, so the poster is the whole picture without JavaScript.
+    expect(section.querySelectorAll("path[data-from]")).toHaveLength(3);
+    expect(section.querySelectorAll("[data-pin]")).toHaveLength(hostingRegions.length);
   });
 
   it("describes the devices in words, as one picture", () => {
