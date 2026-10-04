@@ -27,7 +27,7 @@ async function openMenu(page: Page, name: string) {
       },
       pill: { left: pill.left, right: pill.right, bottom: pill.bottom },
       button: { centre: own.left + own.width / 2 },
-      shift: wrapper.style.getPropertyValue("--menu-shift"),
+      overhang: wrapper.style.getPropertyValue("--menu-overhang"),
     };
   });
 }
@@ -67,9 +67,8 @@ test.describe("the header's menu panels", () => {
   test("hang centred under their button at the top of the page, as they always did", async ({ page }) => {
     await openPage(page, 1440);
     for (const name of menus) {
-      const { panel, button, shift } = await openMenu(page, name);
+      const { panel, button } = await openMenu(page, name);
       expect(Math.abs((panel.left + panel.right) / 2 - button.centre), name).toBeLessThanOrEqual(1);
-      expect(shift, name).toBe("0px");
       await page.keyboard.press("Escape");
     }
   });
@@ -112,12 +111,12 @@ test.describe("the header's menu panels", () => {
     await page.evaluate(() => window.scrollTo(0, 300));
     await page.waitForTimeout(200);
     const open = await openMenu(page, "Features");
-    expect(open.shift).not.toBe("0px");
+    expect(open.overhang).not.toBe("0px");
     await page.keyboard.press("Escape");
     const left = await page
       .locator("header [data-menu-item]")
       .first()
-      .evaluate((li) => li.querySelector<HTMLElement>("[id]")?.style.getPropertyValue("--menu-shift"));
+      .evaluate((li) => li.querySelector<HTMLElement>("[id]")?.style.getPropertyValue("--menu-overhang"));
     expect(left).toBe("");
   });
 });

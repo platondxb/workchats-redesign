@@ -620,12 +620,33 @@
   }
 }
 
-/* Where a header menu panel hangs: centred under its button, then moved sideways by --menu-shift, which the
-   header's script (HeaderNav) sets so that a panel never sticks out past the glass pill once the header has
-   gathered into it. Without the variable, which is the case at the top of the page, it is simply centred. */
+/* Where a header menu panel hangs: centred under its button, then moved sideways so that it never sticks out
+   past the glass pill once the header has gathered into it. HeaderNav measures how far the panel would stick
+   out (--menu-overhang, a length that is 0px when it fits) when a menu opens, and the page's scroll applies
+   it: --menu-gather runs from 0 at the top of the page to 1 over the first 6rem, on the same scroll timeline
+   and range as the pill's own fade-in (nav-glass), so the panel moves in exactly as the pill appears and
+   nothing has to be read or redone as the page scrolls. Without scroll timelines, or with reduced motion, the
+   header is simply the pill, and --menu-gather rests at 1. */
+@property --menu-gather {
+  syntax: "<number>";
+  initial-value: 1;
+  inherits: false;
+}
+
 @utility menu-anchor {
-  left: calc(50% + var(--menu-shift, 0px));
+  left: calc(50% + var(--menu-overhang, 0px) * var(--menu-gather));
   translate: -50% 0;
+  @supports (animation-timeline: scroll()) {
+    animation: menu-gather linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 6rem;
+  }
+}
+
+@keyframes menu-gather {
+  from {
+    --menu-gather: 0;
+  }
 }
 
 /* The phone menu: a modal <dialog> that fades in and out, backdrop included. */

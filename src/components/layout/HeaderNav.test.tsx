@@ -144,80 +144,86 @@ describe("desktop menus", () => {
 });
 
 /**
- * jsdom has no layout, so the boxes are given: the glass pill and the open panel, and how much of the pill
- * is showing (its opacity: 0 at the top of the page, 1 once the header has gathered into it).
+ * jsdom has no layout, so the boxes are given: the glass pill, and the open panel where it hangs when it is
+ * simply centred under its button.
  */
 function box(left: number, right: number): DOMRect {
   return { left, right, width: right - left, top: 0, bottom: 0, x: left, y: 0, height: 0 } as DOMRect;
 }
 
-async function openFeatures(pill: [number, number], panel: [number, number], opacity: string) {
+async function openFeatures(pill: [number, number], panel: [number, number]) {
   const user = userEvent.setup();
   setup();
   const glass = document.querySelector<HTMLElement>("[data-nav-glass]");
   const features = button("Features");
   const wrapper = document.getElementById(features.getAttribute("aria-controls") ?? "");
   if (!glass || !wrapper) throw new Error("the header's markup is missing");
-  vi.spyOn(glass, "getBoundingClientRect").mockReturnValue(box(...pill));
-  vi.spyOn(wrapper, "getBoundingClientRect").mockReturnValue(box(...panel));
-  const real = window.getComputedStyle.bind(window);
-  const computed = vi
-    .spyOn(window, "getComputedStyle")
-    .mockImplementation((element, pseudo) =>
-      element === glass ? ({ opacity } as CSSStyleDeclaration) : real(element, pseudo),
-    );
+  const glassBox = vi.spyOn(glass, "getBoundingClientRect").mockReturnValue(box(...pill));
+  const panelBox = vi.spyOn(wrapper, "getBoundingClientRect").mockReturnValue(box(...panel));
   await user.click(features);
-  return { user, wrapper, features, computed };
+  return { user, wrapper, features, glassBox, panelBox };
 }
 
-const shift = (wrapper: HTMLElement | null) => wrapper?.style.getPropertyValue("--menu-shift");
+const overhang = (wrapper: HTMLElement | null) => wrapper?.style.getPropertyValue("--menu-overhang");
 
 describe("desktop menu panels and the glass pill", () => {
   afterEach(() => vi.restoreAllMocks());
 
-  it("move in from the pill's left end, once the header has gathered into it", async () => {
-    const { wrapper } = await openFeatures([100, 900], [50, 754], "1");
-    expect(shift(wrapper)).toBe("50px");
+  it("measure how far they stick out past the pill's left end", async () => {
+    const { wrapper } = await openFeatures([100, 900], [50, 754]);
+    expect(overhang(wrapper)).toBe("50px");
   });
 
-  it("move in from the pill's right end too", async () => {
-    const { wrapper } = await openFeatures([100, 900], [400, 1104], "1");
-    expect(shift(wrapper)).toBe("-204px");
+  it("measure how far they stick out past its right end too", async () => {
+    const { wrapper } = await openFeatures([100, 900], [400, 1104]);
+    expect(overhang(wrapper)).toBe("-204px");
   });
 
-  it("stay centred under their button when they already fit", async () => {
-    const { wrapper } = await openFeatures([100, 900], [150, 854], "1");
-    expect(shift(wrapper)).toBe("0px");
-  });
-
-  it("stay centred at the top of the page, where the pill is not drawn", async () => {
-    const { wrapper } = await openFeatures([100, 900], [50, 754], "0");
-    expect(shift(wrapper)).toBe("0px");
-  });
-
-  it("follow how much of the pill is showing as the header gathers", async () => {
-    const { wrapper } = await openFeatures([100, 900], [50, 754], "0.5");
-    expect(shift(wrapper)).toBe("25px");
+  it("measure nothing when they already fit", async () => {
+    const { wrapper } = await openFeatures([100, 900], [150, 854]);
+    expect(overhang(wrapper)).toBe("0px");
   });
 
   it("line up with the pill's left end when they are wider than the pill", async () => {
-    const { wrapper } = await openFeatures([100, 500], [50, 754], "1");
-    expect(shift(wrapper)).toBe("50px");
+    const { wrapper } = await openFeatures([100, 500], [50, 754]);
+    expect(overhang(wrapper)).toBe("50px");
   });
 
-  it("are measured again when the page scrolls or resizes while they are open", async () => {
-    const { wrapper, computed } = await openFeatures([100, 900], [50, 754], "0");
-    expect(shift(wrapper)).toBe("0px");
-    computed.mockImplementation(() => ({ opacity: "1" }) as CSSStyleDeclaration);
+  it("measure where the panel hangs when centred, whatever the scroll has moved it by", async () => {
+    // The CSS moves the panel by a share of the overhang as the page scrolls; the measure has to start from
+    // the centred position, so the overhang is reset to nothing while it is taken.
+    const { wrapper, panelBox } = await openFeatures([100, 900], [50, 754]);
+    const seen: (string | undefined)[] = [];
+    panelBox.mockImplementation(() => {
+      seen.push(overhang(wrapper));
+      return box(50, 754);
+    });
+    window.dispatchEvent(new Event("resize"));
+    expect(seen).toEqual(["0px"]);
+    expect(overhang(wrapper)).toBe("50px");
+  });
+
+  it("are measured again when the window is resized while they are open", async () => {
+    const { wrapper, glassBox } = await openFeatures([100, 900], [50, 754]);
+    expect(overhang(wrapper)).toBe("50px");
+    glassBox.mockReturnValue(box(20, 900));
+    window.dispatchEvent(new Event("resize"));
+    expect(overhang(wrapper)).toBe("0px");
+  });
+
+  it("don't read anything as the page scrolls: the CSS does that part", async () => {
+    const { wrapper, glassBox, panelBox } = await openFeatures([100, 900], [50, 754]);
+    const reads = glassBox.mock.calls.length + panelBox.mock.calls.length;
     window.dispatchEvent(new Event("scroll"));
-    expect(shift(wrapper)).toBe("50px");
+    expect(glassBox.mock.calls.length + panelBox.mock.calls.length).toBe(reads);
+    expect(overhang(wrapper)).toBe("50px");
   });
 
   it("give the position back when they close", async () => {
-    const { user, wrapper } = await openFeatures([100, 900], [50, 754], "1");
-    expect(shift(wrapper)).toBe("50px");
+    const { user, wrapper } = await openFeatures([100, 900], [50, 754]);
+    expect(overhang(wrapper)).toBe("50px");
     await user.keyboard("{Escape}");
-    expect(shift(wrapper)).toBe("");
+    expect(overhang(wrapper)).toBe("");
   });
 });
 

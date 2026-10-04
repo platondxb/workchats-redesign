@@ -95,31 +95,30 @@ function DesktopNav({ entries, caret }: { entries: HeaderEntry[]; caret: ReactNo
   useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
 
   // An open panel hangs centred under its button, which for the first and the last menu is past the end of the
-  // glass pill. Once the header has gathered into the pill, move the panel sideways just far enough to sit
-  // inside it. How far depends on how visible the pill is (its opacity: 0 at the top of the page, where the
-  // pill is not drawn and the panel stays centred, 1 once it has gathered), so the panel follows the scroll.
+  // glass pill. Measure how far, once when the menu opens and again if the window is resized, and hand it to
+  // the CSS as --menu-overhang. How much of it applies is the page's scroll's business (the menu-anchor
+  // utility): none at the top, where the pill is not drawn, all of it once the header has gathered into the
+  // pill. So nothing is read or redone on every scroll, and a jump of the page cannot leave the panel behind.
   useEffect(() => {
     if (openIndex === null) return;
     const panel = document.getElementById(`${baseId}-menu-${openIndex}`);
     const glass = navRef.current?.closest("header")?.querySelector<HTMLElement>("[data-nav-glass]");
     if (!panel || !glass) return;
-    const place = () => {
-      panel.style.setProperty("--menu-shift", "0px");
+    const measure = () => {
+      // Where the panel hangs when it is simply centred.
+      panel.style.setProperty("--menu-overhang", "0px");
       const pill = glass.getBoundingClientRect();
       const box = panel.getBoundingClientRect();
-      let shift = 0;
-      if (box.left < pill.left || box.width > pill.width) shift = pill.left - box.left;
-      else if (box.right > pill.right) shift = pill.right - box.right;
-      const gathered = Number.parseFloat(getComputedStyle(glass).opacity) || 0;
-      panel.style.setProperty("--menu-shift", `${Math.round(shift * gathered)}px`);
+      let overhang = 0;
+      if (box.left < pill.left || box.width > pill.width) overhang = pill.left - box.left;
+      else if (box.right > pill.right) overhang = pill.right - box.right;
+      panel.style.setProperty("--menu-overhang", `${Math.round(overhang)}px`);
     };
-    place();
-    window.addEventListener("scroll", place, { passive: true });
-    window.addEventListener("resize", place);
+    measure();
+    window.addEventListener("resize", measure);
     return () => {
-      window.removeEventListener("scroll", place);
-      window.removeEventListener("resize", place);
-      panel.style.removeProperty("--menu-shift");
+      window.removeEventListener("resize", measure);
+      panel.style.removeProperty("--menu-overhang");
     };
   }, [openIndex, baseId]);
 
