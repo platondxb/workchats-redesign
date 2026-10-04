@@ -1,6 +1,7 @@
 import { ArrowRight, ArrowUpRight, CaretDown, DownloadSimple, List, X } from "@phosphor-icons/react/ssr";
 import { LiquidButton } from "@/components/ui/liquid-glass-button";
 import { menuIcons } from "@/components/ui/icons";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { home } from "@/content/home";
 import { isNavGroup, primaryNav, type NavGroup, type NavLink } from "@/content/navigation";
 import { site } from "@/content/site";
@@ -14,7 +15,7 @@ import { Logo } from "./Logo";
  * floating glass pill the width of the content (the nav-* utilities in globals.css, transform and opacity
  * only). Without scroll timelines, or with reduced motion, it is simply the pill.
  *
- * Actions: Sign in, Download (to the platforms on this page), Book a demo, and Start free as the primary.
+ * Actions: Sign in, the theme button, Download (to the platforms on this page), and Start free as the primary.
  * Menu panels, the phone menu and every action are rendered here on the server and handed to the client
  * component, so their icons and buttons never ship as JavaScript.
  */
@@ -24,7 +25,6 @@ export function SiteHeader() {
   );
 
   const signIn = { label: "Sign in", href: site.links.signIn };
-  const demo = { label: "Book a demo", href: site.links.bookDemo };
   const start = home.hero.primary;
 
   return (
@@ -56,6 +56,7 @@ export function SiteHeader() {
                       >
                         {signIn.label}
                       </a>
+                      <ThemeToggle />
                       <LiquidButton
                         href={home.hero.download.href}
                         tone="glass"
@@ -69,15 +70,6 @@ export function SiteHeader() {
                         <span aria-hidden="true" className="max-xl:sr-only">
                           Download
                         </span>
-                      </LiquidButton>
-                      <LiquidButton
-                        href={demo.href}
-                        tone="glass"
-                        size="sm"
-                        data-cta="header-demo"
-                        className="max-xl:px-4"
-                      >
-                        {demo.label}
                       </LiquidButton>
                     </>
                   ),
@@ -100,9 +92,7 @@ export function SiteHeader() {
                         <DownloadSimple aria-hidden="true" className="size-5" />
                         Download
                       </LiquidButton>
-                      <LiquidButton href={demo.href} tone="glass" data-cta="menu-demo">
-                        {demo.label}
-                      </LiquidButton>
+                      <ThemeToggle variant="menu" />
                       <a
                         href={signIn.href}
                         className="inline-flex min-h-12 items-center justify-center rounded-full text-body font-semibold text-on-night-muted hover:text-on-night"

@@ -10,6 +10,7 @@ import { site } from "@/content/site";
 import { gaMeasurementId } from "@/lib/analytics";
 import { analyticsEventsScript } from "@/lib/analytics-events";
 import { platformScript } from "@/lib/platform";
+import { themeScript } from "@/lib/theme";
 import { metaColours } from "@/styles/meta-colours";
 import "./globals.css";
 
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
   applicationName: site.name,
 };
 
-/** The site is dark: browser chrome and form controls follow it. */
+/** The site is dark until the visitor picks the light theme (lib/theme.ts): browser chrome and form controls follow it. */
 export const viewport: Viewport = {
   colorScheme: "dark",
   themeColor: metaColours.night,
@@ -47,13 +48,15 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // suppressHydrationWarning: the <head> script sets data-os on <html> before React hydrates.
+    // suppressHydrationWarning: the <head> scripts set data-theme and data-os on <html> before React hydrates.
     <html
       lang={site.language}
       className={`${stackText.variable} ${stackHeadline.variable}`}
       suppressHydrationWarning
     >
       <head>
+        {/* Runs before the first paint: the visitor's saved theme, so the page never flashes the wrong one (lib/theme.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {/* Runs before the first paint: the visitor's platform, for the download labels (lib/platform.ts). */}
         <script dangerouslySetInnerHTML={{ __html: platformScript }} />
         {/* Analytics events, sent only once gtag exists, which is only after consent (lib/analytics-events.ts). */}

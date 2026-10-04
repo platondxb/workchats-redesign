@@ -10,19 +10,31 @@ import { cx } from "@/lib/cx";
  */
 
 export type LiquidTone = "primary" | "glass";
-export type LiquidSize = "sm" | "md" | "lg";
+export type LiquidSize = "sm" | "md" | "lg" | "icon";
 
 const toneClasses: Record<LiquidTone, string> = {
-  // The main action: solid brand blue under the glass rim, so the hierarchy doesn't depend on the effect.
-  primary: "bg-accent text-on-accent hover:shadow-accent-glow",
+  // The main action: the glass tone's construction (a translucent fill and the same rim), tinted blue. On the
+  // dark page the tint is brand blue at 75%, see-through and still vivid over the dark backdrop. On the light
+  // theme it is the solid accent blue, because a see-through blue picks up a pale backdrop and the white label
+  // loses its contrast (5.1:1 solid), so there the rim is the Download button's dark one (shadow-liquid-ink).
+  // No refraction layer (liquid-backdrop): browsers that composite on the GPU pull pixels from outside the
+  // pill into its corners when they displace the backdrop, and on a fill this far from the page's colour that
+  // shows as a pale blob (a dark one on the dark theme). Over a near-opaque fill there is nothing to refract.
+  primary:
+    "bg-brand/75 text-on-accent before:shadow-liquid hover:bg-brand/85 hover:shadow-accent-glow theme-light:bg-accent theme-light:before:shadow-liquid-ink theme-light:hover:bg-accent-hover",
+  // The distortion sits on the same ::before as the rim, so the rim is painted after the backdrop is
+  // distorted. As a separate layer under the rim it was refracted too, which smeared it into cloudy
+  // patches and washed it out. On the light theme the rim is drawn in shade (shadow-liquid-ink).
   glass:
-    "bg-glass-fill text-on-night hover:bg-glass-fill-hover after:pointer-events-none after:absolute after:inset-0 after:z-behind after:overflow-hidden after:rounded-full after:liquid-backdrop",
+    "bg-glass-fill text-on-night before:shadow-liquid before:liquid-backdrop hover:bg-glass-fill-hover theme-light:before:shadow-liquid-ink",
 };
 
 const sizeClasses: Record<LiquidSize, string> = {
   sm: "min-h-11 px-5 text-small",
   md: "min-h-12 px-6 text-body",
   lg: "min-h-14 px-8 text-body",
+  // A square button that holds one icon, as tall as a small one.
+  icon: "size-11",
 };
 
 export function liquidClasses(tone: LiquidTone, size: LiquidSize, className?: string): string {
@@ -31,7 +43,7 @@ export function liquidClasses(tone: LiquidTone, size: LiquidSize, className?: st
     "transition-[scale,box-shadow,background-color] duration-base ease-spring",
     "hover:scale-104 active:scale-97 active:duration-instant",
     "disabled:pointer-events-none disabled:opacity-50 aria-busy:cursor-progress aria-busy:opacity-80",
-    "before:pointer-events-none before:absolute before:inset-0 before:z-behind before:rounded-full before:shadow-liquid",
+    "before:pointer-events-none before:absolute before:inset-0 before:z-behind before:rounded-full",
     toneClasses[tone],
     sizeClasses[size],
     className,

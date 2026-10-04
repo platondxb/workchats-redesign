@@ -39,15 +39,31 @@ describe("SiteHeader", () => {
     expect(container.querySelector(".nav-gather-end")).not.toBeNull();
   });
 
-  it("keeps Sign in, Download and Book a demo beside Start free", () => {
+  it("keeps Sign in and Download beside Start free, and has no Book a demo", () => {
     render(<SiteHeader />);
-    for (const name of ["Sign in", "Download", "Book a demo", "Start free"]) {
+    for (const name of ["Sign in", "Download", "Start free"]) {
       expect(screen.getByRole("link", { name })).toBeInTheDocument();
     }
+    expect(screen.queryByRole("link", { name: "Book a demo" })).not.toBeInTheDocument();
     // Download goes to the platforms on this page and reports the visitor's platform.
     expect(screen.getByRole("link", { name: "Download" })).toHaveAttribute("href", "#download");
     expect(screen.getByRole("link", { name: "Download" })).toHaveAttribute("data-download", "auto");
     expect(screen.getByRole("link", { name: "Start free" })).toHaveAttribute("data-cta", "header");
+  });
+
+  it("puts one theme button just before Download, named for what it does next", () => {
+    render(<SiteHeader />);
+    const buttons = screen.getAllByRole("button", { name: "Switch to light theme" });
+    expect(buttons).toHaveLength(1);
+    const [theme] = buttons;
+    expect(theme).toHaveAttribute("data-theme-toggle");
+    expect(theme).toHaveAttribute("type", "button");
+    // Both icons are in the HTML and CSS shows one, so the right one is there before the first paint.
+    expect(theme?.querySelectorAll("svg")).toHaveLength(2);
+    const download = screen.getByRole("link", { name: "Download" });
+    expect(theme?.compareDocumentPosition(download)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    const signIn = screen.getByRole("link", { name: "Sign in" });
+    expect(signIn.compareDocumentPosition(theme as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it("lays the Features menu out as one grid of rich items, unreleased ones flagged in place", async () => {

@@ -432,13 +432,21 @@ test.describe("interaction", () => {
     await expect.poll(() => logo.evaluate((el) => getComputedStyle(el).translate)).toMatch(/^(none|0px)/);
   });
 
-  test("the header keeps Sign in, Download and Book a demo beside Start free", async ({ page }) => {
+  test("the header keeps Sign in and Download beside Start free, with the theme button before Download", async ({
+    page,
+  }) => {
     test.skip(isMobile(page), "desktop header");
     await page.goto("/");
     const header = page.getByRole("banner");
-    for (const name of ["Sign in", "Download", "Book a demo", "Start free"]) {
+    for (const name of ["Sign in", "Download", "Start free"]) {
       await expect(header.getByRole("link", { name })).toBeVisible();
     }
+    await expect(header.getByRole("link", { name: "Book a demo" })).toHaveCount(0);
+    const theme = header.getByRole("button", { name: "Switch to light theme" });
+    await expect(theme).toBeVisible();
+    const themeBox = await theme.boundingBox();
+    const downloadBox = await header.getByRole("link", { name: "Download" }).boundingBox();
+    expect(themeBox && downloadBox && themeBox.x + themeBox.width <= downloadBox.x).toBe(true);
   });
 
   test("the laptop's lid leans back at the top of the page and comes up square as it scrolls", async ({
@@ -509,7 +517,7 @@ test.describe("interaction", () => {
     await expect(page.locator('[data-app="phone"]')).toBeVisible();
   });
 
-  test("the phone menu is a dialog that leads with the free sign-up and keeps every action", async ({
+  test("the phone menu is a dialog that leads with the free sign-up and keeps the actions", async ({
     page,
   }) => {
     test.skip(!isMobile(page), "phone navigation");
@@ -518,9 +526,11 @@ test.describe("interaction", () => {
     await page.getByRole("button", { name: "Menu" }).click();
     const dialog = page.getByRole("dialog", { name: "Menu" });
     await expect(dialog).toBeVisible();
-    for (const name of ["Start free", "Download", "Book a demo", "Sign in"]) {
+    for (const name of ["Start free", "Download", "Sign in"]) {
       await expect(dialog.getByRole("link", { name })).toBeVisible();
     }
+    await expect(dialog.getByRole("link", { name: "Book a demo" })).toHaveCount(0);
+    await expect(dialog.getByRole("button", { name: "Light theme" })).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
   });

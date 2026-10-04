@@ -31,6 +31,13 @@
 @custom-variant os-web (&:where([data-os="web"] *));
 
 /*
+ * The light theme, set on <html> by the <head> script in lib/theme.ts (the dark theme is the default and
+ * has no variant). Most of the page changes through the colour tokens in tokens.css; this variant is for
+ * the few places that need a different rule, not just a different colour.
+ */
+@custom-variant theme-light (&:where([data-theme="light"] *));
+
+/*
  * Size-matched fallbacks, so text wraps the same before and after the web fonts arrive (no layout shift).
  * next/font has no metrics for Stack Sans yet, so these were measured: Stack Sans Text sets 9.33% wider
  * than Arial, Stack Sans Headline Bold 2.11% narrower than Arial Bold. Ascent 1000 and descent 300 per

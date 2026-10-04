@@ -6,7 +6,8 @@
  * exists here. scripts/check-tokens.mjs fails the build if a component reaches for a raw value instead.
  *
  * The page is dark: a night stage lit in the brand blue from the top. Light is kept for real artefacts
- * on that stage (the app's own screens and the one-page brief), which use the light tokens below.
+ * on that stage (the app's own screens and the one-page brief), which use the light tokens below. A light
+ * theme for the whole page, chosen with the header's theme button, is at the end of this file.
  *
  * Contrast notes (WCAG 2.2): light tokens are measured against --color-surface (#fff), dark tokens
  * against --color-night (#0b1220), unless stated.
@@ -155,6 +156,13 @@
     inset 1px 1px 1px -0.5px rgb(255 255 255 / 0.6), inset -1px -1px 1px -0.5px rgb(255 255 255 / 0.6),
     inset 0 0 6px 6px rgb(255 255 255 / 0.12), inset 0 0 2px 2px rgb(255 255 255 / 0.06),
     0 0 12px rgb(0 0 0 / 0.15);
+  /* The same edge on the light theme's glass buttons: the light is lost to a pale page, so the rim is drawn
+     in shade instead (the original design's light variant). Chosen per theme in button-classes.ts. */
+  --shadow-liquid-ink:
+    0 0 6px rgb(0 0 0 / 0.03), 0 2px 6px rgb(0 0 0 / 0.08), inset 3px 3px 0.5px -3px rgb(0 0 0 / 0.9),
+    inset -3px -3px 0.5px -3px rgb(0 0 0 / 0.85), inset 1px 1px 1px -0.5px rgb(0 0 0 / 0.6),
+    inset -1px -1px 1px -0.5px rgb(0 0 0 / 0.6), inset 0 0 6px 6px rgb(0 0 0 / 0.12),
+    inset 0 0 2px 2px rgb(0 0 0 / 0.06), 0 0 12px rgb(255 255 255 / 0.15);
   /* A device standing on the stage: a tight contact shadow and a long soft one. */
   --drop-shadow-device: 0 6px 10px rgb(0 0 0 / 0.4), 0 28px 36px rgb(0 0 0 / 0.55);
   /* The primary button's glow on hover: the brand blue lighting the stage under it. */
@@ -290,4 +298,52 @@
     --spacing-section: 6rem;
     --spacing-section-lg: 8rem;
   }
+}
+
+/*
+ * ── The light theme ───────────────────────────────────────────────────────────────────────────────
+ * Set on <html> as data-theme="light" by the <head> script in lib/theme.ts, which the header's theme
+ * button flips and remembers. The page's colour roles keep their names, so no component changes: `night`
+ * still means "the page" and `on-night` "text on the page", and here they carry light values. The light
+ * artefacts (the app's screens, the brief) keep their own tokens and stand out on the pale page by shade
+ * and edge. Contrast is measured against --color-night (#f5f8fc) unless stated; every text pair is at
+ * least 4.5:1 and every control boundary at least 3:1.
+ *
+ * Shadows are baked into Tailwind's utilities (they are not read from variables at runtime), so the three
+ * page elevations are restated below for the utilities themselves.
+ */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --color-night: #f5f8fc; /* page background */
+  --color-night-raised: #ffffff; /* panels on the page, 18.1:1 with the primary text */
+  --color-night-overlay: #e8eef7; /* menus, selected controls, raised chips */
+  --color-night-line: #dbe3ee; /* hairlines on the page */
+  --color-night-line-strong: #7b8aa0; /* boundaries of controls, 3.3:1 (3.5:1 on white) */
+  --color-night-glass: rgb(255 255 255 / 0.78); /* the floating header bar: content reads through it */
+  --color-on-night: #0e1626; /* primary text, 17.0:1 */
+  --color-on-night-muted: #475467; /* secondary text, 7.2:1 (6.6:1 on night-overlay) */
+  --color-on-night-subtle: #5c6679; /* tertiary text and the headline's second line, 5.4:1 (5.0:1 on night-overlay) */
+  --color-accent-on-night: #0057c2; /* links, focus rings and selected states on the page, 6.3:1 */
+  --color-glass-fill: rgb(14 22 38 / 0.05); /* glass buttons and chips on the page */
+  --color-glass-fill-hover: rgb(14 22 38 / 0.09);
+
+  /* The stage light, softened for a pale page: the same blue falling from the top edge. */
+  --gradient-stage-light:
+    radial-gradient(42% 60% at 0% 0%, rgb(0 119 255 / 0.16), transparent 72%),
+    radial-gradient(42% 60% at 100% 0%, rgb(0 119 255 / 0.16), transparent 72%),
+    radial-gradient(80% 42% at 50% -6%, rgb(0 104 230 / 0.14), transparent 78%);
+  --gradient-stage-light-low: radial-gradient(70% 90% at 50% 120%, rgb(0 119 255 / 0.16), transparent 70%);
+}
+
+:root[data-theme="light"] .shadow-raised {
+  --tw-shadow: 0 1px 2px rgb(14 22 38 / 0.06), 0 10px 30px -8px rgb(14 22 38 / 0.16);
+}
+
+:root[data-theme="light"] .shadow-overlay {
+  --tw-shadow: 0 4px 12px rgb(14 22 38 / 0.08), 0 28px 64px -12px rgb(14 22 38 / 0.22);
+}
+
+:root[data-theme="light"] .shadow-float {
+  --tw-shadow: 0 1px 2px rgb(14 22 38 / 0.08), 0 8px 40px -12px rgb(14 22 38 / 0.26);
 }
