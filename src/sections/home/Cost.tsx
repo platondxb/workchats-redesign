@@ -12,8 +12,7 @@ import { convertTotal, formatDisplayPrice } from "@/lib/pricing";
  * example) in every currency, so it reads completely without JavaScript; a small inline script reveals
  * the slider, recalculates, and keeps the currency in step with the pricing section. Above 50 people Pro
  * no longer fits, so the sum switches to Max. Every figure comes from content/home.ts and pricing.ts; the
- * products behind each category are named only in the source comments there. The three totals are marked
- * data-roll: when one changes, with the currency or the team size, its digits roll (lib/price-roll.ts).
+ * products behind each category are named only in the source comments there.
  */
 
 /**
@@ -143,8 +142,7 @@ export function Cost() {
               <span className="block text-small font-semibold text-on-night-muted">{saving.label}</span>
               <span
                 id="cost-saving"
-                data-roll=""
-                className="relative inline-block font-display text-title tabular-nums"
+                className="font-display text-title tabular-nums"
                 suppressHydrationWarning
               >
                 <Amounts gbp={saving.totalGbp} />
@@ -185,12 +183,7 @@ function CostRow({
         <span id={`${id}-label`} className="mr-auto text-small font-semibold" suppressHydrationWarning>
           {label}
         </span>
-        <span
-          id={id}
-          data-roll=""
-          className="relative shrink-0 font-display text-heading tabular-nums"
-          suppressHydrationWarning
-        >
+        <span id={id} className="shrink-0 font-display text-heading tabular-nums" suppressHydrationWarning>
           <Amounts gbp={amountGbp} />
         </span>
         <span className="shrink-0 text-small text-on-night-muted"> {home.cost.calculator.perYear}</span>

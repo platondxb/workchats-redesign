@@ -40,7 +40,7 @@ export function Hero() {
           titleComponent={
             <>
               <h1 id="hero-title" className="font-display text-display">
-                <span className="block text-on-night">{hero.title[0]}</span>
+                <span className="block text-on-night">{hero.title[0]}</span>{" "}
                 <span className="block text-on-night-subtle">{hero.title[1]}</span>
               </h1>
               <p className="mx-auto mt-6 max-w-lead text-lead text-on-night-muted">{hero.lead}</p>
