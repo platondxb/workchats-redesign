@@ -29,7 +29,7 @@ test.describe("content and rendering", () => {
     const page = await context.newPage();
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "Team chat, calls and files.Free for up to 5 people.",
+      "Team chat, calls and files. Free for up to 5 people.",
     );
     const pro = page.getByRole("article", { name: "Pro" });
     const pricing = page.locator("#pricing");

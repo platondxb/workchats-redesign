@@ -26,7 +26,9 @@ import { convert, formatDisplayPrice, gbpPrice } from "@/lib/pricing";
  * Billing period and currency are native radio buttons; CSS shows the matching price (the billing-* and
  * currency-* variants in globals.css), so both switches work before and without JavaScript. A small inline
  * script remembers the chosen currency for the session (sessionStorage: a preference the visitor set, so no
- * consent is needed) and announces the new prices to screen readers.
+ * consent is needed) and announces the new prices to screen readers. A price that changes rolls, digit by
+ * digit, through the shared script in lib/price-roll.ts: the two figures below are marked data-roll for it.
+ * With the script off, or with reduced motion, the price just rises in.
  */
 
 /**
@@ -47,6 +49,9 @@ const periodClasses = {
 } satisfies Record<BillingPeriod, string>;
 
 const pricingScript = `(function(){var s=document.getElementById("pricing");if(!s)return;var K="workchats-currency",live=document.getElementById("pricing-status");function mirror(c){["currency","cost-currency"].forEach(function(n){var el=document.getElementById(n+"-"+c.toLowerCase());if(el)el.checked=true})}try{var c=sessionStorage.getItem(K);if(c)mirror(c)}catch(e){}document.addEventListener("change",function(e){var t=e.target;if(!t||t.type!=="radio")return;if(t.name==="currency"||t.name==="cost-currency"){try{sessionStorage.setItem(K,t.value)}catch(err){}mirror(t.value)}if(!live)return;var code=(document.querySelector('input[name="currency"]:checked')||{value:"GBP"}).value,monthly=document.getElementById("billing-monthly").checked,parts=[];s.querySelectorAll("[data-plan-price]").forEach(function(p){var a=[].find.call(p.querySelectorAll('[data-currency="'+code+'"]'),function(x){return x.offsetParent!==null});if(a)parts.push(p.getAttribute("data-plan-price")+" "+a.textContent)});live.textContent=parts.join(", ")+" per user a month, billed "+(monthly?"monthly":"annually")+"."})})()`;
+
+/** The plans whose action is the shiny button (see shiny-cta in globals.css); every other action is glass. */
+const shinyPlans: ReadonlySet<PlanId> = new Set(["max", "enterprise"]);
 
 function plan(id: PlanId): Plan {
   const found = plans.find((p) => p.id === id);
@@ -172,7 +177,7 @@ function PlanCard({
       <PlanPrice plan={plan} />
       <LiquidButton
         href={plan.cta.href}
-        tone={plan.cta.variant === "primary" ? "primary" : "glass"}
+        tone={shinyPlans.has(plan.id) ? "shiny" : plan.cta.variant === "primary" ? "primary" : "glass"}
         data-cta={`pricing-${plan.id}`}
         className="mt-6 w-full sm:w-auto sm:self-start"
       >
@@ -219,7 +224,9 @@ function PlanPrice({ plan }: { plan: Plan }) {
   if (plan.price.kind === "free") {
     return (
       <div className="mt-6" data-plan-price={plan.name}>
-        <p className="font-display text-title tabular-nums">{amounts("annual")}</p>
+        <p data-roll="" className="relative font-display text-title tabular-nums">
+          {amounts("annual")}
+        </p>
         <p className="text-micro text-on-night-subtle">For as long as you like</p>
       </div>
     );
@@ -229,7 +236,7 @@ function PlanPrice({ plan }: { plan: Plan }) {
   // line up whichever currency is shown.
   return (
     <div className="mt-6" data-plan-price={plan.name}>
-      <p className="font-display text-title tabular-nums">
+      <p data-roll="" className="relative font-display text-title tabular-nums">
         <span className={periodClasses.annual}>{amounts("annual")}</span>
         <span className={periodClasses.monthly}>{amounts("monthly")}</span>
       </p>

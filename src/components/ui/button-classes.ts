@@ -9,7 +9,7 @@ import { cx } from "@/lib/cx";
  * in), disabled, and loading (aria-busy). Every size is at least 44px tall.
  */
 
-export type LiquidTone = "primary" | "glass";
+export type LiquidTone = "primary" | "glass" | "shiny";
 export type LiquidSize = "sm" | "md" | "lg" | "icon";
 
 const toneClasses: Record<LiquidTone, string> = {
@@ -27,6 +27,9 @@ const toneClasses: Record<LiquidTone, string> = {
   // patches and washed it out. On the light theme the rim is drawn in shade (shadow-liquid-ink).
   glass:
     "bg-glass-fill text-on-night before:shadow-liquid before:liquid-backdrop hover:bg-glass-fill-hover theme-light:before:shadow-liquid-ink",
+  // A dark pill with a conic highlight for a border and a shimmer inside (shiny-cta in globals.css). It
+  // brings its own pseudo-elements and transitions, so liquidClasses leaves out the rim and the spring.
+  shiny: "shiny-cta",
 };
 
 const sizeClasses: Record<LiquidSize, string> = {
@@ -38,6 +41,15 @@ const sizeClasses: Record<LiquidSize, string> = {
 };
 
 export function liquidClasses(tone: LiquidTone, size: LiquidSize, className?: string): string {
+  if (tone === "shiny") {
+    return cx(
+      "group/button inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 font-semibold whitespace-nowrap",
+      "disabled:pointer-events-none disabled:opacity-50",
+      toneClasses[tone],
+      sizeClasses[size],
+      className,
+    );
+  }
   return cx(
     "group/button relative isolate inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap",
     "transition-[scale,box-shadow,background-color] duration-base ease-spring",

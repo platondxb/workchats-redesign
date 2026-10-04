@@ -94,6 +94,35 @@ function DesktopNav({ entries, caret }: { entries: HeaderEntry[]; caret: ReactNo
 
   useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
 
+  // An open panel hangs centred under its button, which for the first and the last menu is past the end of the
+  // glass pill. Once the header has gathered into the pill, move the panel sideways just far enough to sit
+  // inside it. How far depends on how visible the pill is (its opacity: 0 at the top of the page, where the
+  // pill is not drawn and the panel stays centred, 1 once it has gathered), so the panel follows the scroll.
+  useEffect(() => {
+    if (openIndex === null) return;
+    const panel = document.getElementById(`${baseId}-menu-${openIndex}`);
+    const glass = navRef.current?.closest("header")?.querySelector<HTMLElement>("[data-nav-glass]");
+    if (!panel || !glass) return;
+    const place = () => {
+      panel.style.setProperty("--menu-shift", "0px");
+      const pill = glass.getBoundingClientRect();
+      const box = panel.getBoundingClientRect();
+      let shift = 0;
+      if (box.left < pill.left || box.width > pill.width) shift = pill.left - box.left;
+      else if (box.right > pill.right) shift = pill.right - box.right;
+      const gathered = Number.parseFloat(getComputedStyle(glass).opacity) || 0;
+      panel.style.setProperty("--menu-shift", `${Math.round(shift * gathered)}px`);
+    };
+    place();
+    window.addEventListener("scroll", place, { passive: true });
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("scroll", place);
+      window.removeEventListener("resize", place);
+      panel.style.removeProperty("--menu-shift");
+    };
+  }, [openIndex, baseId]);
+
   return (
     <nav ref={navRef} aria-label="Main" className="hidden lg:block">
       <ul className="flex items-center xl:gap-1">
@@ -147,11 +176,7 @@ function DesktopNav({ entries, caret }: { entries: HeaderEntry[]; caret: ReactNo
                 {entry.label}
                 {caret}
               </button>
-              <div
-                id={panelId}
-                hidden={!isOpen}
-                className="absolute top-full left-1/2 z-menu -translate-x-1/2 pt-3"
-              >
+              <div id={panelId} hidden={!isOpen} className="absolute top-full menu-anchor z-menu pt-3">
                 {mounted.has(index) ? entry.panel : null}
               </div>
             </li>

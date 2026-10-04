@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/ui/JsonLd";
 import { home } from "@/content/home";
 import { site } from "@/content/site";
+import { priceRollScript } from "@/lib/price-roll";
 import { homeJsonLd } from "@/lib/structured-data";
 import { Cost } from "@/sections/home/Cost";
 import { Customers } from "@/sections/home/Customers";
@@ -54,6 +55,8 @@ export default function HomePage() {
       <Pricing />
       <Faq />
       <FinalCta />
+      {/* Rolls the digits of a price in the pricing cards when the currency or the billing period changes (lib/price-roll.ts). */}
+      <script dangerouslySetInnerHTML={{ __html: priceRollScript }} />
     </>
   );
 }

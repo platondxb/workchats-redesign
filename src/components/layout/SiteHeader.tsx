@@ -33,6 +33,7 @@ export function SiteHeader() {
         <div className="relative">
           <div
             aria-hidden="true"
+            data-nav-glass=""
             className="pointer-events-none absolute nav-glass inset-y-0 rounded-md border border-night-line bg-night-glass shadow-float backdrop-blur-glass"
           />
           <div className="relative nav-inset">

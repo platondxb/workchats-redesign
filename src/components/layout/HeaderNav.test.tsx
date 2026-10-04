@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { isNavGroup, primaryNav } from "@/content/navigation";
 import { HeaderNav, type HeaderEntry } from "./HeaderNav";
 
@@ -43,34 +43,38 @@ const entries: HeaderEntry[] = primaryNav.map((entry) =>
 );
 
 function setup() {
+  // The header's markup around the nav: the glass pill the panels are kept inside once the header has gathered.
   render(
-    <HeaderNav
-      entries={entries}
-      mobileNav={
-        <nav aria-label="Main">
-          <a href="/pricing">Pricing</a>
-        </nav>
-      }
-      actions={{
-        desktop: (
-          <>
-            <a href="https://app.workchats.com/">Sign in</a>
-            <a href="#download">Download</a>
-            <a href="/book-a-demo">Book a demo</a>
-          </>
-        ),
-        primary: <a href="https://admin.workchats.com/signup/">Start free</a>,
-        menu: (
-          <>
-            <a href="https://admin.workchats.com/signup/">Start free</a>
-            <a href="#download">Download</a>
-            <a href="/book-a-demo">Book a demo</a>
-            <a href="https://app.workchats.com/">Sign in</a>
-          </>
-        ),
-      }}
-      icons={{ caret: <span />, menu: <span />, close: <span /> }}
-    />,
+    <header>
+      <div data-nav-glass="" aria-hidden="true" />
+      <HeaderNav
+        entries={entries}
+        mobileNav={
+          <nav aria-label="Main">
+            <a href="/pricing">Pricing</a>
+          </nav>
+        }
+        actions={{
+          desktop: (
+            <>
+              <a href="https://app.workchats.com/">Sign in</a>
+              <a href="#download">Download</a>
+              <a href="/book-a-demo">Book a demo</a>
+            </>
+          ),
+          primary: <a href="https://admin.workchats.com/signup/">Start free</a>,
+          menu: (
+            <>
+              <a href="https://admin.workchats.com/signup/">Start free</a>
+              <a href="#download">Download</a>
+              <a href="/book-a-demo">Book a demo</a>
+              <a href="https://app.workchats.com/">Sign in</a>
+            </>
+          ),
+        }}
+        icons={{ caret: <span />, menu: <span />, close: <span /> }}
+      />
+    </header>,
   );
 }
 
@@ -136,6 +140,84 @@ describe("desktop menus", () => {
     await user.click(features);
     await user.click(screen.getByRole("link", { name: "Video and meetings" }));
     expect(features).toHaveAttribute("aria-expanded", "false");
+  });
+});
+
+/**
+ * jsdom has no layout, so the boxes are given: the glass pill and the open panel, and how much of the pill
+ * is showing (its opacity: 0 at the top of the page, 1 once the header has gathered into it).
+ */
+function box(left: number, right: number): DOMRect {
+  return { left, right, width: right - left, top: 0, bottom: 0, x: left, y: 0, height: 0 } as DOMRect;
+}
+
+async function openFeatures(pill: [number, number], panel: [number, number], opacity: string) {
+  const user = userEvent.setup();
+  setup();
+  const glass = document.querySelector<HTMLElement>("[data-nav-glass]");
+  const features = button("Features");
+  const wrapper = document.getElementById(features.getAttribute("aria-controls") ?? "");
+  if (!glass || !wrapper) throw new Error("the header's markup is missing");
+  vi.spyOn(glass, "getBoundingClientRect").mockReturnValue(box(...pill));
+  vi.spyOn(wrapper, "getBoundingClientRect").mockReturnValue(box(...panel));
+  const real = window.getComputedStyle.bind(window);
+  const computed = vi
+    .spyOn(window, "getComputedStyle")
+    .mockImplementation((element, pseudo) =>
+      element === glass ? ({ opacity } as CSSStyleDeclaration) : real(element, pseudo),
+    );
+  await user.click(features);
+  return { user, wrapper, features, computed };
+}
+
+const shift = (wrapper: HTMLElement | null) => wrapper?.style.getPropertyValue("--menu-shift");
+
+describe("desktop menu panels and the glass pill", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("move in from the pill's left end, once the header has gathered into it", async () => {
+    const { wrapper } = await openFeatures([100, 900], [50, 754], "1");
+    expect(shift(wrapper)).toBe("50px");
+  });
+
+  it("move in from the pill's right end too", async () => {
+    const { wrapper } = await openFeatures([100, 900], [400, 1104], "1");
+    expect(shift(wrapper)).toBe("-204px");
+  });
+
+  it("stay centred under their button when they already fit", async () => {
+    const { wrapper } = await openFeatures([100, 900], [150, 854], "1");
+    expect(shift(wrapper)).toBe("0px");
+  });
+
+  it("stay centred at the top of the page, where the pill is not drawn", async () => {
+    const { wrapper } = await openFeatures([100, 900], [50, 754], "0");
+    expect(shift(wrapper)).toBe("0px");
+  });
+
+  it("follow how much of the pill is showing as the header gathers", async () => {
+    const { wrapper } = await openFeatures([100, 900], [50, 754], "0.5");
+    expect(shift(wrapper)).toBe("25px");
+  });
+
+  it("line up with the pill's left end when they are wider than the pill", async () => {
+    const { wrapper } = await openFeatures([100, 500], [50, 754], "1");
+    expect(shift(wrapper)).toBe("50px");
+  });
+
+  it("are measured again when the page scrolls or resizes while they are open", async () => {
+    const { wrapper, computed } = await openFeatures([100, 900], [50, 754], "0");
+    expect(shift(wrapper)).toBe("0px");
+    computed.mockImplementation(() => ({ opacity: "1" }) as CSSStyleDeclaration);
+    window.dispatchEvent(new Event("scroll"));
+    expect(shift(wrapper)).toBe("50px");
+  });
+
+  it("give the position back when they close", async () => {
+    const { user, wrapper } = await openFeatures([100, 900], [50, 754], "1");
+    expect(shift(wrapper)).toBe("50px");
+    await user.keyboard("{Escape}");
+    expect(shift(wrapper)).toBe("");
   });
 });
 

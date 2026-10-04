@@ -5,8 +5,10 @@ import { liquidClasses, type LiquidSize, type LiquidTone } from "./button-classe
  * The liquid glass button the owner supplied (liquid-glass-button.tsx), adapted to this codebase:
  *
  * - It is a Server Component: no "use client" and no hooks, so it adds no JavaScript to the page.
- * - The glass rim and the backdrop distortion are the button's ::before and ::after, not two extra <div>s.
- *   A <div> isn't allowed inside a <button>, and the page has a 1,000-element budget.
+ * - The glass rim and the backdrop distortion are both the button's ::before, not two extra <div>s. A <div>
+ *   isn't allowed inside a <button>, and the page has a 1,000-element budget. They must share one layer:
+ *   a box-shadow paints over its own backdrop-filter, whereas a rim on a layer below the distortion is
+ *   refracted along with the page.
  * - Its colours, shadows, radii and timings are tokens (shadow-liquid, shadow-accent-glow, ease-spring,
  *   duration-*). The inline `backdropFilter` style became the `liquid-backdrop` utility in globals.css.
  * - The SVG filter it distorts with is rendered once, in the root layout (<LiquidGlassFilter />), rather
@@ -16,6 +18,9 @@ import { liquidClasses, type LiquidSize, type LiquidTone } from "./button-classe
  *
  * The distortion needs backdrop-filter: url(), which only Chromium supports today; other browsers show the
  * same glass rim and fill without it.
+ *
+ * The `shiny` tone is a different button (a dark pill with a moving highlight, see shiny-cta in
+ * globals.css). Its glow is the ::before of a <span> around the label, so the label is wrapped here.
  */
 
 export { liquidClasses, type LiquidSize, type LiquidTone } from "./button-classes";
@@ -36,14 +41,14 @@ export function LiquidButton(props: AsLink | AsButton) {
     const { tone = "primary", size = "md", className, children, ...rest } = props;
     return (
       <a {...rest} className={liquidClasses(tone, size, className)}>
-        {children}
+        {tone === "shiny" ? <span>{children}</span> : children}
       </a>
     );
   }
   const { tone = "primary", size = "md", className, children, type = "button", ...rest } = props;
   return (
     <button {...rest} type={type} className={liquidClasses(tone, size, className)}>
-      {children}
+      {tone === "shiny" ? <span>{children}</span> : children}
     </button>
   );
 }

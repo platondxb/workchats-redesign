@@ -14,6 +14,17 @@ describe("Pricing", () => {
     }
   });
 
+  it("gives the Max and Enterprise actions the shiny treatment, and no other", () => {
+    render(<Pricing />);
+    for (const plan of plans) {
+      const action = within(screen.getByRole("article", { name: plan.name })).getByRole("link", {
+        name: plan.cta.label,
+      });
+      if (plan.id === "max" || plan.id === "enterprise") expect(action).toHaveClass("shiny-cta");
+      else expect(action).not.toHaveClass("shiny-cta");
+    }
+  });
+
   it("marks Pro as the recommended next step in words, not by colour alone", () => {
     render(<Pricing />);
     const pro = screen.getByRole("article", { name: "Pro" });

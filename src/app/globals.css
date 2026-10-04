@@ -168,6 +168,247 @@
   backdrop-filter: url(#liquid-glass);
 }
 
+/*
+ * The shiny button (the "Start with Max" action): a dark pill whose border is a conic highlight, with a
+ * pattern of dots and a shimmer inside, and a glow that breathes under the label. Built from the supplied
+ * shiny-button.tsx as plain CSS: no JavaScript, no <style jsx>, no web-font import (the page's own font is
+ * used), and every colour a token.
+ *
+ * At rest it is one still frame (the highlight sits low on the border, as the original shows it): nothing
+ * loops on its own, which the page's own rule (WCAG 2.2.2, "nothing moves for more than five seconds")
+ * asks for. With a mouse the rotation runs while the button is hovered, and with a keyboard while it has
+ * focus, as a reply to the visitor. A touch screen has no hover, so there the same movement follows the
+ * scroll: it turns as the button crosses the screen, driven by the visitor's thumb and not by the clock.
+ * Reduced motion removes all of it (the global rule at the end of this file). The label sits in a <span>,
+ * which LiquidButton adds, because the glow is that span's ::before.
+ *
+ * The four registered properties are what lets the browser animate and transition the gradient's angle,
+ * width and colour; Chromium, Safari and Firefox 128+ support them, and elsewhere the still frame is shown.
+ */
+@property --shiny-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@property --shiny-angle-offset {
+  syntax: "<angle>";
+  initial-value: -150deg;
+  inherits: false;
+}
+
+@property --shiny-percent {
+  syntax: "<percentage>";
+  initial-value: 5%;
+  inherits: false;
+}
+
+@property --shiny-shine {
+  syntax: "<color>";
+  initial-value: transparent;
+  inherits: false;
+}
+
+@utility shiny-cta {
+  --shiny-cta-bg: var(--color-ink);
+  --shiny-cta-bg-subtle: color-mix(in oklab, var(--color-on-accent) 10%, transparent);
+  --shiny-cta-fg: var(--color-on-accent);
+  --shiny-cta-highlight: var(--color-brand);
+  --shiny-cta-highlight-subtle: color-mix(in oklab, var(--color-brand) 55%, var(--color-on-accent));
+  --shiny-cta-keyframes: shiny-angle;
+  --shiny-cta-duration: 3s;
+  --shiny-cta-edge: 2px;
+  --shiny-cta-dots-rest: 165deg;
+  --shiny-shine: var(--color-on-accent);
+
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  color: var(--shiny-cta-fg);
+  background:
+    linear-gradient(var(--shiny-cta-bg), var(--shiny-cta-bg)) padding-box,
+    conic-gradient(
+        from calc(var(--shiny-angle) - var(--shiny-angle-offset)),
+        transparent,
+        var(--shiny-cta-highlight) var(--shiny-percent),
+        var(--shiny-shine) calc(var(--shiny-percent) * 2),
+        var(--shiny-cta-highlight) calc(var(--shiny-percent) * 3),
+        transparent calc(var(--shiny-percent) * 4)
+      )
+      border-box;
+  box-shadow: inset 0 0 0 1px var(--shiny-cta-bg-subtle);
+  transition: var(--transition-duration-slower) var(--ease-out);
+  transition-property: --shiny-angle-offset, --shiny-percent, --shiny-shine;
+
+  &::before,
+  &::after,
+  & span::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset-inline-start: 50%;
+    inset-block-start: 50%;
+    translate: -50% -50%;
+    z-index: -1;
+  }
+
+  &:active {
+    translate: 0 1px;
+  }
+
+  /* The dots */
+  &::before {
+    --shiny-size: calc(100% - var(--shiny-cta-edge) * 3);
+    --shiny-position: 2px;
+    --shiny-space: calc(var(--shiny-position) * 2);
+    width: var(--shiny-size);
+    height: var(--shiny-size);
+    background: radial-gradient(
+        circle at var(--shiny-position) var(--shiny-position),
+        var(--color-on-accent) calc(var(--shiny-position) / 4),
+        transparent 0
+      )
+      padding-box;
+    background-size: var(--shiny-space) var(--shiny-space);
+    background-repeat: space;
+    mask-image: conic-gradient(
+      from calc(var(--shiny-angle) + 45deg + var(--shiny-cta-dots-rest)),
+      var(--color-ink),
+      transparent 10% 90%,
+      var(--color-ink)
+    );
+    border-radius: inherit;
+    opacity: 0.4;
+  }
+
+  /* The shimmer inside */
+  &::after {
+    --shiny-cta-keyframes: shiny-shimmer;
+    width: 100%;
+    aspect-ratio: 1;
+    background: linear-gradient(-50deg, transparent, var(--shiny-cta-highlight), transparent);
+    mask-image: radial-gradient(circle at bottom, transparent 40%, var(--color-ink));
+    opacity: 0.6;
+  }
+
+  & span {
+    z-index: 1;
+  }
+
+  /* The glow under the label */
+  & span::before {
+    --shiny-size: calc(100% + 1rem);
+    width: var(--shiny-size);
+    height: var(--shiny-size);
+    box-shadow: inset 0 -1ex 2rem 4px var(--shiny-cta-highlight);
+    opacity: 0;
+    transition: opacity var(--transition-duration-slower) var(--ease-out);
+  }
+
+  /* Focused with a keyboard, or hovered with a mouse: the highlight widens and warms, and everything turns.
+     Two rotations at different speeds are added together, so the light drifts rather than spins. */
+  &:focus-visible {
+    --shiny-percent: 20%;
+    --shiny-angle-offset: 95deg;
+    --shiny-shine: var(--shiny-cta-highlight-subtle);
+  }
+
+  &:focus-visible,
+  &:focus-visible::before,
+  &:focus-visible::after {
+    animation:
+      var(--shiny-cta-keyframes) linear infinite var(--shiny-cta-duration),
+      var(--shiny-cta-keyframes) linear infinite calc(var(--shiny-cta-duration) / 0.4) reverse;
+    animation-composition: add;
+  }
+
+  &:focus-visible span::before {
+    opacity: 1;
+    animation: calc(var(--shiny-cta-duration) * 1.5) shiny-breathe linear infinite;
+  }
+
+  /* Only for a pointer that can hover: on a touch screen the hover would stick after a tap and keep looping. */
+  @media (hover: hover) {
+    &:hover {
+      --shiny-percent: 20%;
+      --shiny-angle-offset: 95deg;
+      --shiny-shine: var(--shiny-cta-highlight-subtle);
+    }
+
+    &:hover,
+    &:hover::before,
+    &:hover::after {
+      animation:
+        var(--shiny-cta-keyframes) linear infinite var(--shiny-cta-duration),
+        var(--shiny-cta-keyframes) linear infinite calc(var(--shiny-cta-duration) / 0.4) reverse;
+      animation-composition: add;
+    }
+
+    &:hover span::before {
+      opacity: 1;
+      animation: calc(var(--shiny-cta-duration) * 1.5) shiny-breathe linear infinite;
+    }
+  }
+
+  /* A touch screen has nothing to hover with, so the movement follows the scroll: as the button crosses the
+     screen its highlight, dots and shimmer turn once, and the glow under the label breathes twice, each
+     one tied to where the button is (a view() timeline), so it stops when the thumb does and nothing runs
+     by itself. The button wears its hovered look throughout, since there is no pointer to bring it there.
+     Needs scroll-driven animations (Chromium, Safari 26); elsewhere the button keeps its still frame. */
+  @media (hover: none) and (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      --shiny-percent: 20%;
+      --shiny-angle-offset: 95deg;
+      --shiny-shine: var(--shiny-cta-highlight-subtle);
+
+      &,
+      &::before,
+      &::after {
+        animation-name: var(--shiny-cta-keyframes), var(--shiny-cta-keyframes);
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-direction: normal, reverse;
+        animation-iteration-count: 1, 0.4;
+        animation-timeline: view(), view();
+        animation-composition: add;
+      }
+
+      & span::before {
+        opacity: 1;
+        animation-name: shiny-breathe;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-iteration-count: 2;
+        animation-timeline: view();
+      }
+    }
+  }
+}
+
+@keyframes shiny-angle {
+  to {
+    --shiny-angle: 360deg;
+  }
+}
+
+@keyframes shiny-shimmer {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes shiny-breathe {
+  from,
+  to {
+    scale: 1;
+  }
+  50% {
+    scale: 1.2;
+  }
+}
+
 /* ── Motion ──────────────────────────────────────────────────────────────────────
  * Rules: transform and opacity only; page text is never hidden waiting for a scroll; scroll-linked
  * effects follow the scroll position and never change its speed or direction; each is progressive
@@ -379,6 +620,14 @@
   }
 }
 
+/* Where a header menu panel hangs: centred under its button, then moved sideways by --menu-shift, which the
+   header's script (HeaderNav) sets so that a panel never sticks out past the glass pill once the header has
+   gathered into it. Without the variable, which is the case at the top of the page, it is simply centred. */
+@utility menu-anchor {
+  left: calc(50% + var(--menu-shift, 0px));
+  translate: -50% 0;
+}
+
 /* The phone menu: a modal <dialog> that fades in and out, backdrop included. */
 @utility sheet {
   opacity: 0;
@@ -416,6 +665,96 @@
   to {
     opacity: 1;
     translate: 0 0;
+  }
+}
+
+/* A price that changes rolls, digit by digit, like an odometer: each character that differs leaves upwards
+   (downwards when the price falls) while its replacement rises in from the other side, a few milliseconds
+   after the one before it; characters that did not change stay still. The cells are built by the inline
+   script in lib/price-roll.ts at the moment a price in the pricing cards changes, and removed when the roll
+   ends, so they cost no elements while the page is at rest, and they are aria-hidden: the figure underneath
+   is the real one, and the live region announces the new prices. Each rolling character is one element, its
+   old and new characters drawn by its ::before and ::after, so a roll costs a handful of elements, and runs
+   of unchanged characters are plain text. Without the script, or with reduced motion, the price simply
+   rises in (price-in above). --dir is 1 for up and -1 for down, --i the cell's place in the stagger. */
+@utility price-roll {
+  position: absolute;
+  inset-block-start: 0;
+  display: inline-flex;
+  align-items: baseline;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@utility price-roll-cell {
+  --roll-pad: 0.2em;
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  padding-block: var(--roll-pad);
+  margin-block: calc(var(--roll-pad) * -1);
+  /* The edges fade only within the padding, so the line itself is never touched: at rest the digits are
+     exactly the real figure's. */
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    var(--color-ink) var(--roll-pad),
+    var(--color-ink) calc(100% - var(--roll-pad)),
+    transparent
+  );
+
+  &::before,
+  &::after {
+    display: block;
+    animation-duration: var(--transition-duration-slower);
+    animation-timing-function: var(--ease-out);
+    animation-fill-mode: both;
+    animation-delay: calc(var(--i) * 45ms);
+  }
+
+  /* The character that leaves, read from data-old. */
+  &::before {
+    content: attr(data-old);
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: var(--roll-pad);
+    animation-name: price-roll-out;
+  }
+
+  /* The character that arrives, from data-new: it holds the cell's width, so the line ends the width of the
+     new price. */
+  &::after {
+    content: attr(data-new);
+    animation-name: price-roll-in;
+  }
+
+  /* A character with nothing to replace it (the new price is shorter) keeps its place until it has left. */
+  &:not([data-new])::before {
+    position: static;
+  }
+}
+
+/* The real figure waits, in place, while its replacement rolls over it. It goes on the element that holds
+   the figures (the one marked data-roll), and hides the figures but not the rolling copy inside it. */
+@utility price-rolling {
+  & [data-currency] {
+    visibility: hidden;
+  }
+}
+
+@keyframes price-roll-out {
+  to {
+    translate: 0 calc(var(--dir) * -100%);
+    opacity: 0;
+    filter: blur(0.06em);
+  }
+}
+
+@keyframes price-roll-in {
+  from {
+    translate: 0 calc(var(--dir) * 100%);
+    opacity: 0;
+    filter: blur(0.06em);
   }
 }
 

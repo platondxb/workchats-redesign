@@ -26,7 +26,7 @@ describe("the home page", () => {
   it("has one h1 that says what Workchats is and that 5 people use it free", () => {
     renderPage();
     const h1 = screen.getByRole("heading", { level: 1 });
-    expect(h1).toHaveTextContent("Team chat, calls and files.Free for up to 5 people.");
+    expect(h1).toHaveTextContent("Team chat, calls and files. Free for up to 5 people.");
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
   });
 
