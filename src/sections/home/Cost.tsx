@@ -4,7 +4,7 @@ import { home } from "@/content/home";
 import { displayCurrencies, type CurrencyCode } from "@/content/pricing";
 import { site } from "@/content/site";
 import { cx } from "@/lib/cx";
-import { convertTotal, formatDisplayPrice } from "@/lib/pricing";
+import { convert, convertTotal, formatDisplayPrice } from "@/lib/pricing";
 
 /*
  * The cost case: the apps a typical team pays for, each named with the plan its price is for, at list
@@ -12,7 +12,9 @@ import { convertTotal, formatDisplayPrice } from "@/lib/pricing";
  * breakdown's example) in every currency, so it reads completely without JavaScript; a small inline script
  * reveals the slider, recalculates, and keeps the currency in step with the pricing section. Above 50 people
  * Pro no longer fits, so the sum switches to Max. Every figure comes from content/home.ts and pricing.ts,
- * where each row's source and the date it was checked are kept.
+ * where each row's source and the date it was checked are kept. The list's per-person prices follow the
+ * currency switch too, converted the way the pricing cards are (to the nearest half unit); they do not
+ * depend on the team size, so the script has nothing to recalculate for them.
  */
 
 /**
@@ -27,11 +29,18 @@ const currencyClasses = {
   RUB: "price-in hidden cost-currency-rub:inline",
 } satisfies Record<CurrencyCode, string>;
 
-/** One figure in every display currency. The chosen one is shown by CSS; the script rewrites them all. */
-function Amounts({ gbp }: { gbp: number }) {
+/**
+ * One figure in every display currency. The chosen one is shown by CSS; the script rewrites the totals.
+ * A per-person monthly price rounds to the nearest half unit, as on the pricing cards; a yearly total to a
+ * whole unit.
+ */
+function Amounts({ gbp, perPerson = false }: { gbp: number; perPerson?: boolean }) {
   return displayCurrencies.map((currency) => (
     <span key={currency.code} data-currency={currency.code} className={currencyClasses[currency.code]}>
-      {formatDisplayPrice(convertTotal(gbp, currency.code), currency.code)}
+      {formatDisplayPrice(
+        perPerson ? convert(gbp, currency.code) : convertTotal(gbp, currency.code),
+        currency.code,
+      )}
     </span>
   ));
 }
@@ -70,7 +79,9 @@ export function Cost() {
                   {item.name}
                   {item.kept ? <span className="block text-micro">{cost.keptNote}</span> : null}
                 </span>
-                <span className="shrink-0 tabular-nums">{item.price}</span>
+                <span className="shrink-0 tabular-nums">
+                  <Amounts gbp={item.priceGbp} perPerson />
+                </span>
               </li>
             ))}
           </ul>

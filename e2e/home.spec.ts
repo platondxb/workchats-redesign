@@ -44,6 +44,10 @@ test.describe("content and rendering", () => {
     await page.locator("#cost label").filter({ hasText: /^USD$/ }).click();
     await expect(page.locator('#cost-stack [data-currency="USD"]')).toBeVisible();
     await expect(page.locator('#cost-stack [data-currency="GBP"]')).toBeHidden();
+    // So are the per-person prices in the list beside it.
+    const slack = page.locator("#cost ul > li").first();
+    await expect(slack.locator('[data-currency="USD"]')).toHaveText("$9");
+    await expect(slack.locator('[data-currency="GBP"]')).toBeHidden();
     // The hero's download keeps its neutral label when the platform can't be read.
     await expect(page.getByRole("link", { name: /^Download the app/ })).toBeVisible();
     await context.close();
@@ -336,6 +340,7 @@ test.describe("interaction", () => {
     // One choice for the whole page: the calculator follows the pricing cards.
     await expect(page.locator("#cost").getByRole("radio", { name: "Euro (EUR)" })).toBeChecked();
     await expect(page.locator('#cost-saving [data-currency="EUR"]')).toBeVisible();
+    await expect(page.locator('#cost ul > li [data-currency="EUR"]').first()).toHaveText("€8.50");
     await page.reload();
     await expect(pricing.getByRole("radio", { name: "Euro (EUR)" })).toBeChecked();
     await expect(pro.getByText("€3.50", { exact: true })).toBeVisible();
@@ -348,6 +353,12 @@ test.describe("interaction", () => {
     await expect(page.locator('#cost-saving [data-currency="GBP"]')).toHaveText("£15,744");
     await page.locator("#cost label").filter({ hasText: /^AED$/ }).click();
     await expect(page.locator('#cost-saving [data-currency="AED"]')).toHaveText("Dh 73,367");
+    // The list's per-person prices change with it, to the nearest half unit as the pricing cards do.
+    const rows = page.locator("#cost ul > li");
+    await expect(rows.nth(0).locator('[data-currency="AED"]')).toHaveText("Dh 34");
+    await expect(rows.nth(2).locator('[data-currency="AED"]')).toHaveText("Dh 46.50");
+    await expect(rows.nth(3).locator('[data-currency="AED"]')).toHaveText("Dh 0");
+    await expect(rows.nth(0).locator('[data-currency="GBP"]')).toBeHidden();
     await expect(page.locator("#pricing").getByRole("radio", { name: "UAE dirham (AED)" })).toBeChecked();
     await expect(
       page.getByRole("article", { name: "Pro" }).getByText("Dh 14", { exact: true }),

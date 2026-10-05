@@ -215,7 +215,8 @@ export const home = {
     stack: stack.map((item) => ({
       id: item.id,
       name: item.name,
-      price: gbp(item.price),
+      /** In pounds; the section shows it in the visitor's chosen currency, converted as the pricing cards are. */
+      priceGbp: item.price,
       kept: !item.replaced,
     })),
     keptNote: "You keep this one",
@@ -242,7 +243,7 @@ export const home = {
       },
       saving: { label: "You save", totalGbp: savingAt50 },
       perYear: "a year",
-      note: `List prices per person, billed annually, before VAT, checked ${pricesChecked}. Above ${quotas.pro.members} people the sum uses Workchats Max. Totals in other currencies are approximate.`,
+      note: `List prices per person, billed annually, before VAT, checked ${pricesChecked}. Above ${quotas.pro.members} people the sum uses Workchats Max. Prices and totals in other currencies are approximate.`,
     },
     compare: { label: "Compare plans", href: "#pricing" },
     source: { label: "Read the full cost breakdown", href: site.links.costBreakdown },
