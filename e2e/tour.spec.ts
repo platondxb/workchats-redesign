@@ -37,6 +37,32 @@ test.describe("the hero's product tour", () => {
     await expect.poll(() => showing(page, device)).toMatch(/-light-/);
   });
 
+  test("goes round without stopping: all five parts in order, then chats again", async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto("/");
+    await showDevices(page);
+    // Record every part the tour shows, as it shows it.
+    await page.evaluate(() => {
+      const root = document.getElementById("hero-tour");
+      const seen: string[] = [];
+      (window as unknown as { tourSeen: string[] }).tourSeen = seen;
+      const note = () => {
+        const part = root?.dataset.current;
+        if (part && seen.at(-1) !== part) seen.push(part);
+      };
+      note();
+      if (root)
+        new MutationObserver(note).observe(root, { attributes: true, attributeFilter: ["data-current"] });
+    });
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { tourSeen: string[] }).tourSeen.length), {
+        timeout: 40_000,
+      })
+      .toBeGreaterThanOrEqual(6);
+    const seen = await page.evaluate(() => (window as unknown as { tourSeen: string[] }).tourSeen);
+    expect(seen.slice(0, 6)).toEqual(["chats", "contacts", "schedule", "calls", "tasks", "chats"]);
+  });
+
   test("has no control for the tour: nothing to press on or beside the devices", async ({ page }) => {
     await page.goto("/");
     await showDevices(page);

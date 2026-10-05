@@ -5,13 +5,13 @@ import { tourScript } from "./tour";
 /** The tour's markup, as HeroDevices.tsx renders it, cut down to what the script touches. */
 const markup = `
   <div id="hero-tour" class="tour">
-    <div role="img" data-tour-hold>
+    <div role="img">
       ${home.hero.tour.stops.map((stop) => `<div data-stop="${stop}"></div>`).join("")}
     </div>
   </div>`;
 
 /** How long a part stays, and how long after the page has loaded the tour starts. */
-const step = 4800;
+const step = 3000;
 const startsAfter = 1200;
 
 function mockMotion(reduce: boolean) {
@@ -27,7 +27,7 @@ const run = () => {
   new Function(tourScript)();
 };
 const root = () => document.getElementById("hero-tour");
-const devices = () => document.querySelector("[data-tour-hold]");
+const devices = () => document.querySelector("[role='img']");
 const pointer = (type: string, pointerType: string) => {
   const event = new MouseEvent(type);
   Object.defineProperty(event, "pointerType", { value: pointerType });
@@ -86,25 +86,25 @@ describe("the hero tour script", () => {
     expect(root()).toHaveAttribute("data-preload", "contacts");
   });
 
-  it("holds while a mouse rests on the devices, and goes on when it leaves", () => {
+  it("goes round without end: after a hundred parts it is where the order says it should be", () => {
+    mockMotion(false);
+    run();
+    vi.advanceTimersByTime(startsAfter + 100 * step);
+    const { stops } = home.hero.tour;
+    expect(root()).toHaveAttribute("data-current", stops[100 % stops.length]);
+    expect(root()).toHaveAttribute("data-preload", stops[101 % stops.length]);
+  });
+
+  it("is not held by a mouse resting on the devices, or by a touch", () => {
     mockMotion(false);
     run();
     vi.advanceTimersByTime(startsAfter);
     devices()?.dispatchEvent(pointer("pointerenter", "mouse"));
-    vi.advanceTimersByTime(5 * step);
-    expect(root()).toHaveAttribute("data-current", "chats");
-    devices()?.dispatchEvent(pointer("pointerleave", "mouse"));
     vi.advanceTimersByTime(step);
     expect(root()).toHaveAttribute("data-current", "contacts");
-  });
-
-  it("does not hold for a touch, which has no hover to rest", () => {
-    mockMotion(false);
-    run();
-    vi.advanceTimersByTime(startsAfter);
     devices()?.dispatchEvent(pointer("pointerenter", "touch"));
     vi.advanceTimersByTime(step);
-    expect(root()).toHaveAttribute("data-current", "contacts");
+    expect(root()).toHaveAttribute("data-current", "schedule");
   });
 
   it("plays only while the devices are on screen", () => {

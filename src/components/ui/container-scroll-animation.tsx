@@ -38,7 +38,7 @@ export function ContainerScroll({
       <div className="relative mx-auto mt-6 max-w-laptop md:mt-8">
         {/* The perspective sits on the tilting devices' own parent: a 3D transform is only seen in depth by
             its parent's perspective, two levels up it is flattened. */}
-        <div role="img" aria-label={label} data-tour-hold className="relative perspective-stage">
+        <div role="img" aria-label={label} className="relative perspective-stage">
           {children}
         </div>
       </div>

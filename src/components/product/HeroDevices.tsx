@@ -11,7 +11,7 @@ import { cx } from "@/lib/cx";
  * take turns: chats, contacts, schedule, calls, tasks, in the order of the app's own sidebar, on both
  * devices at once (lib/tour.ts, styles/tour.css). Only the first one's images load with the page; each
  * next one loads a step ahead. Without JavaScript, or with reduced motion, the chats screen stays. There is
- * no control for the tour: it is a picture of the app, and it holds while a mouse rests on it.
+ * no control for the tour: it is a picture of the app, and it goes round for as long as the page is open.
  */
 
 type StopId = (typeof home.hero.tour.stops)[number];
