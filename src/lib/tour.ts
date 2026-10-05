@@ -1,7 +1,7 @@
 import { home } from "@/content/home";
 
 /** How long each part of the app stays on the devices, in milliseconds. */
-const stepMs = 3000;
+const stepMs = 2000;
 
 /**
  * Plays the hero's product tour (components/product/HeroDevices.tsx, styles/tour.css): the app's five parts

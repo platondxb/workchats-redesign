@@ -11,7 +11,7 @@ const markup = `
   </div>`;
 
 /** How long a part stays, and how long after the page has loaded the tour starts. */
-const step = 3000;
+const step = 2000;
 const startsAfter = 1200;
 
 function mockMotion(reduce: boolean) {
