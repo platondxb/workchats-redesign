@@ -1,5 +1,5 @@
 import { DownloadSimple } from "@phosphor-icons/react/ssr";
-import { Laptop, Phone, TourToggle } from "@/components/product/HeroDevices";
+import { Laptop, Phone } from "@/components/product/HeroDevices";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import { LiquidButton } from "@/components/ui/liquid-glass-button";
 import { home } from "@/content/home";
@@ -40,7 +40,6 @@ export function Hero() {
           id="hero-tour"
           className="tour"
           label={hero.productLabel}
-          overlay={<TourToggle className="absolute bottom-14 left-0 z-raised" />}
           titleComponent={
             <>
               <h1 id="hero-title" className="font-display text-display">

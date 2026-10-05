@@ -4,9 +4,8 @@
  * names the current one in data-current on .tour; without it (no JavaScript, reduced motion) the first,
  * chats, stays.
  *
- * While the tour plays, the pause button's ring fills over a few seconds: that animation is the tour's
- * clock (the script moves on when it ends), so pausing the ring pauses the tour, and with reduced motion,
- * where animations are off, the tour never moves on by itself.
+ * The script's timer is the clock; there is no control for the tour. With reduced motion the script does
+ * nothing, so the tour never moves on by itself.
  */
 
 /* A part's screens are display: none until it is current, so their (lazy) images load only then. The
@@ -39,66 +38,5 @@
   from {
     opacity: 0;
     translate: 1.5% 0;
-  }
-}
-
-/* The clock: the pause button's ring fills while the tour plays, and holds while it is paused. It is a
-   hairline in the colour of a control's boundary (3:1 against the page), so the button stays quiet. The script
-   flips data-tick at each step; the two keyframes are the same, and changing the name restarts the ring. */
-@utility tour-ring {
-  fill: none;
-  stroke: var(--color-night-line-strong);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-  .tour[data-playing][data-tick="a"] & {
-    animation: tour-clock-a calc(8 * var(--transition-duration-slower)) linear both;
-  }
-  .tour[data-playing][data-tick="b"] & {
-    animation: tour-clock-b calc(8 * var(--transition-duration-slower)) linear both;
-  }
-  .tour[data-paused] & {
-    animation-play-state: paused;
-  }
-}
-
-@keyframes tour-clock-a {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes tour-clock-b {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-/* The pause button: only where the tour can play. The theme script in <head> sets data-theme before the
-   first paint whenever JavaScript runs, so the button is there from the first frame; without JavaScript,
-   and with reduced motion, there is nothing to pause. */
-@utility tour-toggle {
-  display: none;
-  :where([data-theme]) & {
-    display: grid;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    :where([data-theme]) & {
-      display: none;
-    }
-  }
-}
-
-/* The pause button shows what a press does next. */
-@utility tour-when-playing {
-  .tour:not([data-playing]) & {
-    display: none;
-  }
-}
-
-@utility tour-when-stopped {
-  .tour[data-playing] & {
-    display: none;
   }
 }

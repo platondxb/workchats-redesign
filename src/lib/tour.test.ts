@@ -8,10 +8,11 @@ const markup = `
     <div role="img" data-tour-hold>
       ${home.hero.tour.stops.map((stop) => `<div data-stop="${stop}"></div>`).join("")}
     </div>
-    <button type="button" data-tour-toggle aria-label="${home.hero.tour.play}">
-      <svg><circle class="tour-ring"></circle></svg>
-    </button>
   </div>`;
+
+/** How long a part stays, and how long after the page has loaded the tour starts. */
+const step = 4800;
+const startsAfter = 1200;
 
 function mockMotion(reduce: boolean) {
   vi.stubGlobal(
@@ -26,9 +27,29 @@ const run = () => {
   new Function(tourScript)();
 };
 const root = () => document.getElementById("hero-tour");
-const toggle = () => document.querySelector<HTMLButtonElement>("[data-tour-toggle]");
-const clockRunsOut = () =>
-  document.querySelector(".tour-ring")?.dispatchEvent(new Event("animationend", { bubbles: true }));
+const devices = () => document.querySelector("[data-tour-hold]");
+const pointer = (type: string, pointerType: string) => {
+  const event = new MouseEvent(type);
+  Object.defineProperty(event, "pointerType", { value: pointerType });
+  return event;
+};
+
+/** Stubs an IntersectionObserver that starts off screen and reports whatever the test says. */
+function stubOffScreen() {
+  let report: ((entries: { isIntersecting: boolean }[]) => void) | undefined;
+  vi.stubGlobal(
+    "IntersectionObserver",
+    class {
+      constructor(callback: (entries: { isIntersecting: boolean }[]) => void) {
+        report = callback;
+      }
+      observe() {
+        report?.([{ isIntersecting: false }]);
+      }
+    },
+  );
+  return (isIntersecting: boolean) => report?.([{ isIntersecting }]);
+}
 
 describe("the hero tour script", () => {
   beforeEach(() => {
@@ -42,14 +63,12 @@ describe("the hero tour script", () => {
     document.body.innerHTML = "";
   });
 
-  it("starts soon after the page has loaded, and names its button for what a press does", () => {
+  it("starts soon after the page has loaded, with the first part", () => {
     mockMotion(false);
     run();
-    expect(root()).not.toHaveAttribute("data-playing");
-    vi.advanceTimersByTime(1200);
-    expect(root()).toHaveAttribute("data-playing");
+    expect(root()).not.toHaveAttribute("data-current");
+    vi.advanceTimersByTime(startsAfter);
     expect(root()).toHaveAttribute("data-current", "chats");
-    expect(toggle()).toHaveAttribute("aria-label", home.hero.tour.pause);
     // The next part's screens are put in place, invisibly, so their images are ready in time.
     expect(root()).toHaveAttribute("data-preload", "contacts");
   });
@@ -57,95 +76,70 @@ describe("the hero tour script", () => {
   it("goes through the app's parts in the order of its sidebar, and round again", () => {
     mockMotion(false);
     run();
-    vi.advanceTimersByTime(1200);
+    vi.advanceTimersByTime(startsAfter);
     const seen = [root()?.dataset.current];
-    for (let step = 0; step < 5; step++) {
-      const tick = root()?.dataset.tick;
-      clockRunsOut();
-      // The ring restarts for every part.
-      expect(root()?.dataset.tick).not.toBe(tick);
+    for (let part = 0; part < 5; part++) {
+      vi.advanceTimersByTime(step);
       seen.push(root()?.dataset.current);
     }
     expect(seen).toEqual(["chats", "contacts", "schedule", "calls", "tasks", "chats"]);
+    expect(root()).toHaveAttribute("data-preload", "contacts");
   });
 
-  it("stops and resumes with its button, and stays stopped until pressed again", () => {
+  it("holds while a mouse rests on the devices, and goes on when it leaves", () => {
     mockMotion(false);
     run();
-    vi.advanceTimersByTime(1200);
-    clockRunsOut();
-    toggle()?.click();
-    expect(root()).not.toHaveAttribute("data-playing");
-    expect(toggle()).toHaveAttribute("aria-label", home.hero.tour.play);
-    clockRunsOut();
-    expect(root()).toHaveAttribute("data-current", "contacts");
-    toggle()?.click();
-    expect(root()).toHaveAttribute("data-playing");
+    vi.advanceTimersByTime(startsAfter);
+    devices()?.dispatchEvent(pointer("pointerenter", "mouse"));
+    vi.advanceTimersByTime(5 * step);
+    expect(root()).toHaveAttribute("data-current", "chats");
+    devices()?.dispatchEvent(pointer("pointerleave", "mouse"));
+    vi.advanceTimersByTime(step);
     expect(root()).toHaveAttribute("data-current", "contacts");
   });
 
-  it("holds while a mouse rests on the devices", () => {
+  it("does not hold for a touch, which has no hover to rest", () => {
     mockMotion(false);
     run();
-    const devices = document.querySelector("[data-tour-hold]");
-    const pointer = (type: string) => {
-      const event = new MouseEvent(type);
-      Object.defineProperty(event, "pointerType", { value: "mouse" });
-      return event;
-    };
-    devices?.dispatchEvent(pointer("pointerenter"));
-    expect(root()).toHaveAttribute("data-paused");
-    devices?.dispatchEvent(pointer("pointerleave"));
-    expect(root()).not.toHaveAttribute("data-paused");
+    vi.advanceTimersByTime(startsAfter);
+    devices()?.dispatchEvent(pointer("pointerenter", "touch"));
+    vi.advanceTimersByTime(step);
+    expect(root()).toHaveAttribute("data-current", "contacts");
   });
 
-  it("plays only while the devices are on screen, and a press on pause outlasts scrolling away", () => {
+  it("plays only while the devices are on screen", () => {
     mockMotion(false);
-    let report: ((entries: { isIntersecting: boolean }[]) => void) | undefined;
-    vi.stubGlobal(
-      "IntersectionObserver",
-      class {
-        constructor(callback: (entries: { isIntersecting: boolean }[]) => void) {
-          report = callback;
-        }
-        observe() {
-          report?.([{ isIntersecting: false }]);
-        }
-      },
-    );
+    const onScreen = stubOffScreen();
     run();
-    vi.advanceTimersByTime(5000);
-    expect(root()).not.toHaveAttribute("data-playing");
+    vi.advanceTimersByTime(startsAfter + step);
+    expect(root()).not.toHaveAttribute("data-current");
     expect(root()).not.toHaveAttribute("data-preload");
-    report?.([{ isIntersecting: true }]);
-    expect(root()).toHaveAttribute("data-playing");
-    report?.([{ isIntersecting: false }]);
-    expect(root()).not.toHaveAttribute("data-playing");
-    report?.([{ isIntersecting: true }]);
-    expect(root()).toHaveAttribute("data-playing");
-    toggle()?.click();
-    report?.([{ isIntersecting: false }]);
-    report?.([{ isIntersecting: true }]);
-    expect(root()).not.toHaveAttribute("data-playing");
+    onScreen(true);
+    expect(root()).toHaveAttribute("data-current", "chats");
+    vi.advanceTimersByTime(step);
+    expect(root()).toHaveAttribute("data-current", "contacts");
+    onScreen(false);
+    vi.advanceTimersByTime(3 * step);
+    expect(root()).toHaveAttribute("data-current", "contacts");
+    onScreen(true);
+    vi.advanceTimersByTime(step);
+    expect(root()).toHaveAttribute("data-current", "schedule");
   });
 
-  it("waits for the play button with Save-Data, so no screen is fetched until the visitor asks", () => {
+  it("does nothing with Save-Data, so no screen is fetched that the visitor did not ask to see", () => {
     mockMotion(false);
     vi.stubGlobal("navigator", { ...navigator, connection: { saveData: true } });
     run();
-    vi.advanceTimersByTime(5000);
-    expect(root()).not.toHaveAttribute("data-playing");
+    vi.advanceTimersByTime(startsAfter + 5 * step);
+    expect(root()).not.toHaveAttribute("data-current");
     expect(root()).not.toHaveAttribute("data-preload");
-    toggle()?.click();
-    expect(root()).toHaveAttribute("data-playing");
   });
 
-  it("does nothing with reduced motion: the first screen stays, and the button (hidden by CSS) does nothing", () => {
+  it("does nothing with reduced motion: the first screen stays", () => {
     mockMotion(true);
     run();
-    vi.advanceTimersByTime(5000);
-    toggle()?.click();
-    expect(root()).not.toHaveAttribute("data-playing");
+    vi.advanceTimersByTime(startsAfter + 5 * step);
     expect(root()).not.toHaveAttribute("data-current");
+    expect(root()).not.toHaveAttribute("data-preload");
   });
 });

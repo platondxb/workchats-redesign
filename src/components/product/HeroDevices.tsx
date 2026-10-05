@@ -1,4 +1,3 @@
-import { Pause, Play } from "@phosphor-icons/react/ssr";
 import { home } from "@/content/home";
 import { cx } from "@/lib/cx";
 
@@ -11,7 +10,8 @@ import { cx } from "@/lib/cx";
  * The screens are the real app's layout in both themes, with a fictional team (scripts/screens), and they
  * take turns: chats, contacts, schedule, calls, tasks, in the order of the app's own sidebar, on both
  * devices at once (lib/tour.ts, styles/tour.css). Only the first one's images load with the page; each
- * next one loads a step ahead. Without JavaScript, or with reduced motion, the chats screen stays.
+ * next one loads a step ahead. Without JavaScript, or with reduced motion, the chats screen stays. There is
+ * no control for the tour: it is a picture of the app, and it holds while a mouse rests on it.
  */
 
 type StopId = (typeof home.hero.tour.stops)[number];
@@ -130,38 +130,5 @@ export function Phone({ className }: { className?: string }) {
     <div data-device="phone" className={cx("relative device-phone drop-shadow-device", className)}>
       <Screens device="phone" widths={[450, 900]} height={1856} sizes={sizes.phone} />
     </div>
-  );
-}
-
-/**
- * The tour's one control: pause and play (WCAG 2.2.2), on the devices' corner, outside the picture. It is
- * quiet: a small disc with a hairline ring and a small glyph, inside the full 44px target. The disc is
- * solid, so the glyph keeps its contrast over the laptop's dark base in both themes. The ring fills as the
- * next screen comes up (it is the tour's clock). Shown by CSS where the tour can play, decided before the
- * first paint, so nothing moves when it appears (styles/tour.css, tour-toggle).
- */
-export function TourToggle({ className }: { className?: string }) {
-  const { tour } = home.hero;
-  return (
-    <button
-      type="button"
-      data-tour-toggle
-      aria-label={tour.play}
-      suppressHydrationWarning
-      className={cx(
-        "relative tour-toggle size-11 place-items-center rounded-full text-on-night-muted transition-colors duration-fast ease-out hover:text-on-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-on-night",
-        className,
-      )}
-    >
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 44 44"
-        className="absolute inset-1.5 size-8 -rotate-90 rounded-full bg-night-raised"
-      >
-        <circle cx="22" cy="22" r="20" pathLength={100} className="tour-ring" />
-      </svg>
-      <Pause aria-hidden="true" weight="fill" className="relative tour-when-playing size-3.5" />
-      <Play aria-hidden="true" weight="fill" className="relative tour-when-stopped size-3.5" />
-    </button>
   );
 }

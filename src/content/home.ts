@@ -116,8 +116,6 @@ export const home = {
      */
     tour: {
       stops: ["chats", "contacts", "schedule", "calls", "tasks"],
-      pause: "Pause the product tour",
-      play: "Play the product tour",
     },
   },
 

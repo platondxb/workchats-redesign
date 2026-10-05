@@ -21,7 +21,6 @@ export function ContainerScroll({
   id,
   titleComponent,
   children,
-  overlay,
   label,
   className,
 }: {
@@ -29,8 +28,6 @@ export function ContainerScroll({
   titleComponent: ReactNode;
   /** The devices: one picture to assistive technology, described by `label`. */
   children: ReactNode;
-  /** A control laid over the devices' box, outside the picture (the tour's pause button). */
-  overlay?: ReactNode;
   label: string;
   className?: string;
 }) {
@@ -44,7 +41,6 @@ export function ContainerScroll({
         <div role="img" aria-label={label} data-tour-hold className="relative perspective-stage">
           {children}
         </div>
-        {overlay}
       </div>
     </div>
   );

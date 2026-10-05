@@ -72,12 +72,12 @@ describe("the home page", () => {
     expect(section.querySelectorAll("[data-pin]")).toHaveLength(hostingRegions.length);
   });
 
-  it("describes the devices in words, as one picture, with the tour's pause button outside it", () => {
+  it("describes the devices in words, as one picture, with nothing to operate on or beside them", () => {
     renderPage();
     const devices = screen.getByRole("img", { name: /^Workchats on a laptop and a phone, showing in turn/ });
     // Every part of the app, in both themes, on both devices: 5 × 2 × 2 screens.
     expect(devices.querySelectorAll("[data-stop] img")).toHaveLength(20);
-    const toggle = screen.getByRole("button", { name: "Play the product tour" });
-    expect(devices.contains(toggle)).toBe(false);
+    expect(devices.querySelector("button, a, [tabindex]")).toBeNull();
+    expect(screen.queryByRole("button", { name: /product tour/i })).toBeNull();
   });
 });

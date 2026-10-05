@@ -29,7 +29,6 @@ test.describe("the hero's product tour", () => {
     await showDevices(page);
     const device = isMobile(page) ? "phone" : "laptop";
     await expect.poll(() => showing(page, device)).toMatch(/-chats-dark-/);
-    await expect(tour(page)).toHaveAttribute("data-playing", "", { timeout: 5_000 });
     await expect.poll(() => current(page), { timeout: 10_000 }).toBe("contacts");
     await expect.poll(() => showing(page, device)).toMatch(/-contacts-dark-/);
     if (!isMobile(page)) await expect.poll(() => showing(page, "phone")).toMatch(/phone-contacts-dark-/);
@@ -38,38 +37,19 @@ test.describe("the hero's product tour", () => {
     await expect.poll(() => showing(page, device)).toMatch(/-light-/);
   });
 
-  test("the pause button stops it where it is (WCAG 2.2.2), and plays it again", async ({ page }) => {
+  test("has no control for the tour: nothing to press on or beside the devices", async ({ page }) => {
     await page.goto("/");
     await showDevices(page);
-    const pause = page.getByRole("button", { name: "Pause the product tour" });
-    await expect(pause).toBeVisible({ timeout: 5_000 });
-    await pause.click();
-    await expect(tour(page)).not.toHaveAttribute("data-playing");
-    const stoppedOn = await current(page);
-    await page.waitForTimeout(6_000);
-    expect(await current(page)).toBe(stoppedOn);
-    await page.getByRole("button", { name: "Play the product tour" }).click();
-    await expect(tour(page)).toHaveAttribute("data-playing", "");
+    await expect(page.getByRole("button", { name: /product tour/i })).toHaveCount(0);
+    await expect(page.locator("[data-tour-toggle]")).toHaveCount(0);
   });
 
-  test("the pause button sits on the devices without pushing them down the page", async ({ page }) => {
-    await page.goto("/");
-    const devices = await page.getByRole("img", { name: /^Workchats on a laptop and a phone/ }).boundingBox();
-    const button = await page.locator("[data-tour-toggle]").boundingBox();
-    expect(devices && button).toBeTruthy();
-    if (devices && button) {
-      expect(button.y).toBeGreaterThanOrEqual(devices.y);
-      expect(button.y + button.height).toBeLessThanOrEqual(devices.y + devices.height + 1);
-    }
-  });
-
-  test("with reduced motion it stays on chats, with no pause button to look for", async ({ browser }) => {
+  test("with reduced motion it stays on chats", async ({ browser }) => {
     const context = await browser.newContext({ reducedMotion: "reduce" });
     const page = await context.newPage();
     await page.goto("/");
     await page.waitForTimeout(3_000);
-    await expect(tour(page)).not.toHaveAttribute("data-playing");
-    await expect(page.locator("[data-tour-toggle]")).toBeHidden();
+    await expect(tour(page)).not.toHaveAttribute("data-current");
     const device = (page.viewportSize()?.width ?? 1440) < 768 ? "phone" : "laptop";
     await expect(page.locator(`[data-device="${device}"] [data-stop="chats"]`)).toBeVisible();
     await context.close();
@@ -82,7 +62,6 @@ test.describe("the hero's product tour", () => {
     const device = (page.viewportSize()?.width ?? 1440) < 768 ? "phone" : "laptop";
     await expect(page.locator(`[data-device="${device}"] [data-stop="chats"]`)).toBeVisible();
     await expect(page.locator(`[data-device="${device}"] [data-stop="calls"]`)).toBeHidden();
-    await expect(page.locator("[data-tour-toggle]")).toBeHidden();
     await context.close();
   });
 
