@@ -1,0 +1,103 @@
+/*
+ * The hero's product tour (components/product/HeroDevices.tsx): the app's five parts (chats, contacts,
+ * schedule, calls, tasks) take turns on the laptop's screen and the phone. The tour script (lib/tour.ts)
+ * names the current one in data-current on .tour; without it (no JavaScript, reduced motion) the first,
+ * chats, stays.
+ *
+ * While the tour plays, the pause button's ring fills over a few seconds: that animation is the tour's
+ * clock (the script moves on when it ends), so pausing the ring pauses the tour, and with reduced motion,
+ * where animations are off, the tour never moves on by itself.
+ */
+
+/* A part's screens are display: none until it is current, so their (lazy) images load only then. The
+   script shows the next part a step ahead, invisibly (data-preload), so its images are there in time. */
+@utility tour-screen {
+  display: none;
+}
+
+.tour:not([data-current]) [data-stop="chats"],
+.tour[data-current="chats"] [data-stop="chats"],
+.tour[data-current="contacts"] [data-stop="contacts"],
+.tour[data-current="schedule"] [data-stop="schedule"],
+.tour[data-current="calls"] [data-stop="calls"],
+.tour[data-current="tasks"] [data-stop="tasks"] {
+  display: block;
+  animation: tour-in var(--transition-duration-slower) var(--ease-out) both;
+}
+
+.tour[data-preload="chats"] [data-stop="chats"],
+.tour[data-preload="contacts"] [data-stop="contacts"],
+.tour[data-preload="schedule"] [data-stop="schedule"],
+.tour[data-preload="calls"] [data-stop="calls"],
+.tour[data-preload="tasks"] [data-stop="tasks"] {
+  display: block;
+  opacity: 0;
+}
+
+/* A new part arrives the way the app changes section: a short fade and a small slide in. */
+@keyframes tour-in {
+  from {
+    opacity: 0;
+    translate: 1.5% 0;
+  }
+}
+
+/* The clock: the pause button's ring fills while the tour plays, and holds while it is paused. The script
+   flips data-tick at each step; the two keyframes are the same, and changing the name restarts the ring. */
+@utility tour-ring {
+  fill: none;
+  stroke: var(--color-accent-on-night);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  .tour[data-playing][data-tick="a"] & {
+    animation: tour-clock-a calc(8 * var(--transition-duration-slower)) linear both;
+  }
+  .tour[data-playing][data-tick="b"] & {
+    animation: tour-clock-b calc(8 * var(--transition-duration-slower)) linear both;
+  }
+  .tour[data-paused] & {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes tour-clock-a {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes tour-clock-b {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* The pause button: only where the tour can play. The theme script in <head> sets data-theme before the
+   first paint whenever JavaScript runs, so the button is there from the first frame; without JavaScript,
+   and with reduced motion, there is nothing to pause. */
+@utility tour-toggle {
+  display: none;
+  :where([data-theme]) & {
+    display: grid;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :where([data-theme]) & {
+      display: none;
+    }
+  }
+}
+
+/* The pause button shows what a press does next. */
+@utility tour-when-playing {
+  .tour:not([data-playing]) & {
+    display: none;
+  }
+}
+
+@utility tour-when-stopped {
+  .tour[data-playing] & {
+    display: none;
+  }
+}

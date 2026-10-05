@@ -13,8 +13,9 @@
 <path d="M46 1.6H1954" stroke="url(#chamfer)" stroke-width="2.4" stroke-linecap="round"/>
 <path fill-rule="evenodd" fill="url(#glass)" d="M46 5H1954A41 41 0 0 1 1995 46V1355A6 6 0 0 1 1989 1361H11A6 6 0 0 1 5 1355V46A41 41 0 0 1 46 5ZM48 62H1952A14 14 0 0 1 1966 76V1284A4 4 0 0 1 1962 1288H38A4 4 0 0 1 34 1284V76A14 14 0 0 1 48 62Z"/>
 <path d="M48 61H1952A15 15 0 0 1 1967 76V1284A5 5 0 0 1 1962 1289H38A5 5 0 0 1 33 1284V76A15 15 0 0 1 48 61Z" fill="none" stroke="#000" stroke-opacity=".8" stroke-width="2"/>
-<circle cx="1000" cy="31" r="10" fill="#0f1014"/>
-<circle cx="1000" cy="31" r="6" fill="url(#lens)"/>
-<circle cx="998" cy="29" r="1.6" fill="#9fb0e0" fill-opacity=".55"/>
+<path fill="#030304" d="M896.5 55H1103.5V97A9 9 0 0 1 1094.5 106H905.5A9 9 0 0 1 896.5 97Z"/>
+<circle cx="1000" cy="80" r="8" fill="#0f1014"/>
+<circle cx="1000" cy="80" r="5" fill="url(#lens)"/>
+<circle cx="998.4" cy="78.4" r="1.4" fill="#9fb0e0" fill-opacity=".55"/>
 <g clip-path="url(#glassClip)"><path d="M0 0H1180L0 860Z" fill="url(#sheen)"/></g>
 </svg>

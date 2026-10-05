@@ -20,7 +20,7 @@ const BUDGET = {
   fontFamilies: 2,
   // Loaded after the first view (brief §6.3): client chunks the page imports lazily (today the region
   // globe's planet: cobe and the code that turns it), and any 3D device assets under public/3d/<device>/
-  // (none: the devices are vector renders, docs/redesign/adr-3d-devices.md).
+  // (none: the devices are images rendered offline from self-made models, scripts/devices).
   deferredJsKb: 180, // Brotli
   deviceAssetsKb: 1536, // per device folder: model plus textures
 };
@@ -48,15 +48,24 @@ const scripts = unique(
 );
 const styles = unique([...html.matchAll(/<link[^>]+href="(\/_next\/[^"]+\.css)"/g)].map((m) => m[1]));
 const fonts = unique([...html.matchAll(/<link[^>]+href="(\/_next\/[^"]+\.woff2)"/g)].map((m) => m[1]));
-// Same-origin images, served from public/: the ones the HTML loads straight away (the device renders) and
-// the lazy ones the browser fetches only as they near the screen (the globe's posters). For an image in a
-// <picture>, a current browser fetches its first <source> (the AVIF), so that is the one measured.
+// Same-origin images, served from public/: the ones the HTML loads straight away (the device renders and the
+// first stop of the hero's tour) and the lazy ones the browser fetches only when they are shown (the tour's
+// other stops, the light theme's screens, the globe's posters). For an image in a <picture>, a current
+// browser fetches its first <source> (the AVIF); from a srcset, the largest candidate is measured, which is
+// what a sharp screen at full width downloads.
+const largest = (srcset) =>
+  srcset
+    .split(",")
+    .map((candidate) => candidate.trim().split(/\s+/))
+    .map(([url, descriptor = "1w"]) => ({ url, width: Number.parseFloat(descriptor) || 1 }))
+    .sort((a, b) => b.width - a.width)[0]?.url;
 const publicImages = (lazy) =>
   unique(
-    [...html.matchAll(/(?:<picture>(?:<source[^>]*\ssrcSet="([^"]+)"[^>]*>)?)?<img[^>]+src="(\/(?!_next\/)[^"]+)"[^>]*>/gi)]
-      .filter((m) => /\sloading="lazy"/.test(m[0]) === lazy)
-      .map((m) => m[1] ?? m[2])
-      .filter((url) => existsSync(path.join(root, "public", url))),
+    [...html.matchAll(/(?:<picture>(?:<source[^>]*\ssrcSet="([^"]+)"[^>]*>)?)?(<img[^>]*>)/gi)]
+      .filter((m) => /\ssrc="\/(?!_next\/)/.test(m[2]))
+      .filter((m) => /\sloading="lazy"/.test(m[2]) === lazy)
+      .map((m) => (m[1] ? largest(m[1]) : (largest(/\ssrcSet="([^"]+)"/i.exec(m[2])?.[1] ?? "") || /\ssrc="([^"]+)"/.exec(m[2])?.[1])))
+      .filter((url) => url && existsSync(path.join(root, "public", url))),
   );
 const images = publicImages(false);
 const lazyImages = publicImages(true);
@@ -134,9 +143,9 @@ const rows = [
   [`  (same JavaScript gzipped)`, kb(jsGzip)],
   [`CSS, ${styles.length} file(s)`, kb(cssBrotli)],
   [`Fonts, ${fonts.length} preloaded WOFF2`, kb(fontBytes)],
-  [`Images, ${images.length} (device renders)`, kb(imageBrotli)],
+  [`Images, ${images.length} (devices, tour's first stop)`, kb(imageBrotli)],
   ["Total first view before consent", kb(totalBytes)],
-  [`Lazy images, ${lazyImages.length} (posters, 1 per theme)`, kb(lazyImageBytes)],
+  [`Lazy images, ${lazyImages.length} (loaded when shown)`, kb(lazyImageBytes)],
 ];
 console.log("Compressed transfer sizes (Brotli unless stated):");
 for (const [label, value] of rows) console.log(`  ${label.padEnd(38)} ${value.toFixed(1).padStart(7)} KB`);
@@ -146,7 +155,7 @@ console.log(
   `  ${`Deferred JavaScript, ${deferred.length} files`.padEnd(38)} ${kb(deferredBrotli).toFixed(1).padStart(7)} KB`,
 );
 console.log(
-  `  ${"3D device assets".padEnd(38)} ${devices.length === 0 ? "none (the devices are vector renders)" : devices.map(([name, bytes]) => `${name} ${kb(bytes).toFixed(0)} KB`).join(", ")}`,
+  `  ${"3D device assets".padEnd(38)} ${devices.length === 0 ? "none (the devices are pre-rendered images)" : devices.map(([name, bytes]) => `${name} ${kb(bytes).toFixed(0)} KB`).join(", ")}`,
 );
 
 const failures = [];

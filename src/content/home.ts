@@ -102,8 +102,22 @@ export const home = {
     primary: { label: "Start free", href: site.links.signUp },
     download: { href: "#download" },
     caption: `No credit card needed, no time limit. Pro is ${fromPrice} a person a month when you grow.`,
+    /**
+     * The devices are one picture to assistive technology: this says what they show, in the order they
+     * show it. The views are the real app's layout (the owner's screenshots, 5 October 2026) with a
+     * fictional team.
+     */
     productLabel:
-      "Workchats on a laptop and a phone. In the #spring-launch channel, Priya Shah posts “Quick check-in at 10? I'll start a call here.” and starts a call, which rings on Daniel Novak's phone while he is out on a site visit.",
+      "Workchats on a laptop and a phone, showing in turn: a team chat with a voice message, a shared file and a meeting about to start; the team's contacts; a week of meetings with a daily stand-up; a recorded video call with a shared checklist; and a task board.",
+    /**
+     * The tour on the devices: the app's five parts, in the order of its own sidebar, each shown on both
+     * screens in turn (components/product/HeroDevices.tsx, lib/tour.ts).
+     */
+    tour: {
+      stops: ["chats", "contacts", "schedule", "calls", "tasks"],
+      pause: "Pause the product tour",
+      play: "Play the product tour",
+    },
   },
 
   customers,

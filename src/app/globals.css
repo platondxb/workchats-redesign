@@ -2,6 +2,7 @@
 @import "../styles/tokens.css";
 @import "../styles/devices.css";
 @import "../styles/globe.css";
+@import "../styles/tour.css";
 
 /*
  * Stateful UI without JavaScript. Each switch is a set of native radio inputs; CSS reads which one is
@@ -513,7 +514,7 @@
 
 @keyframes cs-lid {
   from {
-    transform: rotateX(22deg);
+    transform: rotateX(12deg);
   }
 }
 
@@ -563,31 +564,6 @@
 @keyframes cs-aside {
   from {
     translate: 0 6rem;
-  }
-}
-
-/* Cause and effect: the call banner drops into the desktop app, then the call drops onto the phone, the
-   way notifications arrive, from above the edge of the screen that clips them. Transform only: nothing
-   fades through the text underneath. */
-@utility cs-banner {
-  @supports (animation-timeline: scroll()) {
-    animation: cs-drop var(--ease-out) both;
-    animation-timeline: scroll(root);
-    animation-range: 8vh 34vh;
-  }
-}
-
-@utility cs-ring {
-  @supports (animation-timeline: scroll()) {
-    animation: cs-drop var(--ease-out) both;
-    animation-timeline: scroll(root);
-    animation-range: 26vh 52vh;
-  }
-}
-
-@keyframes cs-drop {
-  from {
-    translate: 0 calc(-100% - 3rem);
   }
 }
 

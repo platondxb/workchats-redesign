@@ -1,10 +1,10 @@
 import { DownloadSimple } from "@phosphor-icons/react/ssr";
-import { DesktopApp } from "@/components/product/DesktopApp";
-import { Handset, PhoneChats } from "@/components/product/Handset";
+import { Laptop, Phone, TourToggle } from "@/components/product/HeroDevices";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import { LiquidButton } from "@/components/ui/liquid-glass-button";
 import { home } from "@/content/home";
 import { genericDownloadLabel, platforms, type PlatformId } from "@/content/site";
+import { tourScript } from "@/lib/tour";
 
 /**
  * Which download label shows: the one for the visitor's platform once the <head> script has set data-os
@@ -27,16 +27,20 @@ const neutralLabelClasses =
  * headline is set in two tones (the owner's direction): the first line says what it is, the second what it
  * costs to try. The free plan sits again beside the action, with the price of the next step.
  *
- * The product card tilts back and straightens as the page scrolls (ContainerScroll), and the call started
- * on the laptop arrives on Daniel's phone as it settles. On phones, the phone itself is the device.
+ * Then the product, as it really looks: the desktop app on a laptop and the mobile app on a phone, in the
+ * visitor's theme, its five parts taking turns on both screens (HeroDevices.tsx, lib/tour.ts). The laptop's
+ * lid opens as the page scrolls (ContainerScroll). On phones, the phone itself is the device.
  */
 export function Hero() {
   const { hero } = home;
   return (
-    <section aria-labelledby="hero-title" className="overflow-x-clip pt-10 pb-20 md:pt-20">
+    <section aria-labelledby="hero-title" className="overflow-x-clip pt-10 pb-20 md:pt-16">
       <div className="container-page">
         <ContainerScroll
+          id="hero-tour"
+          className="tour"
           label={hero.productLabel}
+          overlay={<TourToggle className="absolute bottom-14 left-0 z-raised" />}
           titleComponent={
             <>
               <h1 id="hero-title" className="font-display text-display">
@@ -68,14 +72,11 @@ export function Hero() {
               <p className="mt-4 text-small text-on-night-subtle">{hero.caption}</p>
             </>
           }
-          aside={
-            <Handset className="mx-auto cs-card md:hidden lg:absolute lg:right-4 lg:-bottom-12 lg:z-raised lg:block lg:w-56 lg:cs-aside xl:right-8 xl:w-64">
-              <PhoneChats />
-            </Handset>
-          }
         >
-          <DesktopApp />
+          <Laptop />
+          <Phone className="mx-auto w-68 cs-card md:hidden lg:absolute lg:right-4 lg:-bottom-12 lg:z-raised lg:block lg:w-56 lg:cs-aside xl:right-8 xl:w-64" />
         </ContainerScroll>
+        <script dangerouslySetInnerHTML={{ __html: tourScript }} />
       </div>
     </section>
   );

@@ -120,16 +120,19 @@ test.describe("content and rendering", () => {
     test.skip(isMobile(page), "the brief's two-screen rule is for desktop");
     await page.goto("/");
     const twoScreens = 2 * (page.viewportSize()?.height ?? 900);
-    const regions = page.getByRole("region", { name: "Hosted in the UK, the EU or the UAE" });
-    // This measures the bottom of a paragraph after ~1800px of accumulated layout, and the font metrics of
+    // This measures the bottom of a heading after ~1800px of accumulated layout, and the font metrics of
     // the machine the page was built on differ from CI's Linux runner by about 22px over that distance.
     // The assertion guards a regression at the scale of a screen, so it allows that much slack: a
     // sub-pixel boundary here would flip between platforms without catching anything real.
     const renderingSlack = 48;
-    // Cost and what it replaces are in the hero; residency, encryption and reliability lead the next section.
-    const intro = regions.getByText(/^Choose where your workspace lives/);
-    const box = await intro.boundingBox();
+    // Cost, encryption and the free plan are in the hero; where the data lives opens the next section, and
+    // its intro, with the uptime SLA, follows straight after.
+    const heading = page.getByRole("heading", { name: "Hosted in the UK, the EU or the UAE" });
+    const box = await heading.boundingBox();
     expect(box && box.y + box.height).toBeLessThan(twoScreens + renderingSlack);
+    const intro = page
+      .getByRole("region", { name: "Hosted in the UK, the EU or the UAE" })
+      .getByText(/^Choose where/);
     await expect(intro).toContainText("end-to-end encrypted");
     await expect(intro).toContainText("99.9% uptime SLA on Pro and above");
   });
@@ -254,17 +257,15 @@ test.describe("accessibility", () => {
       .locator('main [data-cta="hero"]')
       .evaluate((el) => getComputedStyle(el).transitionDuration);
     expect(duration).toBe("0s");
-    // The card is flat, the title hasn't moved, and the call is already on the phone.
+    // The lid is open and square, the title hasn't moved, and nothing animates, the tour included.
     const settled = await page.evaluate(() => {
       const card = document.querySelector('[data-device-part="lid"]');
-      const ring = document.querySelector(".cs-ring");
       return {
         card: card ? getComputedStyle(card).transform : "missing",
-        ring: ring ? getComputedStyle(ring).translate : "missing",
         animations: document.getAnimations().length,
       };
     });
-    expect(settled).toEqual({ card: "none", ring: "none", animations: 0 });
+    expect(settled).toEqual({ card: "none", animations: 0 });
     // The header's glass is simply on, so the bar is legible over content without the scroll effect.
     await expect(page.locator("header .nav-glass")).toHaveCSS("opacity", "1");
     await context.close();
@@ -501,20 +502,20 @@ test.describe("interaction", () => {
     await expect(features).toBeFocused();
   });
 
-  test("phones show the phone, not a shrunken desktop window", async ({ page }) => {
+  test("phones show the phone, not a shrunken laptop", async ({ page }) => {
     test.skip(!isMobile(page), "phones only");
     await page.goto("/");
-    await expect(page.locator('[data-app="phone"]')).toBeVisible();
-    await expect(page.locator('[data-app="desktop"]')).toBeHidden();
-    const box = await page.locator('[data-app="phone"]').boundingBox();
+    await expect(page.locator('[data-device="phone"]')).toBeVisible();
+    await expect(page.locator('[data-device="laptop"]')).toBeHidden();
+    const box = await page.locator('[data-device="phone"]').boundingBox();
     expect((box?.height ?? 0) / (box?.width ?? 1)).toBeGreaterThan(1.6);
   });
 
-  test("desktop shows the laptop app, with the phone as the second screen", async ({ page }) => {
+  test("desktop shows the laptop, with the phone as the second screen", async ({ page }) => {
     test.skip(isMobile(page), "desktop only");
     await page.goto("/");
-    await expect(page.locator('[data-app="desktop"]')).toBeVisible();
-    await expect(page.locator('[data-app="phone"]')).toBeVisible();
+    await expect(page.locator('[data-device="laptop"]')).toBeVisible();
+    await expect(page.locator('[data-device="phone"]')).toBeVisible();
   });
 
   test("the phone menu is a dialog that leads with the free sign-up and keeps the actions", async ({

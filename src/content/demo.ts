@@ -16,19 +16,6 @@ export const people = {
 
 export type PersonId = keyof typeof people;
 
-export const channels = [
-  { name: "spring-launch", unread: 0 },
-  { name: "design", unread: 3 },
-  { name: "field-ops", unread: 0 },
-  { name: "announcements", unread: 1 },
-] as const;
-
-export const directMessages: readonly { person: PersonId; unread: number; online: boolean }[] = [
-  { person: "priya", unread: 1, online: true },
-  { person: "tom", unread: 0, online: true },
-  { person: "daniel", unread: 0, online: false },
-];
-
 export const sharedFile = {
   name: "Brand guidelines v3.pdf",
   kind: "PDF",
@@ -61,35 +48,6 @@ export const heroDemo = {
     startedBy: "priya" as PersonId,
     joined: ["priya", "amara", "daniel"] as PersonId[],
   },
-} as const;
-
-/** The phone in the hero: Daniel is out on a site visit when Priya starts the call. */
-export const phoneView = {
-  owner: "daniel" as PersonId,
-  time: "09:41",
-  chats: [
-    {
-      kind: "channel",
-      name: "spring-launch",
-      preview: "Tom: Thanks. I'll update the homepage mockups…",
-      time: "09:20",
-    },
-    {
-      kind: "person",
-      person: "priya" as PersonId,
-      preview: "Can you send the photos from site?",
-      time: "09:05",
-      unread: 1,
-    },
-    { kind: "channel", name: "field-ops", preview: "You: Site visit done. Photos coming…", time: "08:47" },
-    {
-      kind: "person",
-      person: "tom" as PersonId,
-      preview: "Left two comments on the header spacing.",
-      time: "Yesterday",
-    },
-    { kind: "channel", name: "announcements", preview: "Amara: Office closed on Friday.", time: "Tue" },
-  ],
 } as const;
 
 export const launchCall = {
