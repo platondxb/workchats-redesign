@@ -5,11 +5,12 @@
  * (scripts/devices/render-devices.mjs, public/devices/phone-*), so it only needs its proportions.
  */
 
-/* The laptop: a lid (83.3% of the device's width, centred) above the wider front lip of its base. */
+/* The laptop: a lid (83.3% of the device's width, centred) above the wider front lip of its base. Its top
+   bezel is about as thin as its sides (31 of the drawing's 2000 units, half what it was). */
 @utility device-lid {
   width: 83.33%;
   margin-inline: auto;
-  aspect-ratio: 2000 / 1366;
+  aspect-ratio: 2000 / 1335;
 }
 
 @utility device-base {
@@ -21,9 +22,9 @@
 @utility laptop-screen {
   position: absolute;
   left: 1.55%;
-  top: 4.39%;
+  top: 2.17%;
   width: 96.9%;
-  height: 90.05%;
+  height: 92.13%;
   border-radius: 0.72% 0.72% 0 0 / 1.14% 1.14% 0 0;
 }
 

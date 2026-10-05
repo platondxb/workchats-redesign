@@ -108,7 +108,7 @@ export function Laptop() {
           src="/devices/laptop-lid.svg"
           alt=""
           width={2000}
-          height={1366}
+          height={1335}
           fetchPriority="high"
           className="pointer-events-none absolute inset-0 size-full select-none"
         />
