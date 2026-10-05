@@ -43,12 +43,13 @@ const regionList = (() => {
  * The cost case: what a typical team pays, per person a month at list prices billed annually, for the
  * tools Workchats replaces. The figures are the owner's, from the cost breakdown on the blog; the live
  * /pricing page states its competitor prices were "verified May 2026" and converted to GBP at prevailing
- * exchange rates. The owner approved this comparison, anonymised, on 3 October 2026, and confirmed that
- * Workchats replaces the screen-recording tool.
+ * exchange rates. The owner approved this comparison, with the apps unnamed, on 3 October 2026 and
+ * confirmed that Workchats replaces the screen-recording tool. On 5 October 2026 the owner asked for the
+ * real apps to be named and lifted the anonymity rule (brief §3.2) for the whole page, so each row now
+ * names the app and the plan its price is for.
  *
- * Product names stay in these comments so the figures can be audited (product, plan, price, date checked).
- * They are never rendered: the page names categories only, and src/app/page.test.tsx and
- * e2e/home.spec.ts fail if any name in content/competitors.ts reaches the page.
+ * Because the apps are named, anyone can check the prices: each comment below gives the plan, the figure,
+ * where it comes from and when it was checked, and the figures must stay true to the vendors' own list prices.
  *
  * Spot check from this repository on 3 October 2026, from an EU network (so not GBP list prices): Google
  * Workspace Business Standard showed €13.60 per user a month, Loom Business $18 a month on monthly
@@ -56,16 +57,16 @@ const regionList = (() => {
  */
 const stack = [
   // Slack Pro, billed annually: £7.25 per user a month. Cost breakdown; /faq "around £7.25". Checked May 2026.
-  { id: "chat", category: "A team chat app", price: 7.25, replaced: true },
+  { id: "chat", name: "Slack Pro", price: 7.25, replaced: true },
   // Zoom Workplace Pro, billed annually: £11.99 per user a month. Cost breakdown; /faq. Checked May 2026.
-  { id: "meetings", category: "A separate video-meeting tool", price: 11.99, replaced: true },
+  { id: "meetings", name: "Zoom Workplace Pro", price: 11.99, replaced: true },
   // Loom Business: £10 per user a month. Cost breakdown. Checked May 2026.
-  { id: "recording", category: "A screen-recording tool", price: 10, replaced: true },
-  // WhatsApp: free.
-  { id: "messenger", category: "A personal messenger the team falls back to", price: 0, replaced: true },
+  { id: "recording", name: "Loom Business", price: 10, replaced: true },
+  // WhatsApp: free. The personal messenger a team falls back to, which Workchats replaces at no saving.
+  { id: "messenger", name: "WhatsApp", price: 0, replaced: true },
   // Google Workspace Business Standard, billed annually: £12 per user a month. Cost breakdown. Kept: email,
   // calendar and documents are not a chat problem. Checked May 2026.
-  { id: "suite", category: "An office suite", price: 12, replaced: false },
+  { id: "suite", name: "Google Workspace Business Standard", price: 12, replaced: false },
 ] as const;
 
 const pricesChecked = "May 2026";
@@ -215,7 +216,7 @@ export const home = {
     stackLabel: "What each person costs a month, at list prices",
     stack: stack.map((item) => ({
       id: item.id,
-      category: item.category,
+      name: item.name,
       price: gbp(item.price),
       kept: !item.replaced,
     })),

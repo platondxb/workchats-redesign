@@ -134,9 +134,11 @@ export function Phone({ className }: { className?: string }) {
 }
 
 /**
- * The tour's one control: pause and play (WCAG 2.2.2), on the devices' corner, outside the picture. Its ring
- * fills as the next screen comes up (it is the tour's clock). Shown by CSS where the tour can play, decided
- * before the first paint, so nothing moves when it appears (styles/tour.css, tour-toggle).
+ * The tour's one control: pause and play (WCAG 2.2.2), on the devices' corner, outside the picture. It is
+ * quiet: a small disc with a hairline ring and a small glyph, inside the full 44px target. The disc is
+ * solid, so the glyph keeps its contrast over the laptop's dark base in both themes. The ring fills as the
+ * next screen comes up (it is the tour's clock). Shown by CSS where the tour can play, decided before the
+ * first paint, so nothing moves when it appears (styles/tour.css, tour-toggle).
  */
 export function TourToggle({ className }: { className?: string }) {
   const { tour } = home.hero;
@@ -147,15 +149,19 @@ export function TourToggle({ className }: { className?: string }) {
       aria-label={tour.play}
       suppressHydrationWarning
       className={cx(
-        "relative tour-toggle size-11 place-items-center rounded-full border border-night-line bg-night-raised/80 text-on-night-muted shadow-raised backdrop-blur-glass transition-colors duration-fast ease-out hover:text-on-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-on-night",
+        "relative tour-toggle size-11 place-items-center rounded-full text-on-night-muted transition-colors duration-fast ease-out hover:text-on-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-on-night",
         className,
       )}
     >
-      <svg aria-hidden="true" viewBox="0 0 44 44" className="absolute inset-0 size-full -rotate-90">
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 44 44"
+        className="absolute inset-1.5 size-8 -rotate-90 rounded-full bg-night-raised"
+      >
         <circle cx="22" cy="22" r="20" pathLength={100} className="tour-ring" />
       </svg>
-      <Pause aria-hidden="true" weight="fill" className="tour-when-playing size-4" />
-      <Play aria-hidden="true" weight="fill" className="tour-when-stopped size-4" />
+      <Pause aria-hidden="true" weight="fill" className="relative tour-when-playing size-3.5" />
+      <Play aria-hidden="true" weight="fill" className="relative tour-when-stopped size-3.5" />
     </button>
   );
 }

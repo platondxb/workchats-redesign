@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
-import { findCompetitorNames } from "@/content/competitors";
 import { faq } from "@/content/faq";
 import { Faq } from "./Faq";
 
@@ -27,10 +26,9 @@ describe("Faq", () => {
     expect(first).toHaveTextContent("5 GB of storage per person");
   });
 
-  it("explains moving over without naming another product", () => {
+  it("explains moving over from the chat tool you use today", () => {
     const switching = faq.find((item) => item.id === "switching");
     expect(switching?.answer).toContain("Import your message history from the chat tool you use today");
-    expect(findCompetitorNames(JSON.stringify(faq))).toEqual([]);
   });
 
   it("answers what happens at the sixth person, with the Pro price", () => {

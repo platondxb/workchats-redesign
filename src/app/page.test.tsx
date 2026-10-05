@@ -1,9 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { findCompetitorNames } from "@/content/competitors";
 import { customers, hostingRegions, platforms } from "@/content/site";
-import { homeJsonLd } from "@/lib/structured-data";
-import HomePage, { metadata } from "./page";
+import HomePage from "./page";
 
 /** The whole page, rendered as it is prerendered (without the root layout's header and footer). */
 function renderPage() {
@@ -16,13 +14,6 @@ function required<T>(value: T | null | undefined, what: string): T {
 }
 
 describe("the home page", () => {
-  it("never names or describes a competing product, in the page, its metadata or its structured data", () => {
-    const { container } = renderPage();
-    expect(findCompetitorNames(container.innerHTML)).toEqual([]);
-    expect(findCompetitorNames(JSON.stringify(metadata))).toEqual([]);
-    expect(findCompetitorNames(JSON.stringify(homeJsonLd()))).toEqual([]);
-  });
-
   it("has one h1 that says what Workchats is and that 5 people use it free", () => {
     renderPage();
     const h1 = screen.getByRole("heading", { level: 1 });

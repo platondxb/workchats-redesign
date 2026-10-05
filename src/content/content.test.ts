@@ -1,18 +1,17 @@
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { findCompetitorNames } from "./competitors";
 import { faq } from "./faq";
 import { home } from "./home";
 import { comingSoon, primaryNav, isNavGroup } from "./navigation";
 import { quotas } from "./pricing";
 import { hostingRegions } from "./site";
 
-/** Every piece of copy on the page, as one string (the competitor list itself is left out). */
+/** Every piece of copy on the page, as one string. */
 function allCopy(): string {
   const dir = path.resolve(import.meta.dirname);
   return readdirSync(dir)
-    .filter((file) => file.endsWith(".ts") && !file.endsWith(".test.ts") && file !== "competitors.ts")
+    .filter((file) => file.endsWith(".ts") && !file.endsWith(".test.ts"))
     .map((file) => readFileSync(path.join(dir, file), "utf8"))
     .join("\n");
 }
@@ -83,10 +82,6 @@ describe("copy rules", () => {
 
   it("uses UK spelling", () => {
     expect(copy).not.toMatch(/\borganization|\bcolor\b|\boptimize|\bcenter\b/);
-  });
-
-  it("never names a competing product in anything the page renders", () => {
-    expect(findCompetitorNames(renderedCopy)).toEqual([]);
   });
 });
 
@@ -163,9 +158,17 @@ describe("the cost calculator", () => {
     expect(calculator.workchats.proLimit).toBe(50);
   });
 
-  it("names categories, not products, keeps the office suite and dates the prices", () => {
-    expect(stack).toHaveLength(5);
-    expect(stack.filter((item) => item.kept).map((item) => item.category)).toEqual(["An office suite"]);
+  it("names the app and plan behind each price, keeps the office suite and dates the prices", () => {
+    expect(stack.map((item) => item.name)).toEqual([
+      "Slack Pro",
+      "Zoom Workplace Pro",
+      "Loom Business",
+      "WhatsApp",
+      "Google Workspace Business Standard",
+    ]);
+    expect(stack.filter((item) => item.kept).map((item) => item.name)).toEqual([
+      "Google Workspace Business Standard",
+    ]);
     expect(home.cost.title).toBe("A typical team pays for five tools. Workchats replaces four.");
     expect(calculator.note).toMatch(
       /List prices per person, billed annually, before VAT, checked [A-Z][a-z]+ \d{4}\./,

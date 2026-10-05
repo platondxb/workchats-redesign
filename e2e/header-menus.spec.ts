@@ -9,8 +9,16 @@ async function openMenu(page: Page, name: string) {
   const button = page.locator("header nav button[aria-expanded]").filter({ hasText: name });
   await button.click();
   await expect(button).toHaveAttribute("aria-expanded", "true");
-  // The panel has settled once its slide-in has finished.
-  await page.waitForTimeout(350);
+  // The panel has settled once its slide-in has finished: it fades in, so it is fully opaque only at the end.
+  // (A fixed wait would measure it mid-slide on a busy machine.)
+  await expect
+    .poll(() =>
+      button.evaluate((trigger) => {
+        const inner = trigger.closest("li")?.querySelector("[id]:not([hidden])")?.firstElementChild;
+        return inner ? getComputedStyle(inner).opacity : "missing";
+      }),
+    )
+    .toBe("1");
   return button.evaluate((trigger) => {
     const item = trigger.closest("li");
     const wrapper = item?.querySelector<HTMLElement>("[id]:not([hidden])");

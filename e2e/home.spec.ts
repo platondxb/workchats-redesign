@@ -1,6 +1,5 @@
 import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test, type Browser, type Page } from "@playwright/test";
-import { findCompetitorNames } from "../src/content/competitors";
 
 const isMobile = (page: Page) => (page.viewportSize()?.width ?? 1440) < 1024;
 
@@ -68,16 +67,6 @@ test.describe("content and rendering", () => {
     await page.goto("/");
     const count = await page.evaluate(() => document.querySelectorAll("*").length);
     expect(count).toBeLessThanOrEqual(1000);
-  });
-
-  test("never names a competing product, in the HTML, the metadata or the structured data", async ({
-    page,
-    request,
-  }) => {
-    const html = await (await request.get("/")).text();
-    expect(findCompetitorNames(html)).toEqual([]);
-    await page.goto("/");
-    expect(findCompetitorNames(await page.locator("body").innerText())).toEqual([]);
   });
 
   test("publishes structured data that matches the page and claims nothing extra", async ({ page }) => {

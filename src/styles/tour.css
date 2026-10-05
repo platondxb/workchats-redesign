@@ -42,12 +42,13 @@
   }
 }
 
-/* The clock: the pause button's ring fills while the tour plays, and holds while it is paused. The script
+/* The clock: the pause button's ring fills while the tour plays, and holds while it is paused. It is a
+   hairline in the colour of a control's boundary (3:1 against the page), so the button stays quiet. The script
    flips data-tick at each step; the two keyframes are the same, and changing the name restarts the ring. */
 @utility tour-ring {
   fill: none;
-  stroke: var(--color-accent-on-night);
-  stroke-width: 2.5;
+  stroke: var(--color-night-line-strong);
+  stroke-width: 2;
   stroke-linecap: round;
   stroke-dasharray: 100;
   stroke-dashoffset: 100;

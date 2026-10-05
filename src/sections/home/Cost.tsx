@@ -7,12 +7,12 @@ import { cx } from "@/lib/cx";
 import { convertTotal, formatDisplayPrice } from "@/lib/pricing";
 
 /*
- * The cost case, anonymised: the tools a typical team pays for, by category, at list prices, and a
- * calculator for their own team size and currency. Server-rendered for 50 people (the cost breakdown's
- * example) in every currency, so it reads completely without JavaScript; a small inline script reveals
- * the slider, recalculates, and keeps the currency in step with the pricing section. Above 50 people Pro
- * no longer fits, so the sum switches to Max. Every figure comes from content/home.ts and pricing.ts; the
- * products behind each category are named only in the source comments there.
+ * The cost case: the apps a typical team pays for, each named with the plan its price is for, at list
+ * prices, and a calculator for their own team size and currency. Server-rendered for 50 people (the cost
+ * breakdown's example) in every currency, so it reads completely without JavaScript; a small inline script
+ * reveals the slider, recalculates, and keeps the currency in step with the pricing section. Above 50 people
+ * Pro no longer fits, so the sum switches to Max. Every figure comes from content/home.ts and pricing.ts,
+ * where each row's source and the date it was checked are kept.
  */
 
 /**
@@ -67,7 +67,7 @@ export function Cost() {
                 )}
               >
                 <span>
-                  {item.category}
+                  {item.name}
                   {item.kept ? <span className="block text-micro">{cost.keptNote}</span> : null}
                 </span>
                 <span className="shrink-0 tabular-nums">{item.price}</span>
